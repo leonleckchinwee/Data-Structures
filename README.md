@@ -1,2 +1,17 @@
-# Data-Structures
- Practicing my data structures and algorithms
+# Data Structures & Algorithm
+This is a CS student's attempt to implement data structures and algorithm from scratch.<br>
+The aim is for this project to serve as a refresher and practice to improve my programming skills.<br>
+For each data structure, I will try my best to implement as many helper functions and methods as possible,
+while also taking care of optimizations and edge cases.
+
+## Current State
+I am currently focusing on implementing data structures in C#.<br>
+I have also included basic NUnit tests.
+
+### Future Plans
+- ❎ Arrays
+- ✅ Doubly Linked Lists
+- ❎ Stacks
+- ❎ Queues
+- ❎ Trees
+- ❎ Graphs

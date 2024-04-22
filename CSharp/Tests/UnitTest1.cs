@@ -224,6 +224,46 @@ public class Tests
     }
 
     [TestFixture]
+    public class LListTests_PrintList
+    {
+        [Test]
+        public void PrintList_Integers_FrontToBack()
+        {
+            LList<int> list = new LList<int>();
+            string result   = "[Front to back]: ";
+
+            for (int i = 0; i < 10; ++i)
+            {
+                list.AddLast(i);
+                result += i.ToString() + " -> ";
+            }
+
+            result += '\n';
+            string resultList = list.ListAsString(frontToBack: true);
+
+            Assert.That(resultList, Is.EqualTo(result));
+        }
+
+        [Test]
+        public void PrintList_Integers_BackToFront()
+        {
+            LList<int> list = new LList<int>();
+            string result   = "[Back to front]: ";
+
+            for (int i = 0; i < 10; ++i)
+            {
+                list.AddFirst(i);
+                result += i.ToString() + " -> ";
+            }
+
+            result += '\n';
+            string resultList = list.ListAsString(frontToBack: false);
+
+            Assert.That(resultList, Is.EqualTo(result));
+        }
+    }
+
+    [TestFixture]
     public class LListTests_AddFirst
     {
         // Existing list is empty, adding the first item
@@ -1873,7 +1913,7 @@ public class Tests
     public class LListTests_BinarySearch
     {
         [Test]
-        public void BinarySearch_FindFirstOccurrence_ReturnsFirstNodeWithValue()
+        public void BinarySearch_ReturnsNodeWithValue()
         {
             // Arrange
             LList<int> list = new LList<int>();
@@ -1895,42 +1935,25 @@ public class Tests
 
         // Testing BinarySearch method for finding the last occurrence
         [Test]
-        public void BinarySearch_FindLastOccurrence_ReturnsLastNodeWithValue()
+        public void BinarySearch_Unsorted()
         {
             // Arrange
             LList<int> list = new LList<int>();
+            list.AddLast(2);
             list.AddLast(1);
             list.AddLast(2);
-            list.AddLast(2);
-            list.AddLast(3);
-            list.AddLast(4);
             list.AddLast(4);
             list.AddLast(4);
             list.AddLast(5);
+            list.AddLast(4);
+            list.AddLast(3);
 
             // Act
             var foundNode = list.BinarySearch(4);
 
             // Assert
+            Assert.That(list.First!.Value, Is.EqualTo(1));
             Assert.That(foundNode!.Value, Is.EqualTo(4));
-        }
-
-        [Test]
-        public void BinarySearch_RandomValues()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(4);
-            list.AddLast(3);
-            list.AddLast(2);
-            list.AddLast(4);
-            list.AddLast(2);
-            list.AddLast(5);
-            list.AddLast(4);
-            list.AddLast(1);
-
-            // Act
-            Assert.Throws<WarningException>(() => list.BinarySearch(4));
         }
 
         // Testing BinarySearch method for non-existing value
@@ -1966,5 +1989,80 @@ public class Tests
             Assert.That(foundNode, Is.Null);
         }
     }
+
+    [TestFixture]
+    public class LListTests_MinMax
+    {
+        [Test]
+        public void Min_ReturnsNodeWithValue()
+        {
+            // Arrange
+            LList<int> list = new LList<int>();
+            list.AddLast(15);
+            list.AddLast(10);
+            list.AddLast(5);
+            list.AddLast(1);
+            list.AddLast(2);
+
+            var max = list.Min();
+
+            // Assert
+            Assert.That(max!.Value, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Min_ListUntouched()
+        {
+            // Arrange
+            LList<int> list = new LList<int>();
+            list.AddLast(22);
+            list.AddLast(10);
+            list.AddLast(1);
+            list.AddLast(15);
+            list.AddLast(5);
+
+            var max = list.Min();
+
+            // Assert
+            Assert.That(list.First!.Value, Is.EqualTo(22));
+            Assert.That(max!.Value, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Max_ReturnsNodeWithValue()
+        {
+            // Arrange
+            LList<int> list = new LList<int>();
+            list.AddLast(1);
+            list.AddLast(10);
+            list.AddLast(5);
+            list.AddLast(15);
+            list.AddLast(2);
+
+            var max = list.Max();
+
+            // Assert
+            Assert.That(max!.Value, Is.EqualTo(15));
+        }
+
+        [Test]
+        public void Max_ListUntouched()
+        {
+            // Arrange
+            LList<int> list = new LList<int>();
+            list.AddLast(1);
+            list.AddLast(10);
+            list.AddLast(5);
+            list.AddLast(15);
+            list.AddLast(22);
+
+            var max = list.Max();
+
+            // Assert
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(max!.Value, Is.EqualTo(22));
+        }
+    }
+
 
 }

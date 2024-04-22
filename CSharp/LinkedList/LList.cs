@@ -1,9 +1,8 @@
 ﻿using System.Collections;
-using System.ComponentModel;
 
 namespace DSA.LinkedList;
 
-public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List does not accept null values
+public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
 {
     #region Properties
 
@@ -350,10 +349,10 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
     {
         if (otherList == null)
             throw new ArgumentNullException(nameof(otherList), "Linkedlist is empty!");
-        if (otherList.Count == 0 || Count == 0)
+        if (otherList.Count == 0)
             throw new InvalidOperationException("Linkedlist is empty!");
 
-        LLNode<T> otherNode = otherList.First!;
+        LLNode<T> otherNode = otherList.First!; // TODO: Edge case where first list is empty!
         while (otherNode != null)
         {
             otherNode.List = this;
@@ -375,6 +374,7 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
     /// <summary>
     /// Removes the node at the start of this list.
     /// </summary>
+    /// <remarks>Time complexity: O(1).</remarks>
     public void RemoveFirst()
     {
         if (First == null || Last == null)
@@ -397,6 +397,7 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
     /// <summary>
     /// Removes the node at the end of this list.
     /// </summary>
+    /// <remarks>Time complexity: O(1).</remarks>
     public void RemoveLast()
     {
         if (First == null || Last == null)
@@ -417,6 +418,7 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
     /// <summary>
     /// Removes the first/last occurence of the specified value from this list.
     /// </summary>
+    /// <remarks>Time complexity: O(n).</remarks>
     public bool Remove(T value, bool removeFirst = true)
     {
         if (Count == 0)     // Empty list
@@ -523,6 +525,8 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
         return node != null;
     }
 
+    // TODO: Contains(LLNode<T> node)
+
     /// <summary>
     /// Determines whether there is a cycle in this list.
     /// </summary>
@@ -547,6 +551,26 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Finds the node with the largest value in this list.
+    /// </summary>
+    /// <remarks>Time complexity: O(n log n).</remarks>
+    /// <returns>Node with largest value if found; otherwise null.</returns>
+    public LLNode<T>? Max()
+    {
+        return MergeSort(First, ascendingOrder: false);
+    }
+
+    /// <summary>
+    /// Finds the node with the smallest value in this list.
+    /// </summary>
+    /// <remarks>Time complexity: O(n log n).</remarks>
+    /// <returns>Node with smallest value if found; otherwise null.</returns>
+    public LLNode<T>? Min()
+    {
+        return MergeSort(First, ascendingOrder: true);
     }
 
     /// <summary>
@@ -589,19 +613,18 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
     /// <summary>
     /// Performs a binary search to find the first node that contains the specified value.
     /// </summary>
-    /// <remarks>If binary search is used on unsorted list (not in ascending order), a warning exception will be thrown.
-    /// Time complexity: O(n).</remarks>
+    /// <remarks>Note: List will be sorted if its not sorted in ascending order.
+    /// Time complexity: O(n), because of finding the middle node.</remarks>
     /// <returns>Node with specified value.</returns>
     public LLNode<T>? BinarySearch(T value)
     {
         if (First == null)
             return null;
 
-        // TODO: Future Improvement: Sort if not sorted yet?
-        if (First > Last)   // Check if its sorted in ascending order
-            throw new WarningException("Perform binary search on unsorted list!");
+        if (!IsSorted(ascendingOrder: true))    // Sort the list if not sorted
+            First = MergeSort(First, ascendingOrder: true);
 
-        LLNode<T> start  = First;
+        LLNode<T> start  = First!;
         LLNode<T>? end   = null;
         LLNode<T> target = new LLNode<T>(value);
         
@@ -630,10 +653,9 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
     #region Sort
 
     /// <summary>
-    /// Swap the positions of two nodes without changing their value
+    /// Swaps the positions of two nodes without changing their values.
     /// </summary>
     /// <remarks>Time complexity: O(1).</remarks>
-    /// <returns>True if value is found; otherwise false.</returns>
     public void Swap(LLNode<T> first, LLNode<T> second)
     {
         if (first.List != this || second.List != this)  // Check if node belongs to another list
@@ -724,6 +746,11 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
         else
             return SortAndMerge(MergeSort(right, ascendingOrder: false),
                                 MergeSort(left,  ascendingOrder: false), ascendingOrder: false);
+    }
+
+    public LLNode<T>? QuickSort()
+    {
+        throw new NotImplementedException();
     }
 
     public LLNode<T> InsertionSort()
@@ -830,6 +857,9 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
     /// <returns>Middle node.</returns>
     public LLNode<T>? GetMiddleNode(LLNode<T> node)
     {
+        if (node.List != this)
+            return null;
+
         if (node == null)
             return null;
 
@@ -850,6 +880,11 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
         return slow;
     }
 
+    /// <summary>
+    /// Gets the middle node between specified start and end node.
+    /// </summary>
+    /// <remarks>Time complexity: O(n).</remarks>
+    /// <returns>Middle node.</returns>
     public LLNode<T>? GetMiddleNode(LLNode<T>? start, LLNode<T>? end)
     {
         bool IsBefore(LLNode<T> start, LLNode<T> end)
@@ -944,6 +979,43 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
         return head;
     }
 
+    /// <summary>
+    /// Gets the string representing the entire list according to specified order.
+    /// </summary>
+    /// <remarks>Time complexity: O(n).</remarks>
+    /// <returns>String representing the list.</returns>
+    public string ListAsString(bool frontToBack = true)
+    {
+        string list = "";
+
+        if (frontToBack)
+        {
+            LLNode<T>? current = First;
+
+            list += "[Front to back]: ";
+            while (current != null)
+            {
+                list += current.Value.ToString() + " -> ";
+                current = current.Next!;
+            }
+            list += '\n';
+        }
+        else
+        {
+            LLNode<T>? current = Last;
+
+            list += "[Back to front]: ";
+            while (current != null)
+            {
+                list += current.Value.ToString() + " -> ";
+                current = current.Previous!;
+            }
+            list += '\n';
+        }
+
+        return list;
+    }
+
     #endregion
 
     #region Private    
@@ -979,6 +1051,33 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
 
             Last = current;
         }
+    }
+
+    /// <summary>
+    /// Checks if list is sorted according to specified order.
+    /// </summary>
+    /// <returns>True is sorted correctly; otherwise false.</returns>
+    bool IsSorted(bool ascendingOrder = true)
+    {
+        if (First == null)
+            return false;
+
+        LLNode<T> current = First;
+        while (current != null)
+        {
+            if (current.Next != null)
+            {
+                if (ascendingOrder && current.Next < current)
+                    return false;
+                
+                if (!ascendingOrder && current.Next > current)
+                    return false;
+            }
+
+            current = current.Next!;
+        }
+
+        return true;
     }
 
     #endregion
