@@ -1,0 +1,10 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=6bc1a3b8_002D0932_002D4082_002Db8f4_002Defd42795c6fc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Constructor_EmptyList_CountZero" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B5781DBD-EF5B-473F-AF8F-1394177C1BC1::net8.0::DSA.Tests.Tests+LListTests_Ctors&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B5781DBD-EF5B-473F-AF8F-1394177C1BC1::net8.0::DSA.Tests.Tests+LListTests_Cycle&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B5781DBD-EF5B-473F-AF8F-1394177C1BC1::net8.0::DSA.Tests.Tests+LListTests_Reverse&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B5781DBD-EF5B-473F-AF8F-1394177C1BC1::net8.0::DSA.Tests.Tests+LListTests_Swap&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::B5781DBD-EF5B-473F-AF8F-1394177C1BC1::net8.0::DSA.Tests.Tests+LListTests_Append.Append_AppendsListCorrectly&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
