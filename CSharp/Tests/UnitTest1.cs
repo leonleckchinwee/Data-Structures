@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSA.LinkedList;
 
 namespace DSA.Tests;
@@ -1611,6 +1612,49 @@ public class Tests
             // Assert
             Assert.That(middleNode, Is.Null);
         }
+
+        [Test]
+        public void GetMiddleNode_BetweenTwoNodes_EvenNodes()
+        {
+            LList<int> list = new LList<int>();
+            LLNode<int> first = list.AddFirst(1);
+            list.AddLast(2);
+            LLNode<int> second = list.AddLast(3);
+            list.AddLast(4);
+
+            var middleNode = list.GetMiddleNode(first, second);
+
+            Assert.That(middleNode!.Value, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void GetMiddleNode_BetweenTwoNodes_OddNodes()
+        {
+            LList<int> list = new LList<int>();
+            LLNode<int> first = list.AddFirst(1);
+            list.AddLast(2);
+            list.AddLast(5);
+            LLNode<int> second = list.AddLast(3);
+            list.AddLast(4);
+
+            var middleNode = list.GetMiddleNode(first, second);
+
+            Assert.That(middleNode!.Value, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void GetMiddleNode_BetweenTwoNodes_EndBeforeStart()
+        {
+            LList<int> list = new LList<int>();
+            LLNode<int> first = list.AddFirst(1);
+            list.AddLast(2);
+            LLNode<int> second = list.AddLast(3);
+            list.AddLast(4);
+
+            var middleNode = list.GetMiddleNode(second, first);
+
+            Assert.That(middleNode!.Value, Is.EqualTo(2));
+        }
     }
 
     [TestFixture]
@@ -1825,6 +1869,102 @@ public class Tests
         }
     }
 
+    [TestFixture]
+    public class LListTests_BinarySearch
+    {
+        [Test]
+        public void BinarySearch_FindFirstOccurrence_ReturnsFirstNodeWithValue()
+        {
+            // Arrange
+            LList<int> list = new LList<int>();
+            list.AddLast(1);
+            list.AddLast(2);
+            list.AddLast(2);
+            list.AddLast(3);
+            list.AddLast(4);
+            list.AddLast(4);
+            list.AddLast(4);
+            list.AddLast(5);
 
+            // Act
+            var foundNode = list.BinarySearch(2);
+
+            // Assert
+            Assert.That(foundNode!.Value, Is.EqualTo(2));
+        }
+
+        // Testing BinarySearch method for finding the last occurrence
+        [Test]
+        public void BinarySearch_FindLastOccurrence_ReturnsLastNodeWithValue()
+        {
+            // Arrange
+            LList<int> list = new LList<int>();
+            list.AddLast(1);
+            list.AddLast(2);
+            list.AddLast(2);
+            list.AddLast(3);
+            list.AddLast(4);
+            list.AddLast(4);
+            list.AddLast(4);
+            list.AddLast(5);
+
+            // Act
+            var foundNode = list.BinarySearch(4);
+
+            // Assert
+            Assert.That(foundNode!.Value, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void BinarySearch_RandomValues()
+        {
+            // Arrange
+            LList<int> list = new LList<int>();
+            list.AddLast(4);
+            list.AddLast(3);
+            list.AddLast(2);
+            list.AddLast(4);
+            list.AddLast(2);
+            list.AddLast(5);
+            list.AddLast(4);
+            list.AddLast(1);
+
+            // Act
+            Assert.Throws<WarningException>(() => list.BinarySearch(4));
+        }
+
+        // Testing BinarySearch method for non-existing value
+        [Test]
+        public void BinarySearch_NonExistingValue_ReturnsNull()
+        {
+            // Arrange
+            LList<int> list = new LList<int>();
+            list.AddLast(1);
+            list.AddLast(2);
+            list.AddLast(3);
+            list.AddLast(4);
+            list.AddLast(5);
+
+            // Act
+            var foundNode = list.BinarySearch(6);
+
+            // Assert
+            Assert.That(foundNode, Is.Null);
+        }
+
+        // Testing BinarySearch method for an empty list
+        [Test]
+        public void BinarySearch_EmptyList_ReturnsNull()
+        {
+            // Arrange
+            LList<int> list = new LList<int>();
+
+            // Act
+            var foundNode = list.BinarySearch(1);
+
+            // Assert
+            Assert.That(foundNode, Is.Null);
+        }
+    }
 
 }

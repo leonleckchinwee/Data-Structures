@@ -998,34 +998,32 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\leckc\\.nuget\\packages\\": {}
+    "/Users/leonleck/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "S:\\Github\\Data-Structures\\CSharp\\Tests\\Tests.csproj",
+      "projectUniqueName": "/Users/leonleck/Documents/GitHub/Data-Structures/CSharp/Tests/Tests.csproj",
       "projectName": "Tests",
-      "projectPath": "S:\\Github\\Data-Structures\\CSharp\\Tests\\Tests.csproj",
-      "packagesPath": "C:\\Users\\leckc\\.nuget\\packages\\",
-      "outputPath": "S:\\Github\\Data-Structures\\CSharp\\Tests\\obj\\",
+      "projectPath": "/Users/leonleck/Documents/GitHub/Data-Structures/CSharp/Tests/Tests.csproj",
+      "packagesPath": "/Users/leonleck/.nuget/packages/",
+      "outputPath": "/Users/leonleck/Documents/GitHub/Data-Structures/CSharp/Tests/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\leckc\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "/Users/leonleck/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "S:\\Github\\Data-Structures\\CSharp\\LinkedList\\LinkedList.csproj": {
-              "projectPath": "S:\\Github\\Data-Structures\\CSharp\\LinkedList\\LinkedList.csproj"
+            "/Users/leonleck/Documents/GitHub/Data-Structures/CSharp/LinkedList/LinkedList.csproj": {
+              "projectPath": "/Users/leonleck/Documents/GitHub/Data-Structures/CSharp/LinkedList/LinkedList.csproj"
             }
           }
         }
@@ -1034,11 +1032,6 @@
         "warnAsError": [
           "NU1605"
         ]
-      },
-      "restoreAuditProperties": {
-        "enableAudit": "true",
-        "auditLevel": "low",
-        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -1082,7 +1075,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.101/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

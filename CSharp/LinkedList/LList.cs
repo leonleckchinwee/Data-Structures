@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.ComponentModel;
 
 namespace DSA.LinkedList;
 
@@ -551,8 +552,9 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
     /// <summary>
     /// Performs a linear search to find the first/last node that contains the specified value.
     /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    /// <returns>True if value is found; otherwise false.</returns>
+    /// <remarks>If findFirst is true, it will search from start to end; otherwise it will search from
+    /// end to start. Time complexity: O(n).</remarks>
+    /// <returns>Node with specified value.</returns>
     public LLNode<T>? LinearSearch(T value, bool findFirst = true)
     {
         if (First == null || Last == null)
@@ -581,6 +583,45 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
             }
         }
         
+        return null;
+    }
+
+    /// <summary>
+    /// Performs a binary search to find the first node that contains the specified value.
+    /// </summary>
+    /// <remarks>If binary search is used on unsorted list (not in ascending order), a warning exception will be thrown.
+    /// Time complexity: O(n).</remarks>
+    /// <returns>Node with specified value.</returns>
+    public LLNode<T>? BinarySearch(T value)
+    {
+        if (First == null)
+            return null;
+
+        // TODO: Future Improvement: Sort if not sorted yet?
+        if (First > Last)   // Check if its sorted in ascending order
+            throw new WarningException("Perform binary search on unsorted list!");
+
+        LLNode<T> start  = First;
+        LLNode<T>? end   = null;
+        LLNode<T> target = new LLNode<T>(value);
+        
+        do
+        {
+            LLNode<T>? middle = GetMiddleNode(start, end);
+
+            if (middle == null)
+                return null;
+            
+            if (middle.Value.Equals(value))
+                return middle;
+
+            if (target < middle)    // Target value lesser than middle node
+                end = middle;
+            else                    // Target value greater than middle node
+                start = middle.Next!;
+        }
+        while (end == null || end != start);
+
         return null;
     }
 
@@ -671,18 +712,18 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
         if (head == null || head.Next == null)
             return head;
 
-        LLNode<T> middle  = GetMiddleNode(head)!;
-        LLNode<T>  left   = head;
-        LLNode<T> right   = middle.Next!; 
+        LLNode<T> middle = GetMiddleNode(head)!;
+        LLNode<T>  left  = head;
+        LLNode<T> right  = middle.Next!; 
 
         middle!.Next = null;    // Splits the list into halves
 
         if (ascendingOrder)
-            return SortAndMerge(MergeSort(left, ascendingOrder: true), 
-                                MergeSort(right, ascendingOrder: true));
+            return SortAndMerge(MergeSort(left,  ascendingOrder: true), 
+                                MergeSort(right, ascendingOrder: true), ascendingOrder: true);
         else
             return SortAndMerge(MergeSort(right, ascendingOrder: false),
-                                MergeSort(left, ascendingOrder: false), ascendingOrder: false);
+                                MergeSort(left,  ascendingOrder: false), ascendingOrder: false);
     }
 
     public LLNode<T> InsertionSort()
@@ -765,8 +806,8 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
         if (Count == 0 || First == null || Last == null)
             throw new InvalidOperationException("Linkedlist is empty!");
 
-        LLNode<T>? fast = First.Next;
         LLNode<T>  slow = First;
+        LLNode<T>? fast = First.Next;
 
         while (fast != null)
         {
@@ -792,8 +833,8 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
         if (node == null)
             return null;
 
-        LLNode<T>? fast = node.Next;
         LLNode<T>  slow = node;
+        LLNode<T>? fast = node.Next;
 
         while (fast != null)
         {
@@ -804,6 +845,46 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T> // List
                 slow = slow.Next!;
                 fast = fast.Next;
             }
+        }
+
+        return slow;
+    }
+
+    public LLNode<T>? GetMiddleNode(LLNode<T>? start, LLNode<T>? end)
+    {
+        bool IsBefore(LLNode<T> start, LLNode<T> end)
+        {
+            LLNode<T> current = start;
+            while (current != null)
+            {
+                if (current == end)
+                    return true;
+
+                current = current.Next!;
+            }
+            return false;
+        }
+
+        if (start == null)
+            return null;
+
+        if (end == null)
+            return GetMiddleNode(start);
+
+        if (start.List != this || end.List != this)
+            throw new InvalidOperationException("Linkedlist node is not in current list!");
+
+        // Check if start is before end
+        if (!IsBefore(start, end))
+            (start, end) = (end, start);
+
+        LLNode<T>  slow = start;
+        LLNode<T>? fast = start;
+
+        while (fast != end && fast?.Next != null)
+        {
+            slow = slow.Next!;
+            fast = fast!.Next!.Next;
         }
 
         return slow;
