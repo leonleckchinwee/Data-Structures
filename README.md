@@ -11,7 +11,7 @@ I have also included basic NUnit tests.
 ### Future Plans
 - ❎ Arrays
 - ✅ Doubly Linked Lists
-- ❎ Stacks
+- ✅ Stacks
 - ❎ Queues
 - ❎ Trees
 - ❎ Graphs
