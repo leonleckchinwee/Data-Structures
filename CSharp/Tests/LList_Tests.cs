@@ -1,7 +1,4 @@
-using System.ComponentModel;
-using DSA.LinkedList;
-
-namespace DSA.Tests;
+namespace DSA.LinkedList.Tests;
 
 public class Tests
 {
