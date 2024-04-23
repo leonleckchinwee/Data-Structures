@@ -1,6 +1,6 @@
 namespace DSA.LinkedList.Tests;
 
-public class Tests
+public class LinkedList_Tests
 {
     [TestFixture]
     public class LListTests_Ctors
