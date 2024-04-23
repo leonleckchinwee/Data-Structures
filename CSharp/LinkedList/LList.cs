@@ -349,7 +349,7 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
     {
         if (otherList == null)
             throw new ArgumentNullException(nameof(otherList), "Linkedlist is empty!");
-        if (otherList.Count == 0)
+        if (otherList.Count == 0 || Count == 0)
             throw new InvalidOperationException("Linkedlist is empty!");
 
         LLNode<T> otherNode = otherList.First!; // TODO: Edge case where first list is empty!
@@ -692,6 +692,12 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
         UpdateLast();
     }
 
+    public void SwapData(LLNode<T> first, LLNode<T> second)
+    {
+        if (first != null && second != null && first != second)
+            (first.Value, second.Value) = (second.Value, first.Value);
+    }
+
     /// <summary>
     /// Reverse the positions of all nodes in this list.
     /// </summary>
@@ -857,10 +863,10 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
     /// <returns>Middle node.</returns>
     public LLNode<T>? GetMiddleNode(LLNode<T> node)
     {
-        if (node.List != this)
+        if (node == null)
             return null;
 
-        if (node == null)
+        if (node.List != this)
             return null;
 
         LLNode<T>  slow = node;
