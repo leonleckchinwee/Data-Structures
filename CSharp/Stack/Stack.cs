@@ -59,8 +59,8 @@ public class Stack : ICloneable, ICollection, IEnumerable
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 0, nameof(capacity));
 
-        Items = new object[capacity];
-        Top   = -1;
+        Items    = new object[capacity];
+        Top      = -1;
         MaxCount = capacity;
     }
 
@@ -68,13 +68,11 @@ public class Stack : ICloneable, ICollection, IEnumerable
 
     #region Add
 
-    #endregion
-
     /// <summary>
     /// Inserts an item at the top of the stack.
     /// </summary>
     /// <param name="item">The item to push onto the stack. The item can be null.</param>
-    /// <remarks>The internal array will resize by twice the size to accomadate more items when needed.</remarks>
+    /// <remarks>The internal array will resize by twice the size to accomodate more items when needed.</remarks>
     public void Push(object? item)
     {
         CheckForResize();
@@ -83,15 +81,46 @@ public class Stack : ICloneable, ICollection, IEnumerable
         Items[Top] = item!;
     }
 
+    /// <summary>
+    /// Inserts an item into the stack at the specified index.
+    /// </summary>
+    /// <param name="index">Index to insert item.</param>
+    /// <param name="item">Item to insert.</param>
+    /// <exception cref="ArgumentOutOfRangeException">index out of range.</exception>
     public void InsertAt(int index, object? item)
     {
+        if (index < 0 || index > Count)
+            throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range!");
 
+        CheckForResize();
+
+        // Move items after index to the right
+        for (int i = Count; i > index; --i)
+        {
+            Items[i] = Items[i - 1];
+        }
+
+        ++Top;
+        Items[index] = item!;
     }
 
+    /// <summary>
+    /// Concatenates another stack to the current stack.
+    /// </summary>
+    /// <param name="other">The other stack to concat.</param>
+    /// <remarks>The new capacity will be the sum of both stacks.</remarks>
     public void Concat(Stack other)
     {
+        if (other.Count == 0)
+            return;
 
+        ForceResize(this.MaxCount + other.MaxCount);
+
+        Array.Copy(other.Items, 0, this.Items, Count, other.Count);
+        Top += other.Count;
     }
+
+    #endregion
 
     #region Remove
 
@@ -106,20 +135,71 @@ public class Stack : ICloneable, ICollection, IEnumerable
             throw new InvalidOperationException("The stack is empty!");
 
         object item = Items[Top];
+        
         --Top;
-
         TrimExcess();
 
         return item;
     }   
 
-    public bool RemoveAt(int index, object? item)
+    /// <summary>
+    /// Removes and returns the item at the specified index of the stack.
+    /// </summary>
+    /// <param name="index">Item's index.</param>
+    /// <returns>The item at the specified index of the stack.</returns>
+    /// <exception cref="InvalidOperationException">stack is empty.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">index out of range.</exception>
+    public object? RemoveAt(int index)
     {
-        throw new NotImplementedException();
+        if (IsEmpty())
+            throw new InvalidOperationException("The stack is empty!");
+
+        if (index < 0 || index >= Count)
+            throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range!");
+
+        object? item = Items[index];
+
+        for (int i = index; i < Count - 1; ++i)
+        {
+            Items[i] = Items[i + 1];
+        }
+
+        Items[Count - 1] = null!;
+
+        --Top;
+        TrimExcess();
+
+        return item;
     }
 
     /// <summary>
-    /// Removes all items from the stack.
+    /// Removes specified item from the stack.
+    /// </summary>
+    /// <param name="item">Item to remove.</param>
+    /// <exception cref="InvalidOperationException">stack is empty.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">index out of range.</exception>
+    public void Remove(object? item)
+    {
+        if (IsEmpty())
+            throw new InvalidOperationException("The stack is empty!");
+
+        int index = IndexOf(item);
+
+        ArgumentOutOfRangeException.ThrowIfEqual(index, -1, nameof(item));
+
+        for (int i = index; i < Count - 1; ++i)
+        {
+            Items[i] = Items[i + 1];
+        }
+
+        Items[Count - 1] = null!;
+
+        --Top;
+        TrimExcess();
+    }
+
+    /// <summary>
+    /// Removes all items from the stack. The capacity remains unchanged.
     /// </summary>
     public void Clear()
     {
@@ -140,23 +220,86 @@ public class Stack : ICloneable, ICollection, IEnumerable
     {
         if (IsEmpty())
             throw new InvalidOperationException("The stack is empty!");
-
+        
         return Items[Top];
     }
 
+    /// <summary>
+    /// Returns the item at the specified index of the stack without removing it.
+    /// </summary>
+    /// <param name="index">Index to peek at.</param>
+    /// <returns>The item at the specified index of the stack.</returns>
+    /// <exception cref="InvalidOperationException">stack is empty.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">index out of range.</exception>
     public object? Peek(int index)
     {
-        throw new NotImplementedException();
+        if (IsEmpty())
+            throw new InvalidOperationException("The stack is empty!");
+
+        if (index < 0 || index >= Count)
+            throw new ArgumentOutOfRangeException(nameof(index), "Index out of range!");
+
+        return Items[index];
     }
 
+    /// <summary>
+    /// Finds the first index of specified item in the stack.
+    /// </summary>
+    /// <param name="item">Item to find index of.</param>
+    /// <returns>Index of item found; otherwise -1.</returns>
+    /// <exception cref="InvalidOperationException">stack is empty.</exception>
     public int IndexOf(object? item)
     {
-        throw new NotImplementedException();
+        if (IsEmpty())
+            throw new InvalidOperationException("The stack is empty!");
+
+        bool nullCheck = item == null;
+
+        for (int i = 0; i < Count; ++i)
+        {
+            if (nullCheck)
+            {
+                if (Items[i] == item)
+                    return i;
+            }
+            else
+            {
+                if (Items[i].Equals(item))
+                    return i;
+            }
+        }
+
+        return -1;
     }
 
+    /// <summary>
+    /// Finds the last index of specified item in the stack.
+    /// </summary>
+    /// <param name="item">Item to find index of.</param>
+    /// <returns>Index of item found; otherwise -1.</returns>
+    /// <exception cref="InvalidOperationException">stack is empty.</exception>
     public int LastIndexOf(object? item)
     {
-        throw new NotImplementedException();
+        if (IsEmpty())
+            throw new InvalidOperationException("The stack is empty!");
+
+        bool nullCheck = item == null;
+
+        for (int i = Count - 1; i >= 0; --i)
+        {
+            if (nullCheck)
+            {
+                if (Items[i] == item)
+                    return i;
+            }
+            else
+            {
+                if (Items[i].Equals(item))
+                    return i;
+            }
+        }
+
+        return -1;
     }
 
     #endregion
@@ -172,14 +315,66 @@ public class Stack : ICloneable, ICollection, IEnumerable
         return Top == -1;
     }
 
+    /// <summary>
+    /// Determines if specified item is in the stack.
+    /// </summary>
+    /// <param name="item">Item to check for.</param>
+    /// <returns>True if stack contains the item; otherwise false.</returns>
+    /// <remarks>This function uses loop unrolling. It is a linear search, and will find the first item it encounters.</remarks>
     public bool Contains(object? item)
     {
-        throw new NotImplementedException();
+        if (IsEmpty())
+            return false;
+
+        int remaining = Count % 4;
+        int i = 0;
+
+        bool nullCheck = item == null;
+
+        // Loop unrolling
+        for (; i < Count - remaining; i += 4)
+        {
+            if (nullCheck)
+            {
+                if (Items[i] == item || Items[i + 1] == item || Items[i + 2] == item || Items[i + 3] == item)
+                    return true;
+            }
+            else
+            {
+                if (Items[i].Equals(item) || Items[i + 1].Equals(item) || Items[i + 2].Equals(item) || Items[i + 3].Equals(item))
+                    return true;     
+            }
+        }
+
+        for (; i < Count; ++i)
+        {
+            if (nullCheck)
+            {
+                if (Items[i] == item)
+                    return true;
+            }    
+            else
+            {
+                if (Items[i].Equals(item))
+                    return true;
+            }
+        }
+
+        return false;
     }
 
+    /// <summary>
+    /// Reverses the order of all the items in the stack.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">stack is empty.</exception>
     public void Reverse()
     {
+        if (IsEmpty())
+            throw new InvalidOperationException("The stack is empty!");
 
+        Array.Reverse(Items, 0, Count);
+
+        Top = Count - 1;
     }
 
     /// <summary>
@@ -191,7 +386,10 @@ public class Stack : ICloneable, ICollection, IEnumerable
         return Items.ToArray();
     }
 
-    // TODO: check this...
+    /// <summary>
+    /// Copies the stack to a new list.
+    /// </summary>
+    /// <returns>A new list containing all the items in the stack.</returns>
     public List<object?> ToList()
     {
         return [.. Items];
@@ -263,10 +461,27 @@ public class Stack : ICloneable, ICollection, IEnumerable
         }
     }
 
+    /// <summary>
+    /// Force a max capacity resize of the stack.
+    /// </summary>
+    /// <param name="newCapacity">capacity is negative.</param>
+    private void ForceResize(int newCapacity)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(newCapacity, 0, nameof(newCapacity));
+
+        Array.Resize(ref Items, newCapacity);
+    }
+
+    /// <summary>
+    /// Trims the excess spaces for memory efficiency. 
+    /// </summary>
+    /// <remarks>Checks if max count can be reduced by half.</remarks>
     private void TrimExcess()
     {
         int halfSize = MaxCount / 2;
         MaxCount = (Count <= halfSize) ? halfSize : MaxCount;
+
+        Array.Resize(ref Items, MaxCount);
     }
 
     #endregion
