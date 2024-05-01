@@ -422,7 +422,7 @@ public class Queue_Tests
             IEnumerator<int> enumerator = queue.GetEnumerator();
 
             // Assert
-            int[] expectedItems = new[] { 1, 2, 3 };
+            int[] expectedItems = [1, 2, 3];
             int index = 0;
             while (enumerator.MoveNext())
             {
@@ -444,7 +444,7 @@ public class Queue_Tests
             IEnumerator enumerator = ((IEnumerable)queue).GetEnumerator();
 
             // Assert
-            int[] expectedItems = new[] { 1, 2, 3 };
+            int[] expectedItems = [1, 2, 3];
             int index = 0;
             while (enumerator.MoveNext())
             {
@@ -484,7 +484,7 @@ public class Queue_Tests
             IEnumerator<int> enumerator = queue.GetEnumerator();
 
             // Assert
-            int[] expectedItems = new[] { 2, 3 };
+            int[] expectedItems = [2, 3];
             int index = 0;
             while (enumerator.MoveNext())
             {
@@ -494,7 +494,76 @@ public class Queue_Tests
         }
     }
 
+    [TestFixture]
+    public class QueueTests_Clear
+    {
+        [Test]
+        public void Clear_SetsCurrentCountToZero()
+        {
+            // Arrange
+            var queue = new Queue<int>();
+            queue.Enqueue(1);
+            queue.Enqueue(2);
+            queue.Enqueue(3);
 
+            // Act
+            queue.Clear();
+
+            // Assert
+            Assert.That(queue.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Clear_ResetsHeadAndTailIndicesToZero()
+        {
+            // Arrange
+            var queue = new Queue<int>(4);
+            queue.Enqueue(1);
+            queue.Enqueue(2);
+            queue.Enqueue(3);
+            queue.Dequeue();
+            queue.Dequeue();
+
+            // Act
+            queue.Clear();
+
+            // Assert
+            Assert.That(queue.ToArray()[0], Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Clear_DoesNotChangeCapacity()
+        {
+            // Arrange
+            var queue = new Queue<int>(8);
+            queue.Enqueue(1);
+            queue.Enqueue(2);
+            queue.Enqueue(3);
+            int initialCapacity = queue.MaxCount;
+
+            // Act
+            queue.Clear();
+
+            // Assert
+            Assert.That(queue.MaxCount, Is.EqualTo(initialCapacity));
+        }
+
+        [Test]
+        public void Clear_ClearsQueueContents()
+        {
+            // Arrange
+            var queue = new Queue<int>(3);
+            queue.Enqueue(1);
+            queue.Enqueue(2);
+            queue.Enqueue(3);
+
+            // Act
+            queue.Clear();
+
+            // Assert
+            Assert.That(queue.ToArray(), Is.EqualTo(new[] { 0, 0, 0 }));
+        }
+    }
 
 
 

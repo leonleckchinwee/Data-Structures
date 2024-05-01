@@ -8,7 +8,7 @@ namespace DSA.Queues;
 /// </summary>
 /// <remarks>This queue accepts null as a valid value for reference types 
 /// and allows duplicate elements.</remarks>
-public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection
+public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection, IEnumerable
 {
     #region Properties
 
@@ -154,6 +154,70 @@ public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection
     }
 
     /// <summary>
+    /// Returns the object at the beginning of the queue without removing it.
+    /// </summary>
+    /// <returns>The object at the beginning of the queue.</returns>
+    /// <exception cref="InvalidOperationException">The queue is empty.</exception>
+    public T Peek()
+    {
+        if (CurrentCount == 0)
+            throw new InvalidOperationException("The queue is empty.");
+
+        return Items[Head];
+    }
+
+    /// <summary>
+    /// Removes the object at the beginning of the queue, and copies it to the item parameter.
+    /// </summary>
+    /// <param name="item">The object that was removed.</param>
+    /// <returns>True if the object is successfully removed; false if the queue is empty.</returns>
+    public bool TryDequeue(out T item)
+    {
+        if (CurrentCount == 0)
+        {
+            item = default!;
+            return false;
+        }
+
+        item      = Items[Head];
+        Items[Head] = default!;
+        Head        = (Head + 1) % MaxCapacity;
+
+        --CurrentCount;
+        return true;
+    }
+
+    /// <summary>
+    /// Returns a value that indicates whether there is an object at the beginning of the queue.
+    /// If one is present, it will be copied to the item parameter. The object is not removed from the queue.
+    /// </summary>
+    /// <param name="item">Object at the beginning of the queue; otherwise, the default value of T.</param>
+    /// <returns>True if there is an object at the beginning of the queue; false if queue is empty.</returns>
+    public bool TryPeek(out T item)
+    {
+        if (CurrentCount == 0)
+        {
+            item = default!;
+            return false;
+        }
+
+        item = Items[Head];
+        return true;
+    }
+
+    /// <summary>
+    /// Removes all objects from the queue.
+    /// </summary>
+    public void Clear()
+    {
+        Array.Clear(Items, 0, Count);
+        
+        CurrentCount = 0;
+        Head         = 0;
+        Tail         = 0;
+    }
+
+    /// <summary>
     /// Ensures that the capacity of the queue is at least the specified capacity.
     /// </summary>
     /// <param name="capacity">The minimum capacity to ensure.</param>
@@ -174,9 +238,43 @@ public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection
         return MaxCapacity;
     }
 
+    public void TrimExcess()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool Contains(T item)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Get the array underlying the queue.
+    /// </summary>
+    /// <returns>Array containing all the items.</returns>
+    public T[] ToArray()
+    {
+        return Items;
+    }
+
     #endregion
 
     #region Interface Overrides
+
+    public override string ToString()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool Equals(object? obj)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>
     /// Copies the elements of the collection to an array, starting at a particular array index.
@@ -230,15 +328,6 @@ public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection
 
     #endregion
 
-    /// <summary>
-    /// Get the array underlying the queue.
-    /// </summary>
-    /// <returns>Array containing all the items.</returns>
-    public T[] ToArray()
-    {
-        return Items;
-    }
-
     #region Private
 
     /// <summary>
@@ -258,8 +347,6 @@ public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection
 
         return number + 1;
     }
-
-    #endregion
 
     /// <summary>
     /// IEnumerable<T> Interface
@@ -304,4 +391,6 @@ public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection
             throw new NotImplementedException();
         }
     }
+
+    #endregion
 }
