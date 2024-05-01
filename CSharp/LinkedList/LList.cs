@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace DSA.LinkedList;
+namespace DSA.LinkedLists;
 
 public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
 {

@@ -1,4 +1,4 @@
-namespace DSA.LinkedList;
+namespace DSA.LinkedLists;
 
 public class LLNode<T> where T : notnull, IComparable<T>
 {

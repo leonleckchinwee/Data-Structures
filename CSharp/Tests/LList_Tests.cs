@@ -1,4 +1,4 @@
-namespace DSA.LinkedList.Tests;
+namespace DSA.LinkedLists.Tests;
 
 public class LinkedList_Tests
 {

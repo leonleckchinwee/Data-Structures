@@ -10,6 +10,7 @@ public class Stack : ICloneable, ICollection, IEnumerable
     /// Default stack capacity.
     /// </summary>
     private const int DefaultCapacity = 100;
+    
     /// <summary>
     /// Holds all the items in the stack in an internal array.
     /// </summary>
