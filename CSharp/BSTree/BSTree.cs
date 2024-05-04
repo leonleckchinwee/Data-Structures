@@ -1,61 +1,64 @@
-﻿namespace DSA.BSTrees;
+﻿using DSA.Stacks;
 
-public class BSTree<T> where T : IComparable<T>
+namespace DSA.BSTrees;
+
+/// <summary>
+/// Binary search tree that only supports integers (for now).
+/// The tree does not allow duplicates.
+/// </summary>
+public class BSTree
 {
-    public class BSTreeNode<T2> where T2 : IComparable<T2>
-    {
-        public T2              Value;
+    /// <summary>
+    /// Root of the tree.
+    /// </summary>
+    public BSTreeNode? Root { get; private set; }
 
-        public BSTreeNode<T2>? Left;
-        public BSTreeNode<T2>? Right;
-
-        public BSTreeNode(T2 value)
-        {
-            Value = value;
-            Left  = null;
-            Right = null;
-        }
-    }
-
-    public BSTreeNode<T>? Root { get; private set; }
-
+    /// <summary>
+    /// Number of nodes in the tree.
+    /// </summary>
     public int Count { get; private set; }
 
+    /// <summary>
+    /// Initializes an empty tree.
+    /// </summary>
     public BSTree()
     {
         Root  = null;
         Count = 0;
     }
 
-    public BSTree(T value)
+    /// <summary>
+    /// Initializes a tree with root node containing the specified value.
+    /// </summary>
+    /// <param name="value">Value to insert as the root of the tree.</param>
+    public BSTree(int value)
     {
-        Root  = new BSTreeNode<T>(value);
+        Root  = new BSTreeNode(value);
         Count = 1;
     }
 
-    public void Insert(T value)
+    /// <summary>
+    /// Inserts a new node into the tree with the specified value.
+    /// </summary>
+    /// <param name="value">Value to insert into tree.</param>
+    /// <exception cref="InvalidOperationException">Duplicate entries not allowed.</exception>
+    public void Insert(int value)
     {
         Root = Insert(Root, value);
     }
 
-    private BSTreeNode<T> Insert(BSTreeNode<T>? node, T value)
+    private BSTreeNode Insert(BSTreeNode? node, int value)
     {
-        if (node == null)   // New node
+        if (node == null)   // New node to insert
         {
-            node = new BSTreeNode<T>(value);
-
             ++Count;
+            node = new BSTreeNode(value);
             return node;
         }
 
         int comparer = value.CompareTo(node.Value);
 
-        if (comparer == 0)  // Duplicate values
-        {
-            throw new InvalidOperationException("Duplicate values not allowed.");
-        }
-
-        if (comparer < 0)   // Value smaller than current node
+        if (comparer < 0)       // Value smaller than current node
         {
             node.Left = Insert(node.Left, value);
         }
@@ -63,13 +66,64 @@ public class BSTree<T> where T : IComparable<T>
         {
             node.Right = Insert(node.Right, value);
         }
+        else                    // Duplicate values
+        {
+            throw new InvalidOperationException("Duplicate values not allowed.");
+        }
 
-        return Root!;
+        return node;
     }
 
-    public void Remove(T value)
+    /// <summary>
+    /// Removes an existing node from the tree with the specified value.
+    /// </summary>
+    /// <param name="value">Value to remove from tree.</param>
+    public bool Remove(int value)
     {
-        throw new NotImplementedException();
+        if (Count == 0)
+            return false;
+
+        bool removed = false;
+        Root = Remove(Root, value, ref removed);
+
+        if (removed)
+            --Count;
+
+        return removed;
+    }
+
+    private BSTreeNode? Remove(BSTreeNode? node, int value, ref bool removed)
+    {
+        if (node == null)
+        {
+            removed = false;
+            return node;
+        }
+
+        int comparer = value.CompareTo(node.Value);
+
+        if (comparer < 0)       // Value smaller than current node
+        {
+            node.Left = Remove(node.Left, value, ref removed);
+        }
+        else if (comparer > 0)  // Value greater than current node
+        {
+            node.Right = Remove(node.Right, value, ref removed);
+        }
+        else                    // Node to remove
+        {
+            removed = true;
+
+            if (node.Left == null)
+                return node!.Right;
+            else if (node.Right == null)
+                return node!.Left;
+                
+            node.Value = Minimum(node.Left);
+            node.Left = Remove(node.Left, node.Value, ref removed); 
+        }
+
+        return node;
     }
 
     public void Clear()
@@ -77,40 +131,79 @@ public class BSTree<T> where T : IComparable<T>
         throw new NotImplementedException();
     }
 
-    public bool Contains(T value)
+    public bool Contains(int value)
     {
         throw new NotImplementedException();
     }
 
-    public void PrintInorder(int indent = 0)
+    public string? PrintInorder()
     {
         if (Root == null)
-            return;
+            return null;
 
-        Inorder(Root, indent);
+        return Inorder(Root);
     }
 
-    private void Inorder(BSTreeNode<T>? node, int indent = 0)
+    private string? Inorder(BSTreeNode? node)
     {
         if (node == null)
-            return;
+            return null;
 
-        Inorder(node!.Left, indent + 1);
+        string nodeString = "";
 
-        Console.Write(new string(' ', indent * 4));
-        Console.Write(node!.Value);
+        nodeString += Inorder(node!.Left);
 
-        Inorder(node!.Right, indent + 1);
+        nodeString += node.Value.ToString() + ", ";
+
+        nodeString += Inorder(node!.Right);
+
+        return nodeString;
     }
 
-    public void PreorderTraversal(Action<T> action)
+    public string? PrintPreorder()
     {
-        throw new NotImplementedException();
+        if (Root == null)
+            return null;
+
+        return Preorder(Root);
     }
 
-    public void PostorderTraversal(Action<T> action)
+    private string? Preorder(BSTreeNode? node)
     {
-        throw new NotImplementedException();
+        if (node == null)
+            return null;
+
+        string nodeString = "";
+
+        nodeString += node.Value.ToString() + ", ";
+
+        nodeString += Preorder(node!.Left);
+        nodeString += Preorder(node!.Right);
+
+        return nodeString;
+    }
+
+    public string? PostorderTraversal()
+    {
+        if (Root == null)
+            return null;
+
+        return Postorder(Root);
+    }
+
+    private string? Postorder(BSTreeNode? node)
+    {
+        if (node == null)
+            return null;
+
+        string nodeString = "";
+
+        nodeString += Postorder(node!.Left);
+        nodeString += Postorder(node!.Right);
+
+        nodeString += node.Value.ToString() + ", ";
+
+        return nodeString;
     }
 
     public int Height()
@@ -118,23 +211,36 @@ public class BSTree<T> where T : IComparable<T>
         throw new NotImplementedException();
     }
 
-    public T Minimum()
+    public int Minimum(BSTreeNode? node)
+    {
+        if (Root == null || node == null)
+            throw new ArgumentNullException("Node is null.");
+
+        int min = node.Value;
+
+        while (node.Left != null)
+        {
+            min  = node.Left.Value;
+            node = node.Left;
+        }
+
+        return min;
+    }
+
+    public int Maximum()
     {
         throw new NotImplementedException();
     }
 
-    public T Maximum()
+    public int Predecessor(int value)
     {
         throw new NotImplementedException();
     }
 
-    public T Predecessor(T value)
+    public BSTreeNode? InorderSuccessor(BSTreeNode? node)
     {
-        throw new NotImplementedException();
-    }
+        Stacks.Stack<BSTreeNode> a = new Stacks.Stack<BSTreeNode>();
 
-    public T Successor(T value)
-    {
         throw new NotImplementedException();
     }
 }

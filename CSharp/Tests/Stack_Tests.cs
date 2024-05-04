@@ -1,6 +1,6 @@
 namespace DSA.Stacks.Tests;
 
-public class Stack_Tests
+public class Stack_Tests_NonGeneric
 {
     [TestFixture]
     public class StackTests_Ctors
@@ -1209,6 +1209,186 @@ public class Stack_Tests
             Assert.That(stack.ToArray(), Is.EqualTo(new object[] { null!, 20, null!, 10 }));
         }
     }
+}
+
+public class Stack_Tests_Generic
+{
+    [TestFixture]
+    public class StackTests_Ctors
+    {
+        [Test]
+        public void DefaultConstructor_StackSizeShouldBeZero()
+        {
+            // Arrange
+            Stack<int> stack = new();
+
+            // Act
+            int count = stack.Count;
+
+            // Assert
+            Assert.Zero(count);
+        }
+
+        [Test]
+        public void CapacityConstructor_StackSizeShouldBeZero()
+        {
+            // Arrange
+            int capacity = 10;
+            Stack<int> stack = new(capacity);
+
+            // Act
+            int count = stack.Count;
+
+            // Assert
+            Assert.Zero(count);
+        }
+
+        [Test]
+        public void CapacityConstructorWithNegativeCapacity_ShouldThrowArgumentOutOfRangeException()
+        {
+            // Arrange
+            int negativeCapacity = -1;
+
+            // Act & Assert
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Stack<int>(negativeCapacity));
+        }
+
+        [Test]
+        public void CapacityConstructorWithZeroCapacity_ShouldCreateEmptyStack()
+        {
+            // Arrange & Act
+            Stack<int> stack = new(0);
+
+            // Assert
+            Assert.Zero(stack.Count);
+        }
+
+        [Test]
+        public void CapacityConstructorWithLargeCapacity_ShouldCreateEmptyStack()
+        {
+            // Arrange
+            int largeCapacity = 1000000;
+
+            // Act
+            Stack<int> stack = new(largeCapacity);
+
+            // Assert
+            Assert.Zero(stack.Count);
+        }
+
+        [Test]
+        public void DefaultConstructor_ShouldInitializeEmptyStack()
+        {
+            // Arrange
+            Stack<int> stack;
+
+            // Act
+            stack = new();
+
+            // Assert
+            Assert.That(stack.MaxCount, Is.EqualTo(16)); // Default capacity
+            Assert.That(stack.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void ParameterizedConstructor_WithValidCapacity_ShouldInitializeStack()
+        {
+            // Arrange
+            int capacity = 50;
+            Stack<int> stack;
+
+            // Act
+            stack = new(capacity);
+
+            // Assert
+            Assert.That(stack.MaxCount, Is.EqualTo(capacity));
+            Assert.That(stack.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void ParameterizedConstructor_WithNegativeCapacity_ShouldThrowArgumentOutOfRangeException()
+        {
+            // Arrange
+            int capacity = -10;
+
+            // Act & Assert
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Stack<int>(capacity));
+        }
+    }
+
+[TestFixture]
+    public class StackTests_Push
+    {
+        [Test]
+        public void Push_WhenStackIsEmpty_ShouldAddItemToStack()
+        {
+            // Arrange
+            Stack<int> stack = new();
+            int item = 42;
+
+            // Act
+            stack.Push(item);
+
+            // Assert
+            Assert.That(stack.MaxCount, Is.EqualTo(16));
+            Assert.That(stack.Count, Is.EqualTo(1));
+            Assert.That(stack.Peek(), Is.EqualTo(item));
+        }
+
+        [Test]
+        public void Push_WhenStackIsNotEmpty_ShouldAddItemToTop()
+        {
+            // Arrange
+            Stack<int> stack = new();
+            int item1 = 10;
+            int item2 = 20;
+
+            // Act
+            stack.Push(item1);
+            stack.Push(item2);
+
+            // Assert
+            Assert.That(stack.Count, Is.EqualTo(2));
+            Assert.That(stack.Peek(), Is.EqualTo(item2));
+        }
+
+        [Test]
+        public void Push_WithNullItem_ShouldAddNullToStack()
+        {
+            // Arrange
+            Stack<string> stack = new();
+            string? nullItem = null;
+
+            // Act
+            stack.Push(nullItem!);
+
+            // Assert
+            Assert.That(stack.Count, Is.EqualTo(1));
+            Assert.That(stack.Peek(), Is.Null);
+        }
+
+        [Test]
+        public void Push_WhenStackReachesCapacity_ShouldResizeInternalArray()
+        {
+            // Arrange
+            Stack<int> stack = new(2);
+            int item1 = 1;
+            int item2 = 2;
+            int item3 = 3;
+
+            // Act
+            stack.Push(item1);
+            stack.Push(item2);
+            stack.Push(item3); // This should trigger the internal array resize
+
+            // Assert
+            Assert.That(stack.Count, Is.EqualTo(3));
+            Assert.That(stack.MaxCount, Is.EqualTo(4));
+            Assert.That(stack.Peek(), Is.EqualTo(item3));
+        }
+    }
+
+
 
 
 }

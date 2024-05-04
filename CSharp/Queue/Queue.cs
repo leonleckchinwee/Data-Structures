@@ -102,9 +102,9 @@ public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection, IEn
         MaxCapacity  = capacity;
         CurrentCount = capacity;
 
+        int index    = 0;
         Items        = new T[capacity];
 
-        int index    = 0;
         foreach (T item in collection)
         {
             Items[index++] = item;
