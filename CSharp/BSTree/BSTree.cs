@@ -1,72 +1,115 @@
-﻿using DSA.Stacks;
-
-namespace DSA.BSTrees;
+﻿namespace DSA.BSTrees;
 
 /// <summary>
 /// Binary search tree that only supports integers (for now).
 /// The tree does not allow duplicates.
 /// </summary>
-public class BSTree
+public class BSTree<T> where T : IComparable<T>
 {
-    /// <summary>
-    /// Root of the tree.
-    /// </summary>
-    public BSTreeNode? Root { get; private set; }
+    #region Properties 
 
     /// <summary>
-    /// Number of nodes in the tree.
+    /// Private member that storing the root node.
     /// </summary>
-    public int Count { get; private set; }
+    private BSTreeNode<T>? m_Root;
 
     /// <summary>
-    /// Initializes an empty tree.
+    /// Private member storing the number of nodes present in the tree.
+    /// </summary>
+    private int m_Count;
+
+    /// <summary>
+    /// Root node of the tree.
+    /// </summary>
+    public BSTreeNode<T>? Root => m_Root;
+
+    /// <summary>
+    /// Number of nodes present in the tree.
+    /// </summary>
+    public int Count => m_Count;
+
+    #endregion
+
+    #region Constructors
+
+    /// <summary>
+    /// Initializes an new empty tree.
     /// </summary>
     public BSTree()
     {
-        Root  = null;
-        Count = 0;
+        m_Root  = null;
+        m_Count = 0;
     }
 
     /// <summary>
-    /// Initializes a tree with root node containing the specified value.
+    /// Initializes a new tree with root node containing the specificied value.
     /// </summary>
-    /// <param name="value">Value to insert as the root of the tree.</param>
-    public BSTree(int value)
+    /// <param name="value">Value to insert as the root node of the tree.</param>
+    public BSTree(T value)
     {
-        Root  = new BSTreeNode(value);
-        Count = 1;
+        m_Root  = new BSTreeNode<T>(value) { Tree = this };
+        m_Count = 1;
+    }
+
+    #endregion
+
+    #region Insert
+
+    /// <summary>
+    /// Inserts a new value into the tree.
+    /// </summary>
+    /// <param name="value">Value to insert.</param>
+    /// <returns>A new node containing the specified value.</returns>
+    /// <exception cref="InvalidOperationException">Duplicate values are not allowed.</exception>
+    public BSTreeNode<T> Insert(T value)
+    {
+        BSTreeNode<T> newNode = new BSTreeNode<T>(value) { Tree = this };
+        m_Root = Insert(m_Root, newNode);
+
+        return newNode;
     }
 
     /// <summary>
-    /// Inserts a new node into the tree with the specified value.
+    /// Inserts an exisiting node into the tree.
     /// </summary>
-    /// <param name="value">Value to insert into tree.</param>
-    /// <exception cref="InvalidOperationException">Duplicate entries not allowed.</exception>
-    public void Insert(int value)
+    /// <param name="newNode">Node to insert into the tree.</param>
+    /// <exception cref="InvalidOperationException">Duplicate values are not allowed.</exception>
+    /// <exception cref="InvalidOperationException">Node belongs to another tree.</exception>
+    public void Insert(BSTreeNode<T> newNode)
     {
-        Root = Insert(Root, value);
+        if (newNode.Tree != null && newNode.Tree != this)   // Check that node belongs to only one tree
+            throw new InvalidOperationException("Node belongs to another tree.");
+
+        newNode.Tree = this;
+        m_Root = Insert(m_Root, newNode);
     }
 
-    private BSTreeNode Insert(BSTreeNode? node, int value)
+    /// <summary>
+    /// Private recursive method to insert a new node.
+    /// </summary>
+    /// <param name="node">Source node.</param>
+    /// <param name="newNode">New node to insert.</param>
+    /// <returns>New node inserted.</returns>
+    /// <exception cref="InvalidOperationException">Duplicate values are not allowed.</exception>
+    private BSTreeNode<T> Insert(BSTreeNode<T>? node, BSTreeNode<T> newNode)
     {
-        if (node == null)   // New node to insert
+        if (node == null)   // Insert new node
         {
-            ++Count;
-            node = new BSTreeNode(value);
-            return node;
+            ++m_Count;
+            return newNode;
         }
 
-        int comparer = value.CompareTo(node.Value);
+        int comparer = newNode.CompareTo(node);
 
-        if (comparer < 0)       // Value smaller than current node
+        if (comparer < 0)   // New node is smaller than current node
         {
-            node.Left = Insert(node.Left, value);
+            node.Left = Insert(node.Left, newNode);
         }
-        else if (comparer > 0)  // Value greater than current node
+        else if (comparer > 0)  // New node is greater than current node
         {
-            node.Right = Insert(node.Right, value);
+            node.Right = Insert(node.Right, newNode);
         }
-        else                    // Duplicate values
+        else    // Duplicate values
         {
             throw new InvalidOperationException("Duplicate values not allowed.");
         }
@@ -74,173 +117,202 @@ public class BSTree
         return node;
     }
 
+    #endregion
+
+    #region Remove
+
+    #endregion
+
+    #region Min, Max
+
     /// <summary>
-    /// Removes an existing node from the tree with the specified value.
+    /// Finds and returns the minimum value in the tree.
     /// </summary>
-    /// <param name="value">Value to remove from tree.</param>
-    public bool Remove(int value)
+    /// <returns>Min value.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    public T MinValue()
     {
-        if (Count == 0)
-            return false;
+        ThrowIfEmpty();
 
-        bool removed = false;
-        Root = Remove(Root, value, ref removed);
+        BSTreeNode<T> node = m_Root!;
+        while (node.Left != null)
+        {
+            node = node.Left;
+        }
 
-        if (removed)
-            --Count;
-
-        return removed;
+        return node.Value;
     }
 
-    private BSTreeNode? Remove(BSTreeNode? node, int value, ref bool removed)
+    /// <summary>
+    /// Finds and returns the maximum value in the tree.
+    /// </summary>
+    /// <returns>Max value.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    public T MaxValue()
     {
-        if (node == null)
+        ThrowIfEmpty();
+
+        BSTreeNode<T> node = m_Root!;
+        while (node.Right != null)
         {
-            removed = false;
-            return node;
+            node = node.Right;
         }
 
-        int comparer = value.CompareTo(node.Value);
+        return node.Value;
+    }
 
-        if (comparer < 0)       // Value smaller than current node
-        {
-            node.Left = Remove(node.Left, value, ref removed);
-        }
-        else if (comparer > 0)  // Value greater than current node
-        {
-            node.Right = Remove(node.Right, value, ref removed);
-        }
-        else                    // Node to remove
-        {
-            removed = true;
+    /// <summary>
+    /// Finds and returns the node containing the minimum value in the tree.
+    /// </summary>
+    /// <returns>Node containing the min value.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    public BSTreeNode<T>? MinNode()
+    {
+        ThrowIfEmpty();
 
-            if (node.Left == null)
-                return node!.Right;
-            else if (node.Right == null)
-                return node!.Left;
-                
-            node.Value = Minimum(node.Left);
-            node.Left = Remove(node.Left, node.Value, ref removed); 
+        BSTreeNode<T> node = m_Root!;
+        while (node.Left != null)
+        {
+            node = node.Left;
         }
 
         return node;
     }
 
-    public void Clear()
+    /// <summary>
+    /// Finds and returns the node containing the maximum value in the tree.
+    /// </summary>
+    /// <returns>Node containing the max value.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    public BSTreeNode<T>? MaxNode()
     {
-        throw new NotImplementedException();
-    }
+        ThrowIfEmpty();
 
-    public bool Contains(int value)
-    {
-        throw new NotImplementedException();
-    }
-
-    public string? PrintInorder()
-    {
-        if (Root == null)
-            return null;
-
-        return Inorder(Root);
-    }
-
-    private string? Inorder(BSTreeNode? node)
-    {
-        if (node == null)
-            return null;
-
-        string nodeString = "";
-
-        nodeString += Inorder(node!.Left);
-
-        nodeString += node.Value.ToString() + ", ";
-
-        nodeString += Inorder(node!.Right);
-
-        return nodeString;
-    }
-
-    public string? PrintPreorder()
-    {
-        if (Root == null)
-            return null;
-
-        return Preorder(Root);
-    }
-
-    private string? Preorder(BSTreeNode? node)
-    {
-        if (node == null)
-            return null;
-
-        string nodeString = "";
-
-        nodeString += node.Value.ToString() + ", ";
-
-        nodeString += Preorder(node!.Left);
-        nodeString += Preorder(node!.Right);
-
-        return nodeString;
-    }
-
-    public string? PostorderTraversal()
-    {
-        if (Root == null)
-            return null;
-
-        return Postorder(Root);
-    }
-
-    private string? Postorder(BSTreeNode? node)
-    {
-        if (node == null)
-            return null;
-
-        string nodeString = "";
-
-        nodeString += Postorder(node!.Left);
-        nodeString += Postorder(node!.Right);
-
-        nodeString += node.Value.ToString() + ", ";
-
-        return nodeString;
-    }
-
-    public int Height()
-    {
-        throw new NotImplementedException();
-    }
-
-    public int Minimum(BSTreeNode? node)
-    {
-        if (Root == null || node == null)
-            throw new ArgumentNullException("Node is null.");
-
-        int min = node.Value;
-
-        while (node.Left != null)
+        BSTreeNode<T> node = m_Root!;
+        while (node.Right != null)
         {
-            min  = node.Left.Value;
-            node = node.Left;
+            node = node.Right;
         }
 
-        return min;
+        return node;
     }
 
-    public int Maximum()
+    #endregion
+
+    #region Height, Depth, Balance Factor
+
+    /// <summary>
+    /// Get the height from the root node to its deepest child node.
+    /// </summary>
+    /// <returns>Height of tree.</returns>
+    public int Height()
     {
-        throw new NotImplementedException();
+        return GetHeight(m_Root);
     }
 
-    public int Predecessor(int value)
+    /// <summary>
+    /// Private recursive method to find the max height of tree.
+    /// </summary>
+    /// <param name="root"></param>
+    /// <returns></returns>
+    private int GetHeight(BSTreeNode<T>? root)
     {
-        throw new NotImplementedException();
+        if (root == null)
+            return -1;
+
+        int left  = GetHeight(root.Left);
+        int right = GetHeight(root.Right);
+
+        return Math.Max(left, right) + 1;
     }
 
-    public BSTreeNode? InorderSuccessor(BSTreeNode? node)
+    /// <summary>
+    /// Get the depth of tree from source node to target node.
+    /// </summary>
+    /// <param name="source">Source node.</param>
+    /// <param name="target">Target node.</param>
+    /// <returns>Depth of tree from source to target.</returns>
+    public int GetDepth(BSTreeNode<T>? source, BSTreeNode<T>? target)
     {
-        Stacks.Stack<BSTreeNode> a = new Stacks.Stack<BSTreeNode>();
+        if (source == null)
+            return -1;
 
-        throw new NotImplementedException();
+        if (source == target)
+            return 0;
+
+        int left  = GetDepth(source.Left, target);
+        int right = GetDepth(source.Right, target);
+
+        if (left != -1)
+            return left + 1;
+        else if (right != -1)
+            return right + 1;
+
+        return -1;   
     }
+
+    /// <summary>
+    /// The difference between the heights of left subtree and right subtree.
+    /// </summary>
+    /// <returns>The difference in heights.</returns>
+    public int BalanceFactor()
+    {
+        return GetBalanceFactor(m_Root);
+    }
+
+    /// <summary>
+    /// Private method to find the difference between the heights of left and right subtrees.
+    /// </summary>
+    /// <param name="root">Root node.</param>
+    /// <returns>The balance factor.</returns>
+    private int GetBalanceFactor(BSTreeNode<T>? root)
+    {
+        if (root == null)
+            return 0;
+
+        int left  = GetHeight(root.Left);
+        int right = GetHeight(root.Right);
+
+        return left - right;
+    }
+
+    #endregion
+
+    #region Utilities
+
+    /// <summary>
+    /// Determines if the tree is empty by checking if the root node exists.
+    /// </summary>
+    /// <returns>True if empty; otherwise false.</returns>
+    public bool IsEmpty()
+    {
+        return Root == null;
+    }
+
+    /// <summary>
+    /// Determines if the tree is balanced. The tree is balanced if the balance factor is within
+    /// the range (-1, 0, 1).
+    /// </summary>
+    /// <returns>True if balanced; otherwise false;</returns>
+    public bool IsBalanced()
+    {
+        return Math.Abs(BalanceFactor()) <= 1;
+    }
+
+    #endregion
+
+    #region Exceptions Handling
+
+    /// <summary>
+    /// Throws an exception if the tree is empty.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    private void ThrowIfEmpty()
+    {
+        if (IsEmpty())
+            throw new InvalidOperationException("Tree is empty.");
+    }
+
+    #endregion
+
 }
