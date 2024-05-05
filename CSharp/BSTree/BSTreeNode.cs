@@ -41,5 +41,11 @@ public class BSTreeNode<T> where T : IComparable<T>
         Tree  = null;
     }
 
+    /// <summary>
+    /// Compares the current node value to the other node value.
+    /// </summary>
+    /// <remarks></remarks>
+    /// <param name="other">Other node to compare with.</param>
+    /// <returns>Negative if this node is smaller; Positive is this node is bigger; 0 if equal.</returns>
     public int CompareTo(BSTreeNode<T> other) => Value.CompareTo(other.Value);
 }

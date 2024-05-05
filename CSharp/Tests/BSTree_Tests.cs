@@ -614,8 +614,214 @@ public class BSTrees_Tests
         }
     }
 
+    [TestFixture]
+    public class BSTreeTest_Predecessor
+    {
+        [Test]
+        public void Predecessor_EmptyTree_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            BSTreeNode<int> node = null!;
 
 
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => tree.Predecessor(node));
+        }
+
+        [Test]
+        public void Predecessor_NodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            BSTreeNode<int> node = null!;
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => tree.Predecessor(node));
+        }
+
+        [Test]
+        public void Predecessor_RootNode_ReturnsNull()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            BSTreeNode<int> rootNode = tree.Root!;
+
+            // Act
+            BSTreeNode<int>? predecessor = tree.Predecessor(rootNode);
+
+            // Assert
+            Assert.That(predecessor, Is.Null);
+        }
+
+        [Test]
+        public void Predecessor_LeafNode_ReturnsCorrectPredecessor()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);   
+            BSTreeNode<int> node1 = tree.Insert(3);
+            BSTreeNode<int> node2 = tree.Insert(6);
+            BSTreeNode<int> node3 = tree.Insert(4);
+
+            // Act
+            BSTreeNode<int>? node4 = tree.Predecessor(node2);
+
+            // Assert
+            Assert.That(node4, Is.SameAs(node3));
+        }
+
+        [Test]
+        public void Predecessor_LeafNode_ReturnsCorrectPredecessor2()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);   
+            BSTreeNode<int> node1 = tree.Insert(3);
+            BSTreeNode<int> node2 = tree.Insert(6);
+
+            // Act
+            BSTreeNode<int>? node4 = tree.Predecessor(node2);
+
+            // Assert
+            Assert.That(node4, Is.SameAs(node1));
+        }
+
+        [Test]
+        public void Predecessor_LeafNode_ReturnsCorrectPredecessor3()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);   
+            BSTreeNode<int> node1 = tree.Insert(10);
+            BSTreeNode<int> node2 = tree.Insert(14);
+            BSTreeNode<int> node3 = tree.Insert(13);
+
+            // Act
+            BSTreeNode<int>? node4 = tree.Predecessor(node3);
+
+            // Assert
+            Assert.That(node4, Is.SameAs(node1));
+        }
+   
+        [Test]
+        public void Predecessor_LeafNode_ReturnsCorrectPredecessor4()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);   
+            BSTreeNode<int> node1 = tree.Insert(3);
+            BSTreeNode<int> node2 = tree.Insert(6);
+            BSTreeNode<int> node3 = tree.Insert(7);
+
+            // Act
+            BSTreeNode<int>? node4 = tree.Predecessor(tree.Root);
+
+            // Assert
+            Assert.That(node4, Is.SameAs(node3));
+        }
+    }
+
+    [TestFixture]
+    public class BSTreeTest_Successor
+    {
+        [Test]
+        public void Successor_EmptyTree_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            BSTreeNode<int> node = null!;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => tree.Successor(node));
+        }
+
+        [Test]
+        public void Successor_NodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            BSTreeNode<int> node = null!;
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => tree.Successor(node));
+        }
+
+        [Test]
+        public void Successor_MaxNode_ReturnsNull()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            tree.Insert(5);
+            tree.Insert(15);
+            BSTreeNode<int>? maxNode = tree.MaxNode();
+
+            // Act
+            BSTreeNode<int>? successor = tree.Successor(maxNode);
+
+            // Assert
+            Assert.That(successor, Is.Null);
+        }
+
+        [Test]
+        public void Successor_LeafNode_ReturnsCorrectSuccessor()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);   
+            BSTreeNode<int> node1 = tree.Insert(3);
+            BSTreeNode<int> node2 = tree.Insert(6);
+            BSTreeNode<int> node3 = tree.Insert(4);
+
+            // Act
+            BSTreeNode<int>? node4 = tree.Successor(node1);
+
+            // Assert
+            Assert.That(node4, Is.SameAs(node3));
+        }
+
+        [Test]
+        public void Successor_LeafNode_ReturnsCorrectSuccessor2()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);   
+            BSTreeNode<int> node1 = tree.Insert(3);
+            BSTreeNode<int> node2 = tree.Insert(6);
+
+            // Act
+            BSTreeNode<int>? node4 = tree.Successor(node2);
+
+            // Assert
+            Assert.That(node4, Is.SameAs(tree.Root));
+        }
+
+        [Test]
+        public void Successor_LeafNode_ReturnsCorrectSuccessor3()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);   
+            BSTreeNode<int> node1 = tree.Insert(10);
+            BSTreeNode<int> node2 = tree.Insert(14);
+            BSTreeNode<int> node3 = tree.Insert(13);
+
+            // Act
+            BSTreeNode<int>? node4 = tree.Successor(node3);
+
+            // Assert
+            Assert.That(node4, Is.SameAs(node2));
+        }
+   
+        [Test]
+        public void Successor_LeafNode_ReturnsCorrectSuccessor4()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);   
+            BSTreeNode<int> node1 = tree.Insert(3);
+            BSTreeNode<int> node2 = tree.Insert(6);
+            BSTreeNode<int> node3 = tree.Insert(7);
+
+            // Act
+            BSTreeNode<int>? node4 = tree.Successor(tree.Root);
+
+            // Assert
+            Assert.That(node4, Is.Null);
+        }
+    }
 
 
 }

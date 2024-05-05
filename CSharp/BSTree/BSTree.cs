@@ -199,6 +199,132 @@ public class BSTree<T> where T : IComparable<T>
 
     #endregion
 
+    #region Traversal
+
+    /// <summary>
+    /// Finds the in-order predecessor of the given node.
+    /// </summary>
+    /// <param name="node">The source node.</param>
+    /// <returns>The predecessor node.</returns>
+    public BSTreeNode<T>? Predecessor(BSTreeNode<T>? node)
+    {
+        ThrowIfEmpty();
+        ThrowIfNull(node);
+
+         // If node has left child, the predecessor is the largest node in left subtree
+        if (node!.Left != null)
+        {
+            BSTreeNode<T> temp = node.Left;
+            while (temp.Right != null)
+            {
+                temp = temp.Right;
+            }
+
+            return temp;
+        }
+        // Predecessor is above this node
+        else
+        {
+            BSTreeNode<T>? predecessor = null;
+            BSTreeNode<T>? current = m_Root!;
+
+            while (current != null)
+            {
+                int comparer = node.CompareTo(current);
+
+                if (comparer < 0)
+                {
+                    // Predecessor must be in left subtree,
+                    // since it must be smaller than current node
+                    current = current.Left;
+                }
+                else if (comparer > 0)
+                {
+                    // Predecessor must be in right subtree,
+                    // since it must be the largest value in the right subtree
+                    predecessor = current;
+                    current = current.Right;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return predecessor;
+        }
+    }
+
+    /// <summary>
+    /// Finds the in-order successor of the given node.
+    /// </summary>
+    /// <param name="node">The source node.</param>
+    /// <returns>The successor node.</returns>
+    public BSTreeNode<T>? Successor(BSTreeNode<T>? node)
+    {
+        ThrowIfEmpty();
+        ThrowIfNull(node);
+
+        // If node has right child, the successor is the smallest node in the right subtree
+        if (node!.Right != null)
+        {
+            BSTreeNode<T> temp = node.Right;
+            while (temp.Left != null)
+            {
+                temp = temp.Left;
+            }
+
+            return temp;
+        }
+        // Successor is above this node
+        else
+        {
+            BSTreeNode<T>? successor = null;
+            BSTreeNode<T>? current = m_Root;
+
+            while (current != null)
+            {
+                int comparer = node.CompareTo(current);
+
+                if (comparer < 0)
+                {
+                    successor = current;
+                    current = current.Left;
+                }
+                else if (comparer > 0)
+                {
+                    current = current.Right;
+                }
+                else
+                {
+                    break;
+                } 
+            }
+
+            return successor;
+        }
+    }
+
+    public string? PrintInorder()
+    {
+        return Inorder(m_Root);
+    }
+
+    private string? Inorder(BSTreeNode<T>? node)
+    {
+        if (node == null)
+            return null;
+
+        string result = "";
+        result += Inorder(node.Left);
+        result += node.Value + ", ";
+        result += Inorder(node.Right);
+
+        return result;
+    }
+
+    #endregion
+
     #region Height, Depth, Balance Factor
 
     /// <summary>
@@ -311,6 +437,17 @@ public class BSTree<T> where T : IComparable<T>
     {
         if (IsEmpty())
             throw new InvalidOperationException("Tree is empty.");
+    }
+
+    /// <summary>
+    /// Throws an exception if given node is null.
+    /// </summary>
+    /// <param name="node">Node to check.</param>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    private void ThrowIfNull(BSTreeNode<T>? node)
+    {
+        if (node == null)
+            throw new ArgumentNullException("Node is null.");
     }
 
     #endregion
