@@ -91,7 +91,7 @@ public class Stack<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection
         if (Count != 0) // Double the capacity
             newCapacity = Count * 2; 
 
-        if (newCapacity  > Array.MaxLength) // Limit max capacity
+        if (newCapacity > Array.MaxLength) // Limit max capacity
             newCapacity = Array.MaxLength;
 
         if (newCapacity < currentCapacity)  
@@ -99,6 +99,29 @@ public class Stack<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection
 
         MaxCount = newCapacity;
         Array.Resize(ref Items, newCapacity);
+    }
+
+    #endregion
+
+    #region Pop
+
+    public T Pop()
+    {
+        if (Count == 0)
+            throw new InvalidOperationException("Stack is empty.");
+
+        throw new NotImplementedException();
+    }
+
+    public bool TryPop(out T item)
+    {
+        if (Count == 0)
+        {
+            item = default!;
+            return false;
+        }
+
+        throw new NotImplementedException();
     }
 
     #endregion

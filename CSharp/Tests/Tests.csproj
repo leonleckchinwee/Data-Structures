@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LinkedList\LinkedList.csproj" />
-    <ProjectReference Include="..\Array\Array.csproj" />
     <ProjectReference Include="..\Stack\Stack.csproj" />
     <ProjectReference Include="..\Queue\Queue.csproj" />
     <ProjectReference Include="..\BSTree\BSTree.csproj" />
