@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Queue", "Queue\Queue.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSTree", "BSTree\BSTree.csproj", "{1E540190-F528-4D36-B92B-7FB6505A0730}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AVLTree", "AVLTree\AVLTree.csproj", "{C58F13AD-4A3F-4F19-AC66-36C2F9F729BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,5 +48,9 @@ Global
 		{1E540190-F528-4D36-B92B-7FB6505A0730}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E540190-F528-4D36-B92B-7FB6505A0730}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E540190-F528-4D36-B92B-7FB6505A0730}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C58F13AD-4A3F-4F19-AC66-36C2F9F729BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C58F13AD-4A3F-4F19-AC66-36C2F9F729BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C58F13AD-4A3F-4F19-AC66-36C2F9F729BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C58F13AD-4A3F-4F19-AC66-36C2F9F729BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

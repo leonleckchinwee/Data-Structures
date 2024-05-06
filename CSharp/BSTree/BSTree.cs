@@ -3,19 +3,19 @@
 /// <summary>
 /// Binary search tree.
 /// The tree does not allow duplicates.
-/// 
+/// Null value is allowed for reference types.
 /// </summary>
 public class BSTree<T> where T : IComparable<T>
 {
     #region Properties 
 
     /// <summary>
-    /// Private member that storing the root node.
+    /// Private property that storing the root node.
     /// </summary>
     private BSTreeNode<T>? m_Root;
 
     /// <summary>
-    /// Private member storing the number of nodes present in the tree.
+    /// Private property storing the number of nodes present in the tree.
     /// </summary>
     private int m_Count;
 

@@ -26,6 +26,7 @@
     <ProjectReference Include="..\Stack\Stack.csproj" />
     <ProjectReference Include="..\Queue\Queue.csproj" />
     <ProjectReference Include="..\BSTree\BSTree.csproj" />
+    <ProjectReference Include="..\AVLTree\AVLTree.csproj" />
   </ItemGroup>
 
 </Project>

@@ -13,6 +13,14 @@ I have also included basic NUnit tests.
 - ❎ Arrays
 - ✅ Doubly Linked Lists
 - ✅ Stacks
-- ❎ Queues
+- ✅ Queues
 - ❎ Trees
+    - ✅ Binary Search Tree
+    - ❎ AVL Tree
+    - ❎ Red-black Tree
+    - ❎ B-Tree
+    - ❎ N-ary tree
 - ❎ Graphs
+    - ❎ Undirected Graphs
+    - ❎ Directed Graphs
+    - ❎ Weighted Graphs
