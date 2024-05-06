@@ -425,6 +425,7 @@ public class BSTree<T> where T : IComparable<T>
     /// </summary>
     /// <param name="k">K index.</param>
     /// <returns>Returns the node if found; otherwise null.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
     /// <exception cref="ArgumentException">Index out of range.</exception>
     public BSTreeNode<T>? KthLargest(int k)
     {
@@ -445,6 +446,7 @@ public class BSTree<T> where T : IComparable<T>
     /// </summary>
     /// <param name="k">K index.</param>
     /// <returns>Returns the node if found; otherwise null.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
     /// <exception cref="ArgumentException">Index out of range.</exception>
     public BSTreeNode<T>? KthSmallest(int k)
     {
@@ -595,6 +597,9 @@ public class BSTree<T> where T : IComparable<T>
     /// </summary>
     /// <param name="node">The source node.</param>
     /// <returns>The predecessor node.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="ArgumentException">Node belongs to another tree.</exception>
     public BSTreeNode<T>? Predecessor(BSTreeNode<T>? node)
     {
         ThrowIfEmpty();
@@ -650,6 +655,9 @@ public class BSTree<T> where T : IComparable<T>
     /// </summary>
     /// <param name="node">The source node.</param>
     /// <returns>The successor node.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="ArgumentException">Node belongs to another tree.</exception>
     public BSTreeNode<T>? Successor(BSTreeNode<T>? node)
     {
         ThrowIfEmpty();
@@ -780,6 +788,9 @@ public class BSTree<T> where T : IComparable<T>
     /// <param name="source">Source node.</param>
     /// <param name="target">Target node.</param>
     /// <returns>Depth of tree from source to target.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="ArgumentException">Node belongs to another tree.</exception>
     public int Depth(BSTreeNode<T>? source, BSTreeNode<T>? target)
     {
         ThrowIfEmpty();
