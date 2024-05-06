@@ -1,8 +1,9 @@
 ﻿namespace DSA.BSTrees;
 
 /// <summary>
-/// Binary search tree that only supports integers (for now).
+/// Binary search tree.
 /// The tree does not allow duplicates.
+/// 
 /// </summary>
 public class BSTree<T> where T : IComparable<T>
 {
@@ -121,6 +122,394 @@ public class BSTree<T> where T : IComparable<T>
 
     #region Remove
 
+    /// <summary>
+    /// Removes the node containing the specified value from the tree.
+    /// </summary>
+    /// <param name="value">Value to remove.</param>
+    /// <returns>True if value is removed; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    /// <exception cref="ArgumentNullException">Value is null.</exception>
+    public bool Remove(T value)
+    {
+        ThrowIfEmpty();
+        ThrowIfNull(value);
+
+        bool removed = false;
+        m_Root = RemoveValue(m_Root, value, ref removed);
+
+        if (removed)
+            --m_Count;
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Removes the specified existing node from the tree.
+    /// </summary>
+    /// <param name="node">Node to remove.</param>
+    /// <returns>True if node is removed; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="ArgumentException">Node belongs to another tree.</exception>
+    public bool Remove(BSTreeNode<T>? node)
+    {
+        ThrowIfEmpty();
+        ThrowIfNull(node);
+        ThrowIfNodeDoesNotBelong(node!);
+
+        bool removed = false;
+        m_Root = RemoveNode(m_Root, node!, ref removed);
+
+        if (removed)
+            --m_Count;
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Attempts to remove the node containing the specified value without any exceptions thrown.
+    /// </summary>
+    /// <param name="value">Value to remove.</param>
+    /// <returns>True if value is successfully removed; otherwise false.</returns>
+    public bool TryRemove(T value)
+    {
+        if (IsEmpty() || value == null)
+        {
+            return false;
+        }
+
+        bool removed = false;
+        m_Root = RemoveValue(m_Root, value, ref removed);
+
+        if (removed)
+            --m_Count;
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Attempts to remove an existing specified node without any exceptions thrown.
+    /// </summary>
+    /// <param name="node">Node to remove.</param>
+    /// <returns>True if node is successfully removed; otherwise false.</returns>
+    public bool TryRemove(BSTreeNode<T>? node)
+    {
+        if (IsEmpty() || node == null || node.Tree != this)
+        {
+            return false;
+        }
+
+        bool removed = false;
+        m_Root = RemoveNode(m_Root, node!, ref removed);
+
+        if (removed)
+            --m_Count;
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Private recursive method to remove a value from the tree.
+    /// </summary>
+    /// <param name="node">Source node.</param>
+    /// <param name="value">Value to remove.</param>
+    /// <param name="removed">Boolean to decrease count.</param>
+    /// <returns>Removed node.</returns>
+    private BSTreeNode<T>? RemoveValue(BSTreeNode<T>? node, T value, ref bool removed)
+    {
+        if (node == null)   // Value not found
+        {
+            removed = false;
+            return null;
+        }
+
+        int comparer = value.CompareTo(node.Value);
+
+        if (comparer < 0)
+        {
+            node.Left = RemoveValue(node.Left, value, ref removed);
+        }
+        else if (comparer > 0)
+        {
+            node.Right = RemoveValue(node.Right, value, ref removed);
+        }
+        else
+        {
+            removed = true;
+
+            // Node has no children
+            if (node.Left == null && node.Right == null)
+                return null;
+
+            // Node has one child
+            if (node.Left == null)
+            {
+                BSTreeNode<T>? temp = node.Right;
+                node.Right = null;
+                return temp;
+            }
+            else if (node.Right == null)
+            {
+                BSTreeNode<T>? temp = node.Left;
+                node.Left = null;
+                return temp;
+            }
+
+            // Node has both childrens
+            BSTreeNode<T> successor = Predecessor(node)!;
+            node.Value = successor!.Value;
+            node.Left = RemoveValue(node.Left, successor.Value, ref removed);
+        }
+
+        return node;
+    }
+
+    /// <summary>
+    /// Private recursive method to remove a node from the tree.
+    /// </summary>
+    /// <param name="node">Source node.</param>
+    /// <param name="target">Target node to remove.</param>
+    /// <param name="removed">Boolean to decrease count.</param>
+    /// <returns>Removed node.</returns>
+    private BSTreeNode<T>? RemoveNode(BSTreeNode<T>? node, BSTreeNode<T> target, ref bool removed)
+    {
+        if (node == null)   // Value not found
+        {
+            removed = false;
+            return null;
+        }
+
+        int comparer = target.CompareTo(node);
+
+        if (comparer < 0)
+        {
+            node.Left = RemoveNode(node.Left, target, ref removed);
+        }
+        else if (comparer > 0)
+        {
+            node.Right = RemoveNode(node.Right, target, ref removed);
+        }
+        else
+        {
+            removed = true;
+
+            // Node has no children
+            if (node.Left == null && node.Right == null)
+                return null;
+
+            // Node has one child
+            if (node.Left == null)
+            {
+                BSTreeNode<T>? temp = node.Right;
+                node.Right = null;
+                return temp;
+            }
+            else if (node.Right == null)
+            {
+                BSTreeNode<T>? temp = node.Left;
+                node.Left = null;
+                return temp;
+            }
+
+            // Node has both childrens
+            BSTreeNode<T> successor = Predecessor(node)!;
+            node.Value = successor!.Value;
+            node.Left = RemoveNode(node.Left, successor, ref removed);
+        }
+
+        return node;
+    }
+
+    /// <summary>
+    /// Clears the entire tree.
+    /// </summary>
+    public void Clear()
+    {
+        ClearNodes(m_Root);
+
+        m_Root  = null;
+        m_Count = 0;
+    }
+
+    /// <summary>
+    /// Private recursive method to clear all nodes and their references.
+    /// </summary>
+    /// <param name="node">Node to clear.</param>
+    private void ClearNodes(BSTreeNode<T>? node)
+    {
+        if (node == null)
+            return;
+
+        ClearNodes(node.Left);
+        ClearNodes(node.Right);
+
+        node.Left  = null;
+        node.Right = null;
+    }
+
+    #endregion
+
+    #region Search
+
+    /// <summary>
+    /// Finds and returns the node containing the specified value.
+    /// </summary>
+    /// <param name="value">Value to search for.</param>
+    /// <returns>Node containing the value.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    /// <exception cref="ArgumentNullException">Value is null.</exception>
+    public BSTreeNode<T>? Find(T value)
+    {
+        ThrowIfEmpty();
+        ThrowIfNull(value);
+
+        return GetNode(m_Root!, value);
+    }
+
+    /// <summary>
+    /// Private recursive method to get a node with the specified value.
+    /// </summary>
+    /// <param name="node">Source node.</param>
+    /// <param name="value">Value to search for.</param>
+    /// <returns>Node containing the value.</returns>
+    private BSTreeNode<T>? GetNode(BSTreeNode<T> node, T value)
+    {
+        if (node == null)
+            return null;
+
+        int comparer = value.CompareTo(node.Value);
+
+        if (comparer < 0)
+        {
+            return GetNode(node.Left!, value);
+        }
+        else if (comparer > 0)
+        {
+            return GetNode(node.Right!, value);
+        }
+        else
+        {
+            return node;
+        }
+    }
+
+    /// <summary>
+    /// Determines if value is present in the tree.
+    /// </summary>
+    /// <param name="value">Value to search for.</param>
+    /// <returns>True if value is in the tree; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    /// <exception cref="ArgumentNullException">Value is null.</exception>
+    public bool Contains(T value)
+    {
+        return Find(value) != null;
+    }
+
+    /// <summary>
+    /// Determines if node is present in the tree.
+    /// </summary>
+    /// <param name="node">Node to search for.</param>
+    /// <returns>True if node belongs to the tree; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException">Tree is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    public bool Contains(BSTreeNode<T>? node)
+    {
+        ThrowIfEmpty();
+        ThrowIfNull(node);
+
+        return node!.Tree == this;
+    }
+
+    /// <summary>
+    /// Finds the node containing the Kth largest value in the tree.
+    /// </summary>
+    /// <param name="k">K index.</param>
+    /// <returns>Returns the node if found; otherwise null.</returns>
+    /// <exception cref="ArgumentException">Index out of range.</exception>
+    public BSTreeNode<T>? KthLargest(int k)
+    {
+        ThrowIfEmpty();
+
+        if (k < 1)
+            throw new ArgumentException("Invalid k-index.");
+
+        int count = 0;
+        BSTreeNode<T>? node = GetKthLargest(m_Root, k, ref count) ?? 
+                                throw new ArgumentException("Invalid k-index.");
+        
+        return node;
+    }
+
+    /// <summary>
+    /// Finds the node containing the Kth smallest value in the tree.
+    /// </summary>
+    /// <param name="k">K index.</param>
+    /// <returns>Returns the node if found; otherwise null.</returns>
+    /// <exception cref="ArgumentException">Index out of range.</exception>
+    public BSTreeNode<T>? KthSmallest(int k)
+    {
+        ThrowIfEmpty();
+
+        if (k < 1)
+            throw new ArgumentException("Invalid k-index.");
+
+        int count = 0;
+        BSTreeNode<T>? node = GetKthSmallest(m_Root, k, ref count) ?? 
+                                throw new ArgumentException("Invalid k-index.");
+        
+        return node;
+    }
+
+    /// <summary>
+    /// Private recursive method to find the Kth largest value in the tree.
+    /// </summary>
+    /// <param name="node">Source node.</param>
+    /// <param name="k">K index.</param>
+    /// <param name="count">Counter for k.</param>
+    /// <returns>Returns the node if found; otherwise false.</returns>
+    private BSTreeNode<T>? GetKthLargest(BSTreeNode<T>? node, int k, ref int count)
+    {
+        if (node == null)
+            return default!;
+
+        // First look at right subtree
+        BSTreeNode<T>? result = GetKthLargest(node.Right, k, ref count);
+        if (result != null)
+            return result;
+
+        // If right subtree does not exist
+        ++count;
+        if (count == k)
+            return node;
+
+        return GetKthLargest(node.Left, k, ref count);
+    }
+
+    /// <summary>
+    /// Private recursive method to find the Kth smallest value in the tree.
+    /// </summary>
+    /// <param name="node">Source node.</param>
+    /// <param name="k">K index.</param>
+    /// <param name="count">Counter for k.</param>
+    /// <returns>Returns the node if found; otherwise false.</returns>
+    private BSTreeNode<T>? GetKthSmallest(BSTreeNode<T>? node, int k, ref int count)
+    {
+        if (node == null)
+            return null;
+
+        // First look at left subtree
+        BSTreeNode<T>? result = GetKthSmallest(node.Left, k, ref count);
+        if (result != null)
+            return result;
+
+        // If left subtree does not exist
+        ++count;
+        if (count == k)
+            return node;
+
+        return GetKthSmallest(node.Right, k, ref count);
+    }
+
     #endregion
 
     #region Min, Max
@@ -210,6 +599,7 @@ public class BSTree<T> where T : IComparable<T>
     {
         ThrowIfEmpty();
         ThrowIfNull(node);
+        ThrowIfNodeDoesNotBelong(node!);
 
          // If node has left child, the predecessor is the largest node in left subtree
         if (node!.Left != null)
@@ -264,6 +654,7 @@ public class BSTree<T> where T : IComparable<T>
     {
         ThrowIfEmpty();
         ThrowIfNull(node);
+        ThrowIfNodeDoesNotBelong(node!);
 
         // If node has right child, the successor is the smallest node in the right subtree
         if (node!.Right != null)
@@ -305,23 +696,51 @@ public class BSTree<T> where T : IComparable<T>
         }
     }
 
-    public string? PrintInorder()
-    {
-        return Inorder(m_Root);
-    }
-
-    private string? Inorder(BSTreeNode<T>? node)
+    /// <summary>
+    /// Prints the tree in-order from the specified node.
+    /// </summary>
+    /// <param name="node">Node to start from.</param>
+    public void PrintInorder(BSTreeNode<T>? node)
     {
         if (node == null)
-            return null;
+            return;
 
-        string result = "";
-        result += Inorder(node.Left);
-        result += node.Value + ", ";
-        result += Inorder(node.Right);
-
-        return result;
+        PrintInorder(node.Left);
+        Console.Write(node.Value.ToString() + ", ");
+        PrintInorder(node.Right);
     }
+
+    /// <summary>
+    /// Prints the tree pre-order from the specified node.
+    /// </summary>
+    /// <param name="node">Node to start from.</param>
+    public void PrintPreorder(BSTreeNode<T>? node)
+    {
+        if (node == null)
+            return;
+
+        Console.Write(node.Value.ToString() + ", ");
+        PrintPreorder(node.Left);
+        PrintPreorder(node.Right);
+    }
+
+    /// <summary>
+    /// Prints the tree post-order from the specified node.
+    /// </summary>
+    /// <param name="node">Node to start from.</param>
+    public void PrintPostorder(BSTreeNode<T>? node)
+    {
+        if (node == null)
+            return;
+
+        PrintPostorder(node.Left);
+        PrintPostorder(node.Right);
+        Console.Write(node.Value.ToString() + ", ");
+    }
+
+    #endregion
+
+    #region Merge, Split
 
     #endregion
 
@@ -358,16 +777,22 @@ public class BSTree<T> where T : IComparable<T>
     /// <param name="source">Source node.</param>
     /// <param name="target">Target node.</param>
     /// <returns>Depth of tree from source to target.</returns>
-    public int GetDepth(BSTreeNode<T>? source, BSTreeNode<T>? target)
+    public int Depth(BSTreeNode<T>? source, BSTreeNode<T>? target)
     {
+        ThrowIfEmpty();
+        ThrowIfNull(target);
+
         if (source == null)
             return -1;
+
+        ThrowIfNodeDoesNotBelong(source!);
+        ThrowIfNodeDoesNotBelong(target!);
 
         if (source == target)
             return 0;
 
-        int left  = GetDepth(source.Left, target);
-        int right = GetDepth(source.Right, target);
+        int left  = Depth(source!.Left, target);
+        int right = Depth(source!.Right, target);
 
         if (left != -1)
             return left + 1;
@@ -427,6 +852,12 @@ public class BSTree<T> where T : IComparable<T>
 
     #endregion
 
+    #region Serialization
+
+    // TODO: file serialization?
+
+    #endregion
+
     #region Exceptions Handling
 
     /// <summary>
@@ -446,10 +877,40 @@ public class BSTree<T> where T : IComparable<T>
     /// <exception cref="ArgumentNullException">Node is null.</exception>
     private void ThrowIfNull(BSTreeNode<T>? node)
     {
-        if (node == null)
-            throw new ArgumentNullException("Node is null.");
+        ArgumentNullException.ThrowIfNull(node, "Node is null.");
+    }
+
+    /// <summary>
+    /// Throws an exception if given value is null.
+    /// </summary>
+    /// <param name="value">Value to check.</param>
+    /// <exception cref="ArgumentNullException">Value is null.</exception>
+    public void ThrowIfNull(T value)
+    {
+        ArgumentNullException.ThrowIfNull(value, "Value is null.");
+    }
+
+    /// <summary>
+    /// Throws an exception if given node belongs to another tree.
+    /// </summary>
+    /// <param name="node">Node to check</param>
+    /// <exception cref="ArgumentException">Node belongs to another tree.</exception>
+    public void ThrowIfNodeDoesNotBelong(BSTreeNode<T> node)
+    {
+        if (node.Tree != this)
+            throw new ArgumentException("Node belongs to another tree.");
+    }
+
+    /// <summary>
+    /// Throws an exception if given index is out of range of the tree.
+    /// </summary>
+    /// <param name="index">Index to check.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Index out of range.</exception>
+    public void ThrowIfOutOfRange(int index)
+    {
+        if (index <= 0 || index > m_Count)
+            throw new ArgumentOutOfRangeException("Index is out of range.");
     }
 
     #endregion
-
 }

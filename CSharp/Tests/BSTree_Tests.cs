@@ -180,6 +180,455 @@ public class BSTrees_Tests
     }
 
     [TestFixture]
+    public class BSTreeTests_Remove
+    {
+        [Test]
+        public void Remove_EmptyTree_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            int value = 42;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => tree.Remove(value));
+        }
+
+        [Test]
+        public void Remove_NullValue_ThrowsArgumentNullException()
+        {
+            // Arrange
+            BSTree<string> tree = new BSTree<string>("hello");
+            string value = null!;
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => tree.Remove(value));
+        }
+
+        [Test]
+        public void Remove_ValueNotInTree_ReturnsFalse()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            tree.Insert(5);
+            tree.Insert(15);
+            int value = 20;
+
+            // Act
+            bool removed = tree.Remove(value);
+
+            // Assert
+            Assert.That(removed, Is.False);
+            Assert.That(tree.Count, Is.EqualTo(3));
+        }
+
+        [TestCase(10, 20, ExpectedResult = true)]
+        [TestCase(50, 25, ExpectedResult = true)]
+        [TestCase(-5, 0, ExpectedResult = true)]
+        public bool Remove_ValueInTree_ReturnsTrue(int rootValue, int valueToRemove)
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(rootValue);
+            tree.Insert(valueToRemove);
+
+            // Act
+            bool removed = tree.Remove(valueToRemove);
+
+            // Assert
+            return removed;
+        }
+
+        [Test]
+        public void Remove_RemoveRootNode_ReturnsTrue01()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);
+            tree.Insert(6);
+            tree.Insert(10);
+
+            // Act
+            bool removed = tree.Remove(10);
+
+            // Assert
+            Assert.That(removed, Is.True);
+            Assert.That(tree.Count, Is.EqualTo(2));
+            Assert.That(tree.Root!.Value, Is.EqualTo(8));
+            Assert.That(tree.Root.Left!.Value, Is.EqualTo(6));
+            Assert.That(tree.Root.Right, Is.Null);
+        }
+
+        [Test]
+        public void Remove_RemoveRootNode_ReturnsTrue02()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);
+            tree.Insert(6);
+            tree.Insert(10);
+            tree.Insert(4);
+
+            // Act
+            bool removed = tree.Remove(6);
+
+            // Assert
+            Assert.That(removed, Is.True);
+            Assert.That(tree.Count, Is.EqualTo(3));
+            Assert.That(tree.Root!.Value, Is.EqualTo(8));
+            Assert.That(tree.Root.Left!.Value, Is.EqualTo(4));
+            Assert.That(tree.Root.Right!.Value, Is.EqualTo(10));
+            Assert.That(tree.Root.Left.Left, Is.Null);
+        }
+
+        [Test]
+        public void Remove_RemoveRootNode_ReturnsTrue03()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);
+            tree.Insert(6);
+            tree.Insert(10);
+            tree.Insert(7);
+
+            // Act
+            bool removed = tree.Remove(6);
+
+            // Assert
+            Assert.That(removed, Is.True);
+            Assert.That(tree.Count, Is.EqualTo(3));
+            Assert.That(tree.Root!.Value, Is.EqualTo(8));
+            Assert.That(tree.Root.Left!.Value, Is.EqualTo(7));
+            Assert.That(tree.Root.Right!.Value, Is.EqualTo(10));
+            Assert.That(tree.Root.Left.Right, Is.Null);
+        }
+
+        [Test]
+        public void Remove_RemoveRootNode_ReturnsTrue04()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);
+            tree.Insert(6);
+            tree.Insert(10);
+            tree.Insert(4);
+            tree.Insert(7);
+
+            // Act
+            bool removed = tree.Remove(6);
+
+            // Assert
+            Assert.That(removed, Is.True);
+            Assert.That(tree.Count, Is.EqualTo(4));
+            Assert.That(tree.Root!.Value, Is.EqualTo(8));
+            Assert.That(tree.Root.Left!.Value, Is.EqualTo(4));
+            Assert.That(tree.Root.Right!.Value, Is.EqualTo(10));
+            Assert.That(tree.Root.Left.Right!.Value, Is.EqualTo(7));
+            Assert.That(tree.Root.Left.Left, Is.Null);
+        }
+    
+        [Test]
+        public void Remove_RemoveRootNode_ReturnsTrue05()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);
+            tree.Insert(10);
+            tree.Insert(9);
+            tree.Insert(11);
+
+            // Act
+            bool removed = tree.Remove(10);
+
+            // Assert
+            Assert.That(removed, Is.True);
+            Assert.That(tree.Count, Is.EqualTo(3));
+            Assert.That(tree.Root!.Value, Is.EqualTo(8));
+            Assert.That(tree.Root.Left, Is.Null);
+            Assert.That(tree.Root.Right!.Value, Is.EqualTo(9));
+            Assert.That(tree.Root.Right.Left, Is.Null);
+            Assert.That(tree.Root.Right.Right!.Value, Is.EqualTo(11));
+        }
+
+        [Test]
+        public void Remove_RemoveRootNode_ReturnsTrue06()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);
+            tree.Insert(10);
+            tree.Insert(9);
+            tree.Insert(11);
+
+            // Act
+            bool removed = tree.Remove(8);
+
+            // Assert
+            Assert.That(removed, Is.True);
+            Assert.That(tree.Count, Is.EqualTo(3));
+            Assert.That(tree.Root!.Value, Is.EqualTo(10));
+            Assert.That(tree.Root.Left!.Value, Is.EqualTo(9));
+            Assert.That(tree.Root.Right!.Value, Is.EqualTo(11));
+            Assert.That(tree.Root.Right.Left, Is.Null);
+        }
+
+        [Test]
+        public void Remove_RemoveRootNode_ReturnsTrue07()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);
+            tree.Insert(5);
+            tree.Insert(2);
+            tree.Insert(7);
+            tree.Insert(6);
+
+            // Act
+            bool removed = tree.Remove(5);
+
+            // Assert
+            Assert.That(removed, Is.True);
+            Assert.That(tree.Count, Is.EqualTo(4));
+            Assert.That(tree.Root!.Value, Is.EqualTo(8));
+            Assert.That(tree.Root.Left!.Value, Is.EqualTo(2));
+            Assert.That(tree.Root.Left.Left, Is.Null);
+            Assert.That(tree.Root.Left.Right!.Value, Is.EqualTo(7));
+            Assert.That(tree.Root.Left.Right.Left!.Value, Is.EqualTo(6));
+        }
+    
+        [Test]
+        public void Remove_RemoveRootNode_ReturnsTrue08()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(8);
+            tree.Insert(5);
+            tree.Insert(2);
+            tree.Insert(7);
+            tree.Insert(1);
+            tree.Insert(3);
+
+            // Act
+            bool removed = tree.Remove(5);
+
+            // Assert
+            Assert.That(removed, Is.True);
+            Assert.That(tree.Count, Is.EqualTo(5));
+            Assert.That(tree.Root!.Value, Is.EqualTo(8));
+            Assert.That(tree.Root.Left!.Value, Is.EqualTo(3));
+            Assert.That(tree.Root.Left.Left!.Value, Is.EqualTo(2));
+            Assert.That(tree.Root.Left.Left.Left!.Value, Is.EqualTo(1));
+            Assert.That(tree.Root.Left.Right!.Value, Is.EqualTo(7));
+        }
+    }
+
+    [TestFixture]
+    public class BSTreeTests_TryRemove
+    {
+        [Test]
+        public void TryRemove_EmptyTree_ReturnsFalse()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            int value = 42;
+
+            // Act
+            bool removed = tree.TryRemove(value);
+
+            // Assert
+            Assert.That(removed, Is.False);
+        }
+
+        [Test]
+        public void TryRemove_NullValue_ReturnsFalse()
+        {
+            // Arrange
+            BSTree<string> tree = new BSTree<string>("hello");
+            string value = null!;
+
+            // Act
+            bool removed = tree.TryRemove(value);
+
+            // Assert
+            Assert.That(removed, Is.False);
+        }
+
+        [Test]
+        public void TryRemove_ValueNotInTree_ReturnsFalse()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            tree.Insert(5);
+            tree.Insert(15);
+            int value = 20;
+
+            // Act
+            bool removed = tree.TryRemove(value);
+
+            // Assert
+            Assert.That(removed, Is.False);
+            Assert.That(tree.Count, Is.EqualTo(3));
+        }
+
+        [TestCase(10, 20, ExpectedResult = true)]
+        [TestCase(50, 25, ExpectedResult = true)]
+        [TestCase(-5, 0, ExpectedResult = true)]
+        public bool TryRemove_ValueInTree_ReturnsTrue(int rootValue, int valueToRemove)
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(rootValue);
+            tree.Insert(valueToRemove);
+
+            // Act
+            bool removed = tree.TryRemove(valueToRemove);
+
+            // Assert
+            return removed;
+        }
+
+        [Test]
+        public void TryRemove_RemoveRootValue_UpdatesRootAndCount()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            tree.Insert(5);
+            tree.Insert(15);
+
+            // Act
+            bool removed = tree.TryRemove(10);
+
+            // Assert
+            Assert.That(removed, Is.True);
+            Assert.That(tree.Count, Is.EqualTo(2));
+            Assert.That(tree.Root!.Value, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void TryRemove_EmptyTree_NodeIsNull_ReturnsFalse()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            BSTreeNode<int> node = null!;
+
+            // Act
+            bool removed = tree.TryRemove(node);
+
+            // Assert
+            Assert.That(removed, Is.False);
+        }
+
+        [Test]
+        public void TryRemove_NonEmptyTree_NodeIsNull_ReturnsFalse()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            tree.Insert(5);
+            tree.Insert(15);
+            BSTreeNode<int> node = null!;
+
+            // Act
+            bool removed = tree.TryRemove(node);
+
+            // Assert
+            Assert.That(removed, Is.False);
+        }
+
+        [Test]
+        public void TryRemove_NodeNotInTree_ReturnsFalse()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            tree.Insert(5);
+            tree.Insert(15);
+            BSTreeNode<int> node = new BSTreeNode<int>(20);
+
+            // Act
+            bool removed = tree.TryRemove(node);
+
+            // Assert
+            Assert.That(removed, Is.False);
+            Assert.That(tree.Count, Is.EqualTo(3));
+        }
+
+        [TestCase(10, 5, ExpectedResult = true)]
+        [TestCase(50, 25, ExpectedResult = true)]
+        [TestCase(-5, 0, ExpectedResult = true)]
+        public bool TryRemove_NodeInTree_ReturnsTrue(int rootValue, int nodeValue)
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(rootValue);
+            BSTreeNode<int> node = new BSTreeNode<int>(nodeValue);
+            tree.Insert(node);
+
+            // Act
+            bool removed = tree.TryRemove(node);
+
+            // Assert
+            return removed;
+        }
+
+        [Test]
+        public void TryRemove_RemoveRootNode_UpdatesRootAndCount()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            tree.Insert(5);
+            tree.Insert(15);
+            BSTreeNode<int> rootNode = tree.Root!;
+
+            // Act
+            bool removed = tree.TryRemove(rootNode);
+
+            // Assert
+            Assert.That(removed, Is.True);
+            Assert.That(tree.Count, Is.EqualTo(2));
+            Assert.That(tree.Root!.Value, Is.EqualTo(5));
+        }
+    }
+
+    [TestFixture]
+    public class BSTreeTests_Clear
+    {
+        [Test]
+        public void Clear_EmptyTree_TreeRemainsEmpty()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+
+            // Act
+            tree.Clear();
+
+            // Assert
+            Assert.That(tree.Root, Is.Null);
+            Assert.That(tree.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Clear_SingleNodeTree_TreeBecomesEmpty()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(42);
+
+            // Act
+            tree.Clear();
+
+            // Assert
+            Assert.That(tree.Root, Is.Null);
+            Assert.That(tree.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Clear_NonEmptyTree_TreeBecomesEmpty()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            tree.Insert(5);
+            tree.Insert(15);
+            tree.Insert(3);
+            tree.Insert(7);
+            tree.Insert(12);
+            tree.Insert(20);
+
+            // Act
+            tree.Clear();
+
+            // Assert
+            Assert.That(tree.Root, Is.Null);
+            Assert.That(tree.Count, Is.EqualTo(0));
+        }
+    }
+
+    [TestFixture]
     public class BSTreeTests_Height
     {
         [Test]
@@ -252,16 +701,13 @@ public class BSTrees_Tests
     public class BSTreeTests_Depth
     {
         [Test]
-        public void GetDepth_EmptyTree_ReturnsNegativeOne()
+        public void GetDepth_EmptyTree_ThrowsInvalidOperationException()
         {
             // Arrange
             BSTree<int> tree = new BSTree<int>();
 
-            // Act
-            int depth = tree.GetDepth(null, null);
-
-            // Assert
-            Assert.That(depth, Is.EqualTo(-1));
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => tree.Depth(null, null));
         }
 
         [Test]
@@ -272,56 +718,14 @@ public class BSTrees_Tests
             BSTreeNode<int> root = tree.Root!;
 
             // Act
-            int depth = tree.GetDepth(root, root);
+            int depth = tree.Depth(root, root);
 
             // Assert
             Assert.That(depth, Is.EqualTo(0));
         }
 
-        [TestCase(10, 5, 1, 15, 1, 12, -1, 20, 2)]
-        [TestCase(50, 25, 1, 75, 1, 12, 2, 37, 2, 62, 2, 87, 2)]
-        public void GetDepth_TargetNodeInTree_ReturnsCorrectDepth(int rootValue, int value1, 
-        int expectedDepth1, int value2, int expectedDepth2, int value3, int expectedDepth3, 
-        int value4, int expectedDepth4, int value5 = 0, int expectedDepth5 = 0, int value6 = 0, 
-        int expectedDepth6 = 0)
-        {
-            // Arrange
-            BSTree<int> tree = new BSTree<int>(rootValue);
-            tree.Insert(value1);
-            tree.Insert(value2);
-            tree.Insert(value3);
-            tree.Insert(value4);
-            if (value5 != 0)
-                tree.Insert(value5);
-            if (value6 != 0)
-                tree.Insert(value6);
-
-            BSTreeNode<int> targetNode1 = tree.Root!.Left!;
-            BSTreeNode<int> targetNode2 = tree.Root!.Right!;
-            BSTreeNode<int> targetNode3 = tree.Root!.Left!.Left!;
-            BSTreeNode<int> targetNode4 = tree.Root!.Right!.Right!;
-            BSTreeNode<int>? targetNode5 = value5 != 0 ? tree!.Root!.Left!.Right! : null;
-            BSTreeNode<int>? targetNode6 = value6 != 0 ? tree!.Root!.Right!.Left! : null;
-
-            // Act
-            int depth1 = tree.GetDepth(tree.Root, targetNode1);
-            int depth2 = tree.GetDepth(tree.Root, targetNode2);
-            int depth3 = tree.GetDepth(tree.Root, targetNode3);
-            int depth4 = tree.GetDepth(tree.Root, targetNode4);
-            int depth5 = value5 != 0 ? tree.GetDepth(tree.Root, targetNode5) : 0;
-            int depth6 = value6 != 0 ? tree.GetDepth(tree.Root, targetNode6) : 0;
-
-            // Assert
-            Assert.That(depth1, Is.EqualTo(expectedDepth1));
-            Assert.That(depth2, Is.EqualTo(expectedDepth2));
-            Assert.That(depth3, Is.EqualTo(expectedDepth3));
-            Assert.That(depth4, Is.EqualTo(expectedDepth4));
-            Assert.That(depth5, Is.EqualTo(expectedDepth5));
-            Assert.That(depth6, Is.EqualTo(expectedDepth6));
-        }
-
         [Test]
-        public void GetDepth_TargetNodeNotInTree_ReturnsNegativeOne()
+        public void GetDepth_TargetNodeNotInTree_ThrowsArgumentException()
         {
             // Arrange
             BSTree<int> tree = new BSTree<int>(10);
@@ -329,11 +733,26 @@ public class BSTrees_Tests
             tree.Insert(15);
             BSTreeNode<int> nonExistentNode = new BSTreeNode<int>(42);
 
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => tree.Depth(tree.Root, nonExistentNode));
+        }
+
+        [TestCase(8, 3, 2, 1, ExpectedResult = 3)]
+        [TestCase(8, 3, 10, 2, ExpectedResult = 2)]
+        [TestCase(8, 3, 2, 10, ExpectedResult = 1)]
+        public int GetDepth_TargetNodeIsChildren_ReturnsCorrectDepth(int root, int one, int two, int three)
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(root);
+            BSTreeNode<int> node1 = tree.Insert(one);
+            BSTreeNode<int> node2 = tree.Insert(two);
+            BSTreeNode<int> node3 = tree.Insert(three);
+
             // Act
-            int depth = tree.GetDepth(tree.Root, nonExistentNode);
+            int depth = tree.Depth(tree.Root, node3);
 
             // Assert
-            Assert.That(depth, Is.EqualTo(-1));
+            return depth;
         }
     }
 
@@ -820,6 +1239,434 @@ public class BSTrees_Tests
 
             // Assert
             Assert.That(node4, Is.Null);
+        }
+    }
+
+    [TestFixture]
+    public class BSTreeTest_Find
+    {
+        [Test]
+        public void Find_EmptyTree_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            int value = 42;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => tree.Find(value));
+        }
+
+        [Test]
+        public void Find_NullValue_ThrowsArgumentNullException()
+        {
+            // Arrange
+            BSTree<string> tree = new BSTree<string>("hello");
+            string value = null!;
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => tree.Find(value));
+        }
+
+        [TestCase(10, 20, ExpectedResult = true)]
+        [TestCase(50, 25, ExpectedResult = true)]
+        [TestCase(-5, 0, ExpectedResult = true)]
+        public bool Find_ValueInTree_ReturnsNode(int rootValue, int valueToFind)
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(rootValue);
+            tree.Insert(valueToFind);
+
+            // Act
+            BSTreeNode<int>? node = tree.Find(valueToFind);
+
+            // Assert
+            return node != null;
+        }
+
+        [TestCase(10, 20, ExpectedResult = true)]
+        [TestCase(50, 100, ExpectedResult = true)]
+        [TestCase(-5, 10, ExpectedResult = true)]
+        public bool Find_ValueNotInTree_ReturnsNull(int rootValue, int valueToFind)
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(rootValue);
+            tree.Insert(rootValue + 1);
+            tree.Insert(rootValue - 1);
+
+            // Act
+            BSTreeNode<int>? node = tree.Find(valueToFind);
+
+            // Assert
+            return node == null;
+        }
+    }
+
+    [TestFixture]
+    public class BSTreeTests_Contains
+    {
+        [Test]
+        public void Contains_EmptyTree_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            int value = 42;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => tree.Contains(value));
+        }
+
+        [Test]
+        public void Contains_NullValue_ThrowsArgumentNullException()
+        {
+            // Arrange
+            BSTree<string> tree = new BSTree<string>("hello");
+            string value = null!;
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => tree.Contains(value));
+        }
+
+        [TestCase(10, 20, ExpectedResult = true)]
+        [TestCase(50, 25, ExpectedResult = true)]
+        [TestCase(-5, 0, ExpectedResult = true)]
+        public bool Contains_ValueInTree_ReturnsTrue(int rootValue, int valueToFind)
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(rootValue);
+            tree.Insert(valueToFind);
+
+            // Act
+            bool contains = tree.Contains(valueToFind);
+
+            // Assert
+            return contains;
+        }
+
+        [TestCase(10, 20, ExpectedResult = false)]
+        [TestCase(50, 100, ExpectedResult = false)]
+        [TestCase(-5, 10, ExpectedResult = false)]
+        public bool Contains_ValueNotInTree_ReturnsFalse(int rootValue, int valueToFind)
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(rootValue);
+            tree.Insert(rootValue + 1);
+            tree.Insert(rootValue - 1);
+
+            // Act
+            bool contains = tree.Contains(valueToFind);
+
+            // Assert
+            return contains;
+        }
+    
+        [Test]
+        public void Contains_EmptyTree_ContainsNode_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            BSTreeNode<int> node = null!;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => tree.Contains(node));
+        }
+
+        [Test]
+        public void Contains_EmptyTree_NodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            BSTreeNode<int> node = new BSTreeNode<int>(1);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => tree.Contains(node));
+        }
+    
+        [TestCase(10, 20, ExpectedResult = true)]
+        [TestCase(50, 25, ExpectedResult = true)]
+        [TestCase(-5, 0, ExpectedResult = true)]
+        public bool Contains_NodeInTree_ReturnsTrue(int rootValue, int nodeValue)
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(rootValue);
+            BSTreeNode<int> node = new BSTreeNode<int>(nodeValue);
+            tree.Insert(node);
+
+            // Act
+            bool contains = tree.Contains(node);
+
+            // Assert
+            return contains;
+        }
+
+        [Test]
+        public void Contains_NodeNotInTree_ReturnsFalse()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            tree.Insert(5);
+            tree.Insert(15);
+            BSTreeNode<int> node = new BSTreeNode<int>(20);
+
+            // Act
+            bool contains = tree.Contains(node);
+
+            // Assert
+            Assert.That(contains, Is.False);
+        }
+    }
+
+    [TestFixture]
+    public class BSTreeTests_Traversal_Printing
+    {
+        [Test]
+        public void PrintInorder_EmptyTree_PrintsNothing()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            using (StringWriter sw = new StringWriter())
+            {
+                Console.SetOut(sw);
+
+                // Act
+                tree.PrintInorder(tree.Root);
+                string output = sw.ToString().Trim();
+
+                // Assert
+                Assert.That(output, Is.EqualTo(""));
+            }
+        }
+
+        [Test]
+        public void PrintPreorder_EmptyTree_PrintsNothing()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            using (StringWriter sw = new StringWriter())
+            {
+                Console.SetOut(sw);
+
+                // Act
+                tree.PrintPreorder(tree.Root);
+                string output = sw.ToString().Trim();
+
+                // Assert
+                Assert.That(output, Is.EqualTo(""));
+            }
+        }
+
+        [Test]
+        public void PrintPostorder_EmptyTree_PrintsNothing()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>();
+            using (StringWriter sw = new StringWriter())
+            {
+                Console.SetOut(sw);
+
+                // Act
+                tree.PrintPostorder(tree.Root);
+                string output = sw.ToString().Trim();
+
+                // Assert
+                Assert.That(output, Is.EqualTo(""));
+            }
+        }
+
+        [Test]
+        public void PrintTraversals_NonEmptyTree_PrintsCorrectly()
+        {
+            // Arrange
+            BSTree<int> tree = new BSTree<int>(10);
+            tree.Insert(5);
+            tree.Insert(15);
+            tree.Insert(3);
+            tree.Insert(7);
+            tree.Insert(12);
+            tree.Insert(20);
+
+            using (StringWriter sw = new StringWriter())
+            {
+                Console.SetOut(sw);
+
+                // Act
+                tree.PrintInorder(tree.Root);
+                string inorderOutput = sw.ToString().Trim();
+                sw.GetStringBuilder().Clear();
+
+                tree.PrintPreorder(tree.Root);
+                string preorderOutput = sw.ToString().Trim();
+                sw.GetStringBuilder().Clear();
+
+                tree.PrintPostorder(tree.Root);
+                string postorderOutput = sw.ToString().Trim();
+
+                // Assert
+                Assert.That(inorderOutput, Is.EqualTo("3, 5, 7, 10, 12, 15, 20,"));
+                Assert.That(preorderOutput, Is.EqualTo("10, 5, 3, 7, 15, 12, 20,"));
+                Assert.That(postorderOutput, Is.EqualTo("3, 7, 5, 12, 20, 15, 10,"));
+            }
+        }
+    }
+
+    [TestFixture]
+    public class BSTreeTests_KthLargest
+    {
+        [Test]
+        public void KthLargest_EmptyTree_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var tree = new BSTree<int>();
+            int k = 1;
+
+            // Act & Assert
+            Assert.That(() => tree.KthLargest(k), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void KthLargest_SingleNodeTree_ReturnsRoot()
+        {
+            // Arrange
+            var tree = new BSTree<int>(5);
+            int k = 1;
+
+            // Act
+            var result = tree.KthLargest(k);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Value, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void KthLargest_KGreaterThanCount_ThrowsArgumentOutOfRangeException()
+        {
+            // Arrange
+            var tree = new BSTree<int>();
+            tree.Insert(5);
+            tree.Insert(3);
+            tree.Insert(7);
+            int k = 4;
+
+            // Act & Assert
+            Assert.That(() => tree.KthLargest(k), Throws.ArgumentException);
+        }
+
+        [Test]
+        public void KthLargest_KLessThanOne_ThrowsArgumentOutOfRangeException()
+        {
+            // Arrange
+            var tree = new BSTree<int>();
+            tree.Insert(5);
+            tree.Insert(3);
+            tree.Insert(7);
+            int k = 0;
+
+            // Act & Assert
+            Assert.That(() => tree.KthLargest(k), Throws.ArgumentException);
+        }
+
+        [Test]
+        public void KthLargest_ValidInput_ReturnsCorrectNode()
+        {
+            // Arrange
+            var tree = new BSTree<int>();
+            tree.Insert(5);
+            tree.Insert(3);
+            tree.Insert(7);
+            tree.Insert(2);
+            tree.Insert(4);
+            tree.Insert(6);
+            tree.Insert(8);
+            int k = 3;
+
+            // Act
+            var result = tree.KthLargest(k);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Value, Is.EqualTo(6));
+        }
+
+
+    }
+
+    [TestFixture]
+    public class BSTreeTests_KthSmallest
+    {
+        [Test]
+        public void KthSmallest_EmptyTree_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var tree = new BSTree<int>();
+            int k = 1;
+
+            // Act & Assert
+            Assert.That(() => tree.KthSmallest(k), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void KthSmallest_SingleNodeTree_ReturnsRoot()
+        {
+            // Arrange
+            var tree = new BSTree<int>(5);
+            int k = 1;
+
+            // Act
+            var result = tree.KthSmallest(k);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Value, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void KthSmallest_KGreaterThanCount_ThrowsArgumentOutOfRangeException()
+        {
+            // Arrange
+            var tree = new BSTree<int>();
+            tree.Insert(5);
+            tree.Insert(3);
+            tree.Insert(7);
+            int k = 4;
+
+            // Act & Assert
+            Assert.That(() => tree.KthSmallest(k), Throws.ArgumentException);
+        }
+
+        [Test]
+        public void KthSmallest_KLessThanOne_ThrowsArgumentOutOfRangeException()
+        {
+            // Arrange
+            var tree = new BSTree<int>();
+            tree.Insert(5);
+            tree.Insert(3);
+            tree.Insert(7);
+            int k = 0;
+
+            // Act & Assert
+            Assert.That(() => tree.KthSmallest(k), Throws.ArgumentException);
+        }
+
+        [Test]
+        public void KthSmallest_ValidInput_ReturnsCorrectNode()
+        {
+            // Arrange
+            var tree = new BSTree<int>();
+            tree.Insert(5);
+            tree.Insert(3);
+            tree.Insert(7);
+            tree.Insert(2);
+            tree.Insert(4);
+            tree.Insert(6);
+            tree.Insert(8);
+            int k = 3;
+
+            // Act
+            var result = tree.KthSmallest(k);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Value, Is.EqualTo(4));
         }
     }
 
