@@ -2,52 +2,95 @@
 
 namespace DSA.LinkedLists;
 
-public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
+/// <summary>
+/// Doubly linked-list class.
+/// This class accepts null value for reference types.
+/// This class allows for duplicate values.
+/// </summary>
+public class LList<T> : IEnumerable<T> where T : IComparable<T>
 {
     #region Properties
 
     /// <summary>
-    /// Gets the number of nodes actually contained in this list.
+    /// Private property containing the first node of the list.
     /// </summary>
-    public int Count { get; private set; }
+    private LLNode<T>? m_Head;
 
     /// <summary>
-    /// Gets the first node of this list.
+    /// Private property containing the last node of the list.
     /// </summary>
-    public LLNode<T>? First { get; private set; }
+    private LLNode<T>? m_Tail;
 
     /// <summary>
-    /// Gets the last node of this list.
+    /// Private property containing the number of elements in the list.
     /// </summary>
-    public LLNode<T>? Last { get; private set; }
+    private int m_Count;
+
+    /// <summary>
+    /// Gets the first node of the list.
+    /// </summary>
+    public LLNode<T>? First => m_Head;
+
+    /// <summary>
+    /// Gets the last node of the list.
+    /// </summary>
+    public LLNode<T>? Last => m_Tail;
+
+    /// <summary>
+    /// Gets the number of elements in the list.
+    /// </summary>
+    public int Count => m_Count;
+
+    /// <summary>
+    /// Square bracket operator for accessing node at specified index.
+    /// </summary>
+    /// <param name="index">Index of the node.</param>
+    /// <returns>Value at the specified index.</returns>
+    /// <remarks>This list is zero-index.</remarks>
+    public T this[int index]
+    {
+        get => GetValue(index);
+        set => SetValue(index, value);
+    }
 
     #endregion
 
     #region Constructors
 
     /// <summary>
-    /// Initializes a new instance of list that is empty.
+    /// Initializes a new empty list.
     /// </summary>
     public LList()
     {
-        First = null;
-        Last  = null;
-        Count = 0;
+        m_Head  = null;
+        m_Tail  = null;
+        m_Count = 0;
     }
 
     /// <summary>
-    /// Initializes a new instance of list that contains elements copied from the 
-    /// specified IEnumerable.
+    /// Initializes a new list with one node containing the specified value.
     /// </summary>
-    public LList(IEnumerable<T> other)
+    /// <param name="value">Value to insert.</param>
+    public LList(T value)
     {
-        if (other == null)
-            return;
+        LLNode<T> node = new(value) { List = this, Previous = null, Next = null };
+        m_Head         = node;
+        m_Tail         = node;
+        m_Count        = 1;
+    }
 
-        foreach (T item in other)
+    /// <summary>
+    /// Initializes a new list by copying all elements from the specified collection 
+    /// into the list.
+    /// </summary>
+    /// <param name="collection">Collection to copy from.</param>
+    public LList(IEnumerable<T> collection)
+    {
+        ArgumentNullException.ThrowIfNull(collection);
+
+        foreach (T item in collection)
         {
-            LLNode<T> node = new LLNode<T>(item);
-
+            LLNode<T> node = new(item);
             AddLast(node);
         }
     }
@@ -57,314 +100,288 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
     #region Add
 
     /// <summary>
-    /// Adds a new node containing the specified value at the start of this list.
+    /// Inserts a new node containing the specified value into the front of the list.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    /// <returns>The new node containing the value.</returns>
-    public LLNode<T> AddFirst(T item)
+    /// <param name="value">Value to insert.</param>
+    /// <returns>The new node containing the specified value.</returns>
+    public LLNode<T> AddFirst(T value)
     {
-        LLNode<T> newNode = new LLNode<T>(item) { List = this };
+        LLNode<T> newNode = new(value);
 
-        if (First == null || Last == null)  // Empty list
-        {
-            First = newNode;
-            Last  = First;
-        }
-        else
-        {
-            newNode.Next   = First;
-            First.Previous = newNode;
-            First          = newNode;
-
-            UpdateLast();
-        }
-
-        ++Count;
+        AddFirst(newNode);
 
         return newNode;
     }
 
     /// <summary>
-    /// Adds the specified new node at that start of this list.
+    /// Inserts an existing node into the front of the list.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    public void AddFirst(LLNode<T> item)
+    /// <param name="node">Node to insert.</param>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="InvalidOperationException">Node belongs to another list.</exception>
+    public void AddFirst(LLNode<T> node)
     {
-        if (item.List != null)  // Check if node belongs to another list
-            throw new InvalidOperationException("LinkedList node belongs to another list!");
-        if (item == null)       // Check if new node is null
-            throw new ArgumentNullException(nameof(item), "LinkedList node is null!");
+        ThrowIfNull(node);
+        LList<T>.ThrowIfNodeAssigned(node);
 
-        item.List = this;
-
-        if (First == null || Last == null)  // Empty list
+        node.List = this;
+        
+        // Case 1: list is empty
+        if (IsEmpty())
         {
-            First = item;
-            Last  = First;  
+            m_Head = node;
+            m_Tail = node;
         }
+        // Case 2: push first node back and insert front
         else
         {
-            item.Next      = First;
-            First.Previous = item;
-            First          = item;
-
-            UpdateLast();
+            node.Previous    = null;
+            node.Next        = m_Head;
+            m_Head!.Previous = node;
+            m_Head           = node;
         }
 
-        ++Count;
+        ++m_Count;
+        UpdateTail();   // Update last node pointer
     }
 
     /// <summary>
-    /// Adds a new node containing the specified value at the end of this list.
+    /// Inserts a new node containing the specified value into the back of the list.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    /// <returns>The new node containing the value.</returns>
-    public LLNode<T> AddLast(T item)
+    /// <param name="value">Value to insert.</param>
+    /// <returns>The new node containing the specified value.</returns>
+    public LLNode<T> AddLast(T value)
     {
-        LLNode<T> newNode = new LLNode<T>(item) { List = this };
+        LLNode<T> newNode = new(value);
 
-        if (First == null || Last == null)  // Empty list
-        {
-            First = newNode;
-            Last  = First;
-        }
-        else
-        {
-            Last.Next        = newNode;
-            newNode.Previous = Last;
-
-            UpdateLast();
-        }
-
-        ++Count;
+        AddLast(newNode);
 
         return newNode;
     }
 
     /// <summary>
-    /// Adds the specified new node at that end of this list.
+    /// Inserts an existing node into the back of the list.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    public void AddLast(LLNode<T> item)
+    /// <param name="node">Node to insert.</param>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="InvalidOperationException">Node belongs to another list.</exception>
+    public void AddLast(LLNode<T> node)
     {
-        if (item.List != null)  // Check if node belongs to another list
-            throw new InvalidOperationException("LinkedList node belongs to another list!");
-        if (item == null)       // Check if new node is null
-            throw new ArgumentNullException(nameof(item), "LinkedList node is null!");
+        ThrowIfNull(node);
+        LList<T>.ThrowIfNodeAssigned(node);
 
-        item.List = this;
+        node.List = this;
 
-        if (First == null || Last == null)  // Empty list
+        // Case 1: list is empty.
+        if (IsEmpty())
         {
-            First = item;
-            Last  = First;  
+            m_Head = node;
+            m_Tail = node;
         }
+        // Case 2: insert last and push last node back
         else
         {
-            Last.Next     = item;
-            item.Previous = Last;
-
-            UpdateLast();
+            node.Previous = m_Tail!;
+            node.Next     = null;
+            m_Tail!.Next  = node;
+            m_Tail        = node;
         }
 
-        ++Count;
+        ++m_Count;
+        UpdateTail();   // Update last node pointer
     }
 
     /// <summary>
-    /// Adds a new node containing the specified value before the specified existing node in this list.
+    /// Inserts a new node containing the specified value before the specified existing 
+    /// reference node from the list.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    /// <returns>The new node containing the value.</returns>
-    public LLNode<T> AddBefore(LLNode<T> node, T item)
+    /// <param name="reference">Reference node.</param>
+    /// <param name="value">Value to insert.</param>
+    /// <returns>The new node containing the specified value.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="InvalidOperationException">Node does not belong to this list.</exception>
+    public LLNode<T> AddBefore(LLNode<T> reference, T value)
     {
-        if (node.List != this)  // Check if node belongs to another list
-            throw new InvalidOperationException("LinkedList node is not in current list!");
-        if (node == null)       // Check if new node is null
-            throw new ArgumentNullException(nameof(item), "LinkedList node is null!");
-
-        LLNode<T> newNode = new LLNode<T>(item) { List = this };
-
-        if (First == null || Last == null)  // Empty list
-        {
-            First = newNode;
-            Last  = First;
-        }
-        else
-        {
-            if (node.Previous == null)  // Front of list
-            {
-                node.Previous = newNode;
-                newNode.Next  = node;
-                First         = newNode;
-            }
-            else
-            {
-                newNode.Previous   = node.Previous;
-                node.Previous.Next = newNode;
-                newNode.Next       = node;
-                node.Previous      = newNode;
-            }
-
-            UpdateLast();
-        }
-
-        ++Count;
+        LLNode<T> newNode = new(value);
+        
+        AddBefore(reference, newNode);
 
         return newNode;
     }
 
     /// <summary>
-    /// Adds the specified new node before the specified existing node in this list.
+    /// Inserts an existing node before the specified existing reference node from the list.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    public void AddBefore(LLNode<T> node, LLNode<T> newNode)
+    /// <param name="reference">Reference node.</param>
+    /// <param name="node">Node to insert.</param>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="InvalidOperationException">Node does not belong to this list.</exception>
+    /// <exception cref="InvalidOperationException">Node belongs to another list.</exception>
+    public void AddBefore(LLNode<T> reference, LLNode<T> node)
     {
-        if (node.List != this)  // Check if node belongs to another list
-            throw new InvalidOperationException("LinkedList node is not in current list!");
-        if (node == null)       // Check if new node is null
-            throw new ArgumentNullException(nameof(node), "LinkedList node is null!");
-
-        if (newNode.List != this)
-            throw new InvalidOperationException("LinkedList node belongs to another list!");
-        if (newNode == null)
-            throw new ArgumentNullException(nameof(newNode), "LinkedList node is null!");
-
-         if (First == null || Last == null)  // Empty list
+        // Exceptions
         {
-            First = newNode;
-            Last  = First;
+            ThrowIfEmpty(this);
+            ThrowIfNull(reference);
+            ThrowIfNull(node);
+            LList<T>.ThrowIfNodeDoesNotBelong(this, reference);
+            LList<T>.ThrowIfNodeAssigned(node);
         }
+
+        node.List = this;
+
+        // Case 1: add before the first node
+        if (reference == m_Head)
+        {
+            node.Previous      = null;
+            node.Next          = reference;
+            reference.Previous = node;
+            m_Head             = node;
+        }
+        // Case 2: add before any other node,
+        // no need to update tail
         else
         {
-            if (node.Previous == null)  // Front of list
-            {
-                node.Previous = newNode;
-                newNode.Next  = node;
-                First         = newNode;
-            }
-            else
-            {
-                newNode.Previous   = node.Previous;
-                node.Previous.Next = newNode;
-                newNode.Next       = node;
-                node.Previous      = newNode;
-            }
-
-            UpdateLast();
+            node.Previous            = reference.Previous;
+            node.Next                = reference;
+            reference.Previous!.Next = node;
+            reference.Previous       = node;
         }
 
-        ++Count;
+        ++m_Count;
+        UpdateTail();
     }
 
     /// <summary>
-    /// Adds a new node containing the specified value after the specified existing node in this list.
+    /// Inserts a new node containing the specified value after the specified existing 
+    /// reference node from the list.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    /// <returns>The new node containing the value.</returns>
-    /// 
-    public LLNode<T> AddAfter(LLNode<T> node, T item)
+    /// <param name="reference">Reference node.</param>
+    /// <param name="value">Value to insert.</param>
+    /// <returns>The new node containing the specified value.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="InvalidOperationException">Node does not belong to this list.</exception>
+    public LLNode<T> AddAfter(LLNode<T> reference, T value)
     {
-        if (node.List != this)  // Check if node belongs to another list
-            throw new InvalidOperationException("LinkedList node is not in current list!");
-        if (node == null)       // Check if new node is null
-            throw new ArgumentNullException(nameof(item), "LinkedList node is null!");
-
-        LLNode<T> newNode = new LLNode<T>(item) { List = this };
-
-        if (First == null || Last == null)  // Empty list
-        {
-            First = newNode;
-            Last  = First;
-        }
-        else
-        {
-            if (node.Next == null)  // End of list
-            {
-                node.Next        = newNode;
-                newNode.Previous = node;
-            }
-            else
-            {
-                newNode.Previous   = node;
-                node.Next.Previous = newNode;
-                newNode.Next       = node.Next;
-                node.Next          = newNode;
-            }
-
-            UpdateLast();
-        }
-
-        ++Count;
+        LLNode<T> newNode = new(value);
+        
+        AddAfter(reference, newNode);
 
         return newNode;
     }
 
     /// <summary>
-    /// Adds the specified new node after the specified existing node in this list.
+    /// Inserts an existing node after the specified existing reference node from the list.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    public void AddAfter(LLNode<T> node, LLNode<T> newNode)
+    /// <param name="reference">Reference node.</param>
+    /// <param name="node">Node to insert.</param>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="InvalidOperationException">Node does not belong to this list.</exception>
+    /// <exception cref="InvalidOperationException">Node belongs to another list.</exception>
+    public void AddAfter(LLNode<T> reference, LLNode<T> node)
     {
-        if (node.List != this)  // Check if node belongs to another list
-            throw new InvalidOperationException("LinkedList node is not in current list!");
-        if (node == null)       // Check if new node is null
-            throw new ArgumentNullException(nameof(node), "LinkedList node is null!");
-
-        if (newNode.List != this)
-            throw new InvalidOperationException("LinkedList node belongs to another list!");
-        if (newNode == null)
-            throw new ArgumentNullException(nameof(newNode), "LinkedList node is null!");
-
-        if (First == null || Last == null)  // Empty list
+        // Exceptions
         {
-            First = newNode;
-            Last  = First;
+            ThrowIfEmpty(this);
+            ThrowIfNull(reference);
+            ThrowIfNull(node);
+            LList<T>.ThrowIfNodeDoesNotBelong(this, reference);
+            LList<T>.ThrowIfNodeAssigned(node);
         }
+
+        node.List = this;
+
+        // Case 1: add after the last node, updates tail pointer
+        if (reference == m_Tail)
+        {
+            node.Previous = m_Tail!;
+            node.Next     = null;
+            m_Tail.Next   = node;
+            m_Tail        = node;
+        }
+        // Case 2: after after any node,
+        // no need to update head
         else
         {
-            if (node.Next == null)  // End of list
-            {
-                node.Next        = newNode;
-                newNode.Previous = node;
-            }
-            else
-            {
-                newNode.Previous   = node;
-                node.Next.Previous = newNode;
-                newNode.Next       = node.Next;
-                node.Next          = newNode;
-            }
-
-            UpdateLast();
+            node.Previous            = reference;
+            node.Next                = reference.Next;
+            reference.Next!.Previous = node;
+            reference.Next           = node;
         }
 
-        ++Count;
+        ++m_Count;
     }
 
     /// <summary>
-    /// Appends another list to this list, adding all nodes from second list to the end of the first list.
+    /// Inserts a new node containing the specified value at the index of the list.
     /// </summary>
-    /// <remarks>Time complexity: O(m + n) where m is the Count in the other list.</remarks>
-    public void Append(LList<T>? otherList)
+    /// <param name="index">Index to insert at.</param>
+    /// <param name="value">Value to insert.</param>
+    /// <returns>The new node containing the specified value.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    public LLNode<T> AddAt(int index, T value)
     {
-        if (otherList == null)
-            throw new ArgumentNullException(nameof(otherList), "Linkedlist is empty!");
-        if (otherList.Count == 0 || Count == 0)
-            throw new InvalidOperationException("Linkedlist is empty!");
+        LLNode<T> newNode = new(value);
 
-        LLNode<T> otherNode = otherList.First!; // TODO: Edge case where first list is empty!
-        while (otherNode != null)
+        AddAt(index, newNode);
+
+        return newNode;
+    }
+
+    /// <summary>
+    /// Inserts an existing node at the specified index of the list.
+    /// </summary>
+    /// <param name="index">Index to insert at.</param>
+    /// <param name="node">Node ti insert.</param>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    /// <exception cref="InvalidOperationException">Node belongs to another list.</exception>
+    public void AddAt(int index, LLNode<T> node)
+    {
+        // Exceptions
         {
-            otherNode.List = this;
-
-            otherNode.Previous = Last;
-            Last = otherNode; 
-
-            otherNode = otherNode.Next!;
+            ThrowIfEmpty(this);
+            ThrowIfNull(node);
+            ThrowIfIndexOutOfRange(this, index);
+            LList<T>.ThrowIfNodeAssigned(node);
         }
 
-        UpdateLast();
-        Count += otherList.Count;
+        node.List = this;
+
+        // Case 1: add at first node, push node back
+        if (index == 0)
+        {
+            node.Previous    = null;
+            node.Next        = m_Head;
+            m_Head!.Previous = node;
+            m_Head           = node;
+        }
+        // Case 2: add at any other node
+        else 
+        {
+            LLNode<T> current = m_Head!;
+            int             i = 0;
+
+            while (current.Next != null && i < index)
+            {
+                ++i;
+                current = current.Next;
+            }
+
+            node.Previous          = current.Previous;
+            node.Next              = current;
+            current.Previous!.Next = node;
+            current.Previous       = node;
+        }
+
+        ++m_Count;
+        UpdateTail();
     }
 
     #endregion
@@ -372,141 +389,180 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
     #region Remove
 
     /// <summary>
-    /// Removes the node at the start of this list.
+    /// Removes the node at the front of the list.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    public void RemoveFirst()
+    /// <returns>True if node is removed successfully; otherwise false.</returns>
+    public bool RemoveFirst()
     {
-        if (First == null || Last == null)
-            throw new InvalidOperationException("LinkedList is empty!");
-
-        if (First == Last) // Only one element
+        if (IsEmpty())
+            return false;
+        
+        // Case 1: only one node in the list, 
+        // only update head
+        if (m_Count == 1)
         {
-            First = Last = null;
+            m_Head = m_Head!.Next;
         }
+        // Case 2: multiple nodes in the list,
+        // need to update the next node
         else
         {
-            First = First.Next;
-
-            UpdateLast();
+            m_Head!.Next!.Previous = null;
+            m_Head = m_Head.Next;
         }
 
-        --Count;
+        --m_Count;
+        return true;
     }
 
     /// <summary>
-    /// Removes the node at the end of this list.
+    /// Removes the node at the end of the list.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    public void RemoveLast()
+    /// <returns>True if node is removed successfully; otherwise false.</returns>
+    public bool RemoveLast()
     {
-        if (First == null || Last == null)
-            throw new InvalidOperationException("LinkedList is empty!");
-
-        if (First == Last) // Only one element
-        {
-            First = Last = null;
-        }
-        else
-        {
-            Last = Last.Previous;
-        }
-
-        --Count;
-    }
-
-    /// <summary>
-    /// Removes the first/last occurence of the specified value from this list.
-    /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    public bool Remove(T value, bool removeFirst = true)
-    {
-        if (Count == 0)     // Empty list
+        if (IsEmpty())
             return false;
 
-        if (First == Last)  // Only one element in list
+        // Case 1: only one node in the list,
+        // only update head
+        if (m_Count == 1)
         {
-            if (First!.Value.Equals(value))
-            {
-                First = Last = null;
-                --Count;
+            m_Head = m_Head!.Next;
+        }
+        // Case 2: multiple nodes in the list,
+        // need to update tail's previous node
+        else
+        {
+            m_Tail!.Previous!.Next = null;
+            m_Tail = m_Tail!.Previous;
+        }
 
-                return true;
+        --m_Count;
+        return true;
+    }
+
+    /// <summary>
+    /// Removes the node containing the specified value from the list.
+    /// </summary>
+    /// <param name="value">Value to remove.</param>
+    /// <returns>True if node is removed successfully; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public bool Remove(T value)
+    {
+        ThrowIfEmpty(this);
+
+        LLNode<T> current = m_Head!;
+        while (current != null)
+        {
+            if (!value.Equals(current.Value))
+            {   
+                current = current.Next!;
+                continue;
             }
 
-            return false;
+            // Case 1: removing first node
+            if (current == m_Head)
+            {
+                if (m_Head.Next != null)
+                    m_Head.Next.Previous = null;
+
+                m_Head = m_Head.Next;
+            }
+            // Case 2: removing last node
+            else if (current == m_Tail)
+            {
+                if (m_Tail.Previous != null)
+                    m_Tail.Previous.Next = null;
+
+                m_Tail = m_Tail.Previous;
+            }
+            // Case 3: removing middle node
+            else
+            {
+                current.Previous!.Next = current.Next;
+                current.Next!.Previous = current.Previous;
+            }
+
+            --m_Count;
+
+            return true;
         }
 
-        LLNode<T>? node = LinearSearch(value, findFirst: removeFirst);
+        return false;
+    }
 
-        if (node == null)   // Element not in list
-            return false;
+    /// <summary>
+    /// Removes the existing specified node from the list.
+    /// </summary>
+    /// <param name="node">Node to remove.</param>
+    /// <returns>True if node is removed successfully; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="InvalidOperationException">Node belongs to another list.</exception>
+    public bool Remove(LLNode<T> node)
+    {
+        ThrowIfEmpty(this);
+        ThrowIfNull(node);
+        ThrowIfNodeDoesNotBelong(this, node);
 
-        if (node == First)  // First element
+        // Case 1: removing first node
+        if (node == m_Head)
         {
-            First = First.Next;
+            if (m_Head.Next != null)
+                m_Head.Next.Previous = null;
+
+            m_Head = m_Head.Next;
         }
-        else if (node == Last)  // Last element
+        // Case 2: removing last node
+        else if (node == m_Tail)
         {
-            Last = Last.Previous;
+            if (m_Tail.Previous != null)
+                m_Tail.Previous.Next = null;
+
+            m_Tail = m_Tail.Previous;
         }
+        // Case 3: removing middle node
         else
         {
             node.Previous!.Next = node.Next;
             node.Next!.Previous = node.Previous;
         }
 
-        UpdateLast();
-
-        --Count;
+        --m_Count;
 
         return true;
     }
 
     /// <summary>
-    /// Removes the specified node from this list.
+    /// Removes the existing node at the specified index of the list.
     /// </summary>
-    public void Remove(LLNode<T> node)
+    /// <param name="index">Index to remove.</param>
+    /// <returns>True if node is removed successfully; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    public bool RemoveAt(int index)
     {
-        if (node.List != this)  // Check if node belongs to another list
-            throw new InvalidOperationException("LinkedList node is not in current list!");
-        if (node == null)       // Check if new node is null
-            throw new ArgumentNullException(nameof(node), "LinkedList node is null!");
+        LLNode<T> node = GetNode(index)!;
 
-        if (First == Last)  // Only one element in list
-        {
-            First = Last = null;
-            --Count;
-
-            return;
-        }
-
-        if (node == First)  // First element
-        {
-            First = First.Next;
-        }
-        else if (node == Last)  // Last element
-        {
-            Last = Last.Previous;
-        }
-        else
-        {
-            node.Previous!.Next = node.Next;
-            node.Next!.Previous = node.Previous;
-        }
-
-        UpdateLast();
-        
-        --Count;
+        return Remove(node);
     }
 
     /// <summary>
-    /// Removes all nodes from this list.
+    /// Clears all nodes in the list.
     /// </summary>
     public void Clear()
     {
-        First = Last = null;
-        Count = 0;
+        LLNode<T> current = m_Head!;
+        while (current != null)
+        {
+            current.List = null;
+            current = current.Next!;
+        }
+
+        m_Head  = null;
+        m_Tail  = null;
+        m_Count = 0;
     }
 
     #endregion
@@ -514,138 +570,63 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
     #region Search
 
     /// <summary>
-    /// Determines whether a value is in this list.
+    /// Finds and returns the existing node containing the specified value in the list.
     /// </summary>
-    /// <remarks>This method performs a linear search: O(n) where n is Count.</remarks>
-    /// <returns>True if value is found; otherwise false.</returns>
-    public bool Contains(T value)
+    /// <param name="value">Value to search for.</param>
+    /// <returns>Node containing the specified value if found; otherwise null.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public LLNode<T>? Find(T value)
     {
-        LLNode<T>? node = LinearSearch(value);
+        ThrowIfEmpty(this);
 
-        return node != null;
+        LLNode<T> current = m_Head!;
+
+        while (current != null)
+        {
+            if (value.Equals(current.Value))
+            {
+                return current;
+            }
+
+            current = current.Next!;
+        }
+
+        return null;
     }
 
-    // TODO: Contains(LLNode<T> node)
-
     /// <summary>
-    /// Determines whether there is a cycle in this list.
+    /// Determines if the specified value exists in the list.
     /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    /// <returns>True if cycle is found; otherwise false.</returns>
-    public bool HasCycle(LLNode<T> node)
+    /// <param name="value">Value to check.</param>
+    /// <returns>True if value is in the list; otherwise false.</returns>
+    public bool Contains(T value)
     {
-        if (node.List != this)  // Check if node belongs to another list
-            throw new InvalidOperationException("LinkedList node is not in current list!");
-        if (node == null)       // Check if new node is null
-            throw new ArgumentNullException(nameof(node), "LinkedList node is null!");
+        if (IsEmpty())
+            return false;
 
-        HashSet<LLNode<T>> nodes = new HashSet<LLNode<T>>();
-        while (node != null)
+        LLNode<T> current = m_Head!;
+
+        while (current != null)
         {
-            if (nodes.Contains(node))
+            if (value.Equals(current.Value))
                 return true;
 
-            nodes.Add(node);
-
-            node = node.Next!;
+            current = current.Next!;
         }
 
         return false;
     }
 
     /// <summary>
-    /// Finds the node with the largest value in this list.
+    /// Determines if the specified node belongs to this list.
     /// </summary>
-    /// <remarks>Time complexity: O(n log n).</remarks>
-    /// <returns>Node with largest value if found; otherwise null.</returns>
-    public LLNode<T>? Max()
+    /// <param name="node">Node to check.</param>
+    /// <returns>True if node belongs to this list; otherwise false.</returns>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    public bool Contains(LLNode<T> node)
     {
-        return MergeSort(First, ascendingOrder: false);
-    }
-
-    /// <summary>
-    /// Finds the node with the smallest value in this list.
-    /// </summary>
-    /// <remarks>Time complexity: O(n log n).</remarks>
-    /// <returns>Node with smallest value if found; otherwise null.</returns>
-    public LLNode<T>? Min()
-    {
-        return MergeSort(First, ascendingOrder: true);
-    }
-
-    /// <summary>
-    /// Performs a linear search to find the first/last node that contains the specified value.
-    /// </summary>
-    /// <remarks>If findFirst is true, it will search from start to end; otherwise it will search from
-    /// end to start. Time complexity: O(n).</remarks>
-    /// <returns>Node with specified value.</returns>
-    public LLNode<T>? LinearSearch(T value, bool findFirst = true)
-    {
-        if (First == null || Last == null)
-            return null;
-
-        if (findFirst)  // Finds from first to last
-        {
-            LLNode<T> head = First;
-            while (head != null)
-            {
-                if (head.Value.Equals(value))
-                    return head;
-
-                head = head.Next!;
-            }
-        }
-        else    // Finds from last to first
-        {
-            LLNode<T> tail = Last;
-            while (tail != null)
-            {
-                if (tail.Value.Equals(value))
-                    return tail;
-
-                tail = tail.Previous!;
-            }
-        }
-        
-        return null;
-    }
-
-    /// <summary>
-    /// Performs a binary search to find the first node that contains the specified value.
-    /// </summary>
-    /// <remarks>Note: List will be sorted if its not sorted in ascending order.
-    /// Time complexity: O(n), because of finding the middle node.</remarks>
-    /// <returns>Node with specified value.</returns>
-    public LLNode<T>? BinarySearch(T value)
-    {
-        if (First == null)
-            return null;
-
-        if (!IsSorted(ascendingOrder: true))    // Sort the list if not sorted
-            First = MergeSort(First, ascendingOrder: true);
-
-        LLNode<T> start  = First!;
-        LLNode<T>? end   = null;
-        LLNode<T> target = new LLNode<T>(value);
-        
-        do
-        {
-            LLNode<T>? middle = GetMiddleNode(start, end);
-
-            if (middle == null)
-                return null;
-            
-            if (middle.Value.Equals(value))
-                return middle;
-
-            if (target < middle)    // Target value lesser than middle node
-                end = middle;
-            else                    // Target value greater than middle node
-                start = middle.Next!;
-        }
-        while (end == null || end != start);
-
-        return null;
+        ThrowIfNull(node);
+        return node.List == this;
     }
 
     #endregion
@@ -653,125 +634,634 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
     #region Sort
 
     /// <summary>
-    /// Swaps the positions of two nodes without changing their values.
+    /// Determines if the list is sorted according to the specified order.
     /// </summary>
-    /// <remarks>Time complexity: O(1).</remarks>
-    public void Swap(LLNode<T> first, LLNode<T> second)
-    {
-        if (first.List != this || second.List != this)  // Check if node belongs to another list
-            throw new InvalidOperationException("LinkedList node is not in current list!");
-        if (first == null || second == null)            // Check if node is null
-            throw new ArgumentNullException("LinkedList node is null!");
-        if (first == second)                            // Check if nodes are the same
-            throw new InvalidOperationException("Cannot swap the same node!");
+    /// <param name="isAscending">Order to check if sorted by.</param>
+    /// <returns>True if sorted correctly; otherwise false.</returns>
+    public bool IsSorted(bool isAscending = true)
+    {        
+        if (m_Count <= 1)
+            return true;
 
-        if (first == First)
-            First = second;
-        else if (second == First)
-            First = first;
-
-        if (first.Previous != null)
-            first.Previous.Next = second;
-        if (second.Previous != null)
-            second.Previous.Next = first;
-
-        if (first.Next != null)
-            first.Next.Previous = second;
-        if (second.Next != null)
-            second.Next.Previous = first;
-
-        (first.Next, second.Next) = (second.Next, first.Next);
-
-        if (first == second.Previous)
-            first.Previous = second;
-        else if (second == first.Previous)
-            second.Previous = first;
-        else
-            (first.Previous, second.Previous) = (second.Previous, first.Previous);
-
-        UpdateLast();
-    }
-
-    public void SwapData(LLNode<T> first, LLNode<T> second)
-    {
-        if (first != null && second != null && first != second)
-            (first.Value, second.Value) = (second.Value, first.Value);
-    }
-
-    /// <summary>
-    /// Reverse the positions of all nodes in this list.
-    /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    /// <returns>The new head of this list.</returns>
-    public LLNode<T> Reverse()
-    {
-        if (Count == 0 || First == null || Last == null)
-            throw new InvalidOperationException("Linkedlist is empty!");
-
-        if (First == Last)  // Only one element
-            return First;
-
-        LLNode<T> current   = First;
-        LLNode<T>? previous = null;
-        
-        while (current != null)
+        if (isAscending)
         {
-            LLNode<T>? next  = current.Next;
-            current.Next     = previous;
-            current.Previous = next;
+            LLNode<T> current = m_Head!;
+            T value           = current.Value;
 
-            previous = current;
-            current  = next!;
+            while (current != null)
+            {
+                if (value.CompareTo(current.Value) > 0)
+                    return false;
+
+                current = current.Next!;
+            }
+        }
+        else
+        {
+            LLNode<T> current = m_Head!;
+            T value           = current.Value;
+
+            while (current != null)
+            {
+                if (value.CompareTo(current.Value) < 0)
+                    return false;
+
+                current = current.Next!;
+            }
         }
 
-        First = Last;
-        UpdateLast();
-
-        return First;
+        return true;
     }
 
     /// <summary>
-    /// Performs merge sort to sort the list in specified order
+    /// Apply merge sort to the list according to the specified order.
     /// </summary>
-    /// <remarks>Time complexity: O(n log n).</remarks>
-    /// <returns>The new head of the ordered list.</returns>
-    public LLNode<T>? MergeSort(LLNode<T>? head, bool ascendingOrder = true)
+    /// <param name="isAscending">Order to sort by.</param>
+    /// <remarks>Time complexity: O(n.log.n)</remarks>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public void MergeSort(bool isAscending = true)
     {
+        ThrowIfEmpty(this);
+
+        MergeSort(m_Head, isAscending);
+
+        UpdateTail();
+    }
+
+    /// <summary>
+    /// Private recursive method to split and merge sort according to the specified order.
+    /// </summary>
+    /// <param name="head">Starting node.</param>
+    /// <param name="ascending">Order to sort by.</param>
+    /// <returns>New head of the sorted list.</returns>
+    private LLNode<T>? MergeSort(LLNode<T>? head, bool ascending)
+    {
+        // Base case
         if (head == null || head.Next == null)
             return head;
 
-        LLNode<T> middle = GetMiddleNode(head)!;
-        LLNode<T>  left  = head;
-        LLNode<T> right  = middle.Next!; 
+        LLNode<T>? slow = head;
+        LLNode<T>? fast = head.Next;
 
-        middle!.Next = null;    // Splits the list into halves
+        // Find the "middle" node
+        while (fast != null && fast.Next != null)
+        {
+            slow = slow!.Next;
+            fast = fast.Next.Next;
+        }
 
-        if (ascendingOrder)
-            return SortAndMerge(MergeSort(left,  ascendingOrder: true), 
-                                MergeSort(right, ascendingOrder: true), ascendingOrder: true);
+        LLNode<T>? secondHalf = slow!.Next;
+        slow.Next = null;
+
+        // Keep splitting until only 2 nodes
+        LLNode<T>? firstHalfSorted = MergeSort(head, ascending);
+        LLNode<T>? secondHalfSorted = MergeSort(secondHalf, ascending);
+
+        // Merge 2 nodes together
+        return Merge(firstHalfSorted!, secondHalfSorted!, ascending);
+    }
+
+    /// <summary>
+    /// Merge two nodes and sort them by order specified.
+    /// </summary>
+    /// <param name="node1">First node.</param>
+    /// <param name="node2">Second node.</param>
+    /// <returns>New head for the merged nodes.</returns>
+    private LLNode<T> Merge(LLNode<T> node1, LLNode<T> node2, bool ascending)
+    {
+        LLNode<T> dummy;
+
+        // Clear previous pointers since the nodes will be at the front
+        node1.Previous = null;
+        node2.Previous = null;
+
+        // Use the smaller node as the first node
+        if (ascending)
+        {
+            if (node1.CompareTo(node2) <= 0)
+            {
+                dummy = node1;
+                node1 = node1.Next!;
+            }
+            else
+            {
+                dummy = node2;
+                node2 = node2.Next!;
+            }
+        }
+        // Use the bigger node as the first node
         else
-            return SortAndMerge(MergeSort(right, ascendingOrder: false),
-                                MergeSort(left,  ascendingOrder: false), ascendingOrder: false);
+        {
+            if (node1.CompareTo(node2) > 0)
+            {
+                dummy = node1;
+                node1 = node1.Next!;
+            }
+            else
+            {
+                dummy = node2;
+                node2 = node2.Next!;
+            }
+        }
+        
+        LLNode<T> current = dummy;
+
+        while (node1 != null && node2 != null)
+        {
+            int comparer = node1.CompareTo(node2);
+
+            if (ascending)
+            {
+                // Node1 is smaller than node2
+                if (comparer <= 0)
+                {
+                    current.Next = node1;
+                    node1 = node1.Next!;
+                }
+                // Node2 is smaller than node1
+                else
+                {
+                    current.Next = node2;
+                    node2 = node2.Next!;
+                }
+            }
+            else
+            {
+                // Node2 is bigger than node1
+                if (comparer > 0)
+                {
+                    current.Next = node1;
+                    node1 = node1.Next!;
+                }
+                // Node1 is bigger than node2
+                else
+                {
+                    current.Next = node2;
+                    node2 = node2.Next!;
+                }
+            }
+            
+            current.Next.Previous = current;
+            current = current.Next;
+        }
+
+        // Append the rest of the nodes
+        current.Next = node1 ?? node2;
+
+        if (current.Next != null)
+        {
+            current.Next.Previous = current;
+        }
+
+        // Update head
+        m_Head = dummy;
+        return dummy;
     }
 
-    public LLNode<T>? QuickSort()
+    #endregion
+
+    #region List Manipulation
+
+    /// <summary>
+    /// Reverse the order of the entire list.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public void Reverse()
+    {
+        ThrowIfEmpty(this);
+        
+        if (m_Count == 1)
+            return;
+
+        LLNode<T> current = m_Head!;
+        while (current != null)
+        {
+            (current.Next, current.Previous) = (current.Previous, current.Next);
+
+            current = current.Previous!;
+        }
+
+        (m_Head, m_Tail) = (m_Tail, m_Head);
+    }
+
+    /// <summary>
+    /// Concatenates the specified list to this list. 
+    /// </summary>
+    /// <param name="list">Other list to concatenate with.</param>
+    /// <param name="toBackOfList">Concat to either back or front of list.</param>
+    /// <remarks>Note that the specified list will become empty, and all its nodes
+    /// will be added to this list instead.</remarks>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public void Concat(LList<T> list, bool toBackOfList = true)
+    {
+        ThrowIfNull(list);
+
+        if (IsEmpty() && list.IsEmpty())
+            throw new InvalidOperationException("Both list cannot be empty.");
+
+        // Add to back of this list
+        if (toBackOfList)
+        {
+            LLNode<T> secondHalf = list.m_Head!;
+            while (secondHalf != null)
+            {
+                list.Remove(secondHalf);
+                secondHalf.List = null;
+
+                AddLast(secondHalf.Value);
+
+                secondHalf = secondHalf.Next!;
+            }
+        }
+        // Add to front of this list
+        else
+        {
+            LList<T> newList    = new();
+            LLNode<T> firstHalf = list.First!;
+
+            // First half of new list containing elements from other list
+            while (firstHalf != null)
+            {
+                list.Remove(firstHalf);
+                firstHalf.List = null;
+
+                newList.AddLast(firstHalf.Value);
+
+                firstHalf = firstHalf.Next!;
+            }
+
+            LLNode<T> secondHalf = m_Head!;
+
+            // Second half of new list containing elements from this list
+            while (secondHalf != null)
+            {
+                Remove(secondHalf);
+                secondHalf.List = null;
+
+                newList.AddLast(secondHalf.Value);
+
+                secondHalf = secondHalf.Next!;
+            }
+
+            m_Count = newList.m_Count;
+            m_Head = newList.First;
+        }
+
+        UpdateTail();
+
+        list.m_Head = null;
+        list.m_Tail = null;
+    }
+
+    public void Split(T value)
     {
         throw new NotImplementedException();
     }
 
-    public LLNode<T> InsertionSort()
+    public void Split(LLNode<T> node)
     {
         throw new NotImplementedException();
     }
 
-    public LLNode<T> SelectionSort()
+    public void SplitAt(int index)
     {
         throw new NotImplementedException();
     }
 
-    public LLNode<T> BubbleSort()
+    public void Merge(LList<T> list1, LList<T> list2)
     {
         throw new NotImplementedException();
+    }
+
+    #endregion
+
+    #region Get, Set, Index
+
+    /// <summary>
+    /// Returns the value at the specified index of the tree.
+    /// </summary>
+    /// <param name="index">Index to get value from.</param>
+    /// <returns>Value at specified index.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    public T GetValue(int index)
+    {
+        ThrowIfEmpty(this);
+        ThrowIfIndexOutOfRange(this, index);
+
+        int i             = 0;
+        LLNode<T> current = m_Head!;
+        T value           = default!;
+
+        while (current != null)
+        {
+            if (index.Equals(i))
+            {
+                value = current.Value;
+                break;
+            }
+
+            ++i;
+            current = current.Next!;
+        }
+
+        return value;
+    }
+
+    /// <summary>
+    /// Returns the node at the specified index of the tree.
+    /// </summary>
+    /// <param name="index">Index to get node from.</param>
+    /// <returns>Node at specified index.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    public LLNode<T>? GetNode(int index)
+    {
+        ThrowIfEmpty(this);
+        ThrowIfIndexOutOfRange(this, index);
+
+        int i             = 0;
+        LLNode<T> current = m_Head!;
+        LLNode<T> temp    = null!;
+
+        while (current != null)
+        {
+            if (index.Equals(i))
+            {
+                temp = current;
+                break;
+            }
+
+            ++i;
+            current = current.Next!;
+        }
+
+        return temp;
+    }
+
+    /// <summary>
+    /// Replaces the existing node's value with the specified value 
+    /// at the specified index of the list.
+    /// </summary>
+    /// <param name="index">Index to set value at.</param>
+    /// <param name="value">Value to set.</param>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    public void SetValue(int index, T value)
+    {
+        ThrowIfEmpty(this);
+        ThrowIfIndexOutOfRange(this, index);
+
+        int i             = 0;
+        LLNode<T> current = m_Head!;
+
+        while (current != null)
+        {
+            if (i == index)
+            {
+                current.Value = value;
+                break;
+            }
+
+            ++i;
+            current = current.Next!;
+        }
+    }
+
+    /// <summary>
+    /// Replaces the existing node's value with the specified node's value
+    /// at the specified index of the list.
+    /// </summary>
+    /// <param name="index">Index to set value at.</param>
+    /// <param name="node">Node to set.</param>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    public void SetNode(int index, LLNode<T> node)
+    {
+        ThrowIfEmpty(this);
+        ThrowIfNull(node);
+        ThrowIfIndexOutOfRange(this, index);
+
+        int i             = 0;
+        LLNode<T> current = m_Head!;
+
+        while (current != null)
+        {
+            if (index.Equals(i))
+            {
+                current.Value = node.Value;
+                break;
+            }
+
+            ++i;
+            current = current.Next!;
+        }
+    }
+
+    /// <summary>
+    /// Returns the first index of node containing the specified value in the list.
+    /// </summary>
+    /// <param name="value">Value to find index of.</param>
+    /// <returns>Index if value is found; otherwise -1.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public int IndexOf(T value)
+    {
+        ThrowIfEmpty(this);
+
+        int i             = 0;
+        LLNode<T> current = m_Head!;
+
+        while (current != null)
+        {
+            if (value.Equals(current.Value))
+                return i;
+
+            ++i;
+            current = current.Next!;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Returns the first index of node containing the same value from the specified node.
+    /// </summary>
+    /// <param name="node">Node's value to find index of.</param>
+    /// <returns>Index if node's value is found; otherwise -1.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <remarks>The specified node need not belong to the same list, this method will find
+    /// the first index by matching the values.</remarks>
+    public int IndexOf(LLNode<T>? node)
+    {
+        ThrowIfEmpty(this);
+        ThrowIfNull(node);
+
+        int i             = 0;
+        LLNode<T> current = m_Head!;
+
+        while (current != null)
+        {
+            if (node!.Equals(current))
+                return i;
+
+            ++i;
+            current = current.Next!;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Returns the last index of node containing the specified value in the list.
+    /// </summary>
+    /// <param name="value">Value to find last index of.</param>
+    /// <returns>Index if value is found; otherwise -1.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public int LastIndexOf(T value)
+    {
+        ThrowIfEmpty(this);
+
+        int i             = m_Count - 1;
+        LLNode<T> current = m_Tail!;
+
+        while (current != null)
+        {
+            if (value.Equals(current.Value))
+                return i;
+
+            --i;
+            current = current.Previous!;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Returns the last index of node containing the same value from the specified node.
+    /// </summary>
+    /// <param name="value">Value to find last index of.</param>
+    /// <returns>Index if value is found; otherwise -1.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <remarks>The specified node need not belong to the same list, this method will find
+    /// the last index by matching the values.</remarks>
+    public int LastIndexOf(LLNode<T>? node)
+    {
+        ThrowIfEmpty(this);
+        ThrowIfNull(node);
+
+        int i             = m_Count - 1;
+        LLNode<T> current = m_Tail!;
+
+        while (current != null)
+        {
+            if (node!.Equals(current))
+                return i;
+
+            --i;
+            current = current.Previous!;
+        }
+
+        return -1;
+    }
+
+    #endregion
+
+    #region Min, Max
+
+    /// <summary>
+    /// Returns the smallest value in the list.
+    /// </summary>
+    /// <returns>Smallest value in the list.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public T MinValue()
+    {
+        ThrowIfEmpty(this);
+        
+        LLNode<T> current = m_Head!;
+        T min = current.Value;
+
+        while (current != null)
+        {
+            if (current.Value.CompareTo(min) < 0)
+                min = current.Value;
+
+            current = current.Next!;
+        }
+
+        return min;
+    }
+
+    /// <summary>
+    /// Returns the largest value in the list.
+    /// </summary>
+    /// <returns>Largest value in the list.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public T MaxValue()
+    {
+        ThrowIfEmpty(this);
+        
+        LLNode<T> current = m_Head!;
+        T max = current.Value;
+
+        while (current != null)
+        {
+            if (current.Value.CompareTo(max) > 0)
+                max = current.Value;
+
+            current = current.Next!;
+        }
+
+        return max;
+    }
+
+    /// <summary>
+    /// Returns the node containing the smallest value in the list.
+    /// </summary>
+    /// <returns>Node containing the smallest value in the list.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public LLNode<T> MinNode()
+    {
+        ThrowIfEmpty(this);
+
+        LLNode<T> current = m_Head!;
+        LLNode<T> min = current;
+
+        while (current != null)
+        {
+            if (current.Value.CompareTo(min.Value) < 0)
+                min = current;
+
+            current = current.Next!;
+        }
+
+        return min;
+    }
+
+    /// <summary>
+    /// Returns the node containing the largest value in the list.
+    /// </summary>
+    /// <returns>Node containing the largest value in the list.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    public LLNode<T> MaxNode()
+    {
+        ThrowIfEmpty(this);
+
+        LLNode<T> current = m_Head!;
+        LLNode<T> max = current;
+
+        while (current != null)
+        {
+            if (current.Value.CompareTo(max.Value) > 0)
+                max = current;
+
+            current = current.Next!;
+        }
+
+        return max;
     }
 
     #endregion
@@ -779,244 +1269,170 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
     #region Utilities
 
     /// <summary>
-    /// An enumerator for this list.
+    /// Determines if the list is empty by checking if the first node exists.
     /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    /// <returns>List enumerator.</returns>
+    /// <returns>True if the list is empty; otherwise false.</returns>
+    public bool IsEmpty()
+    {
+        return m_Head == null;
+    }
+
+    /// <summary>
+    /// Copies all elements from the list into an array.
+    /// </summary>
+    /// <returns>Array containing all the values from the list.</returns>
+    public T[]? ToArray()
+    {
+        if (IsEmpty())
+            return null;
+
+        T[] array         = new T[m_Count];
+        int index         = 0;
+        LLNode<T> current = m_Head!;
+
+        while (current != null)
+        {
+            array[index] = current.Value;
+
+            ++index;
+            current = current.Next!;
+        }
+
+        return array;
+    }
+
+    /// <summary>
+    /// Copies all elements from the list into a list.
+    /// </summary>
+    /// <returns>List containing all the values from the list.</returns>
+    public List<T>? ToList()
+    {
+        if (IsEmpty())
+            return null;
+
+        List<T> list      = [];
+        LLNode<T> current = m_Head!;
+
+        while (current != null)
+        {
+            list.Add(current.Value);
+            current = current.Next!;
+        }
+        return list;
+    }
+
+    public bool HasCycle()
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Updates the pointer to point at the last node of the list.
+    /// </summary>
+    private void UpdateTail()
+    {
+        if (IsEmpty())
+            return;
+
+        LLNode<T> current = m_Head!;
+        while (current != null)
+        {
+            m_Tail          = current;
+            m_Tail.Previous = current.Previous;
+            m_Tail.Next     = current.Next;
+            current         = current.Next!;
+        }
+    }
+
+    #endregion
+
+    #region Enumerators
+
+    /// <summary>
+    /// Gets the enumerator for this list.
+    /// </summary>
+    /// <returns>Enumerator.</returns>
     public IEnumerator<T> GetEnumerator()
     {
-        LLNode<T>? current = First;
+        LLNode<T>? current = m_Head;
+
         while (current != null)
         {
             yield return current.Value;
-            
-            current = current.Next!;
+            current = current.Next;
         }
     }
 
     /// <summary>
-    /// An enumerator for this list.
+    /// Gets the enumerator for this list.
     /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    /// <returns>List enumerator.</returns>
+    /// <returns>Enumerator.</returns>
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return GetEnumerator()!;
+        return GetEnumerator();
+    }
+
+    #endregion
+
+    #region Overrides
+
+    /// <summary>
+    /// Determines if two lists have the same values.
+    /// </summary>
+    /// <param name="obj">Other list to check with.</param>
+    /// <returns>True if both list's values are the same; otherwise false.</returns>
+    /// <remarks>This method checks the nodes' values.</remarks>
+    public override bool Equals(object? obj)
+    {
+        if (obj is not LList<T>)
+            return false;
+
+        LList<T> other = (LList<T>)obj;
+        if (other.Count != m_Count)
+            return false;
+
+        LLNode<T> node = m_Head!;
+        LLNode<T> otherNode = other.m_Head!;
+        while (node != null && m_Head != null)
+        {
+            if (!node.Value.Equals(otherNode.Value))
+                return false;
+
+            node = node.Next!;
+            otherNode = otherNode.Next!;
+        }
+
+        if (node != null || otherNode != null)
+            return false;
+
+        return true;
     }
 
     /// <summary>
-    /// Copies the entire list to a compatible one-dimensional array, starting at the 
-    /// specified index of the target array.
+    /// Default hash code.
     /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    public void CopyTo(T[] array, int index)
+    /// <returns>Hash code.</returns>
+    public override int GetHashCode()
     {
-        if (array == null)
-            throw new ArgumentNullException(nameof(array), "Array is null!");
-        if (index < 0)
-            throw new ArgumentOutOfRangeException(nameof(index), "Index must be non-negative!");
+        return base.GetHashCode();
+    }
 
-        if (Count > array.Length - index)
-            throw new ArgumentException("Array capacity is insufficient!");
+    /// <summary>
+    /// Gets the linked list as string.
+    /// </summary>
+    /// <returns>String representative of the linked list.</returns>
+    public override string ToString()
+    {
+        if (IsEmpty())
+            return "Empty list.";
 
-        LLNode<T>? current = First;
-        int i = index;
+        string list = "";
+        LLNode<T>? current = m_Head;
+
         while (current != null)
         {
-            array[i] = current.Value;
-            current  = current.Next!;
-            ++i;
-        }
-    }
-
-     /// <summary>
-    /// Gets the middle node of this list.
-    /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    /// <returns>Middle node of this list.</returns>
-    public LLNode<T> GetMiddleNode()
-    {
-        if (Count == 0 || First == null || Last == null)
-            throw new InvalidOperationException("Linkedlist is empty!");
-
-        LLNode<T>  slow = First;
-        LLNode<T>? fast = First.Next;
-
-        while (fast != null)
-        {
-            fast = fast.Next;
-
-            if (fast != null)
-            {
-                slow = slow.Next!;
-                fast = fast.Next;
-            }
-        }
-
-        return slow;
-    }
-
-    /// <summary>
-    /// Gets the middle node between specified node and end of list.
-    /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    /// <returns>Middle node.</returns>
-    public LLNode<T>? GetMiddleNode(LLNode<T> node)
-    {
-        if (node == null)
-            return null;
-
-        if (node.List != this)
-            return null;
-
-        LLNode<T>  slow = node;
-        LLNode<T>? fast = node.Next;
-
-        while (fast != null)
-        {
-            fast = fast.Next;
-
-            if (fast != null)
-            {
-                slow = slow.Next!;
-                fast = fast.Next;
-            }
-        }
-
-        return slow;
-    }
-
-    /// <summary>
-    /// Gets the middle node between specified start and end node.
-    /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    /// <returns>Middle node.</returns>
-    public LLNode<T>? GetMiddleNode(LLNode<T>? start, LLNode<T>? end)
-    {
-        bool IsBefore(LLNode<T> start, LLNode<T> end)
-        {
-            LLNode<T> current = start;
-            while (current != null)
-            {
-                if (current == end)
-                    return true;
-
-                current = current.Next!;
-            }
-            return false;
-        }
-
-        if (start == null)
-            return null;
-
-        if (end == null)
-            return GetMiddleNode(start);
-
-        if (start.List != this || end.List != this)
-            throw new InvalidOperationException("Linkedlist node is not in current list!");
-
-        // Check if start is before end
-        if (!IsBefore(start, end))
-            (start, end) = (end, start);
-
-        LLNode<T>  slow = start;
-        LLNode<T>? fast = start;
-
-        while (fast != end && fast?.Next != null)
-        {
-            slow = slow.Next!;
-            fast = fast!.Next!.Next;
-        }
-
-        return slow;
-    }
-
-    /// <summary>
-    /// Sort and merge lists according to the order specified.
-    /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    /// <returns>First node of new sorted list.</returns>
-    public LLNode<T>? SortAndMerge(LLNode<T>? a, LLNode<T>? b, bool ascendingOrder = true)
-    {
-        if (a == null)
-            return b;
-
-        if (b == null)
-            return a;
-
-        LLNode<T>? result;
-
-        if (ascendingOrder) // Smallest to greatest
-        {
-            if (a <= b)
-            {
-                result          = a;
-                result.Next     = SortAndMerge(a.Next, b, ascendingOrder: true);
-            }
-            else
-            {
-                result          = b;
-                result.Next     = SortAndMerge(a, b.Next, ascendingOrder: true);
-            }
-        }
-        else    // Greatest to smallest
-        {
-            if (a >= b)
-            {
-                result      = a;
-                result.Next = SortAndMerge(a.Next, b, ascendingOrder: false);
-            }
-            else
-            {
-                result      = b;
-                result.Next = SortAndMerge(a, b.Next, ascendingOrder: false);
-            }
-        }
-
-        // Handles previous pointers
-        LLNode<T> head = result;
-        while (result.Next != null)
-        {
-            LLNode<T> temp  = result;
-            result          = result.Next!;
-            result.Previous = temp;
-        }
-
-        return head;
-    }
-
-    /// <summary>
-    /// Gets the string representing the entire list according to specified order.
-    /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    /// <returns>String representing the list.</returns>
-    public string ListAsString(bool frontToBack = true)
-    {
-        string list = "";
-
-        if (frontToBack)
-        {
-            LLNode<T>? current = First;
-
-            list += "[Front to back]: ";
-            while (current != null)
-            {
-                list += current.Value.ToString() + " -> ";
-                current = current.Next!;
-            }
-            list += '\n';
-        }
-        else
-        {
-            LLNode<T>? current = Last;
-
-            list += "[Back to front]: ";
-            while (current != null)
-            {
-                list += current.Value.ToString() + " -> ";
-                current = current.Previous!;
-            }
-            list += '\n';
+            list += current.Value + ", ";
+            current = current.Next!;
         }
 
         return list;
@@ -1024,66 +1440,62 @@ public class LList<T> : IEnumerable<T> where T : notnull, IComparable<T>
 
     #endregion
 
-    #region Private    
+    #region Exceptions
 
     /// <summary>
-    /// Updates the last pointer to point at the correct end of this list.
+    /// Throws if object specified is null.
     /// </summary>
-    /// <remarks>Time complexity: O(n).</remarks>
-    void UpdateLast()
+    /// <param name="value">Value to check</param>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    private static void ThrowIfNull(object? value)
     {
-        if (First == null && Last == null)
-            return;
-
-        if (Last == null)   // Last is null, so need to traverse the entire list to find last again
-        {
-            LLNode<T> current = First!;
-
-            while (current.Next != null)
-            {
-                current = current.Next;
-            }
-
-            Last = current;
-        }
-        else    // Travserse from last if last is not null
-        {
-            LLNode<T> current = Last;
-
-            while (current.Next != null)
-            {
-                current = current.Next;
-            }
-
-            Last = current;
-        }
+        ArgumentNullException.ThrowIfNull(value, "Argument is null.");
     }
 
     /// <summary>
-    /// Checks if list is sorted according to specified order.
+    /// Throws if list is empty.
     /// </summary>
-    /// <returns>True is sorted correctly; otherwise false.</returns>
-    bool IsSorted(bool ascendingOrder = true)
+    /// <param name="list">List to check.</param>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    private static void ThrowIfEmpty(LList<T> list)
     {
-        if (First == null)
-            return false;
+        if (list.IsEmpty())
+            throw new InvalidOperationException("List is empty.");
+    }
 
-        LLNode<T> current = First;
-        while (current != null)
-        {
-            if (current.Next != null)
-            {
-                if (ascendingOrder && current.Next < current)
-                    return false;
-                
-                if (!ascendingOrder && current.Next > current)
-                    return false;
-            }
+    /// <summary>
+    /// Throws if node belongs to another list.
+    /// </summary>
+    /// <param name="node">Node to check.</param>
+    /// <exception cref="InvalidOperationException">Node belongs to another list.</exception>
+    private static void ThrowIfNodeAssigned(LLNode<T> node)
+    {
+        if (node.List != null)
+            throw new InvalidOperationException("Node can only be assigned to one list.");
+    }
 
-            current = current.Next!;
-        }
+    /// <summary>
+    /// Throws if node that must be belonging to this list does not.
+    /// </summary>
+    /// <param name="list">List which node must belong to.</param>
+    /// <param name="node">Node to check.</param>
+    /// <exception cref="InvalidOperationException">Node does not belong to this list.</exception>
+    private static void ThrowIfNodeDoesNotBelong(LList<T> list, LLNode<T> node)
+    {
+        if (node.List != list)
+            throw new InvalidOperationException("Node does not belong to this list.");
+    }
 
-        return true;
+    /// <summary>
+    /// Throws if index is out of range.
+    /// </summary>
+    /// <param name="list">List to check.</param>
+    /// <param name="index">Index to check.</param>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    private static void ThrowIfIndexOutOfRange(LList<T> list, int index)
+    {
+        if (index < 0 || index >= list.Count)
+            throw new IndexOutOfRangeException("Index out of range.");
     }
 
     #endregion

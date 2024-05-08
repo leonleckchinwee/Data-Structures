@@ -3,1803 +3,2004 @@ namespace DSA.LinkedLists.Tests;
 public class LinkedList_Tests
 {
     [TestFixture]
-    public class LListTests_Ctors
+    public class LListTests_Node
     {
-        [Test]
-        public void Constructor_EmptyList_CountZero()
+        [TestCase(1, ExpectedResult = 1)]
+        [TestCase(-100, ExpectedResult = -100)]
+        [TestCase(int.MaxValue, ExpectedResult = int.MaxValue)]
+        public int CreateNode_ContainingCorrectValue(int value)
         {
             // Arrange
-            LList<int> list = new LList<int>();
+            LLNode<int> node = new LLNode<int>(value);
 
-            // Act
-            int count = list.Count;
+            // Act & Assert
+            Assert.That(node.Next, Is.Null);
+            Assert.That(node.Previous, Is.Null);
+            Assert.That(node.List, Is.Null);
 
-            // Assert
-            Assert.That(count, Is.EqualTo(0));
-            Assert.IsNull(list.First);
-            Assert.IsNull(list.Last);
-        }
-
-        [Test]
-        public void Constructor_FromArray_ValidList()
-        {
-            // Arrange
-            int[] array = { 1, 2, 3 };
-
-            // Act
-            LList<int> list = new LList<int>(array);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(1));
-            Assert.That(list.Last!.Value, Is.EqualTo(3));
-        }
-
-        [Test]
-        public void Constructor_FromList_ValidList()
-        {
-            // Arrange
-            var inputList = new List<string> { "apple", "banana", "orange" };
-
-            // Act
-            LList<string> list = new LList<string>(inputList);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo("apple"));
-            Assert.That(list.Last!.Value, Is.EqualTo("orange"));
-        }
-
-        [Test]
-        public void Constructor_NullCollection_EmptyList()
-        {
-            // Arrange
-            IEnumerable<int>? collection = null;
-
-            // Act
-            LList<int> list = new LList<int>(collection!);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(0));
-            Assert.IsNull(list.First);
-            Assert.IsNull(list.Last);
+            return node.Value;
         }
     }
 
     [TestFixture]
-    public class LListTests_Pointers
+    public class LListTests_Constructor
     {
-        // Testing if First and Last pointers are pointing to the correct elements after adding to the front of the list
         [Test]
-        public void FirstAndLast_AfterAddFirst_AreCorrect()
+        public void Constructor_Empty()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddFirst(5);
-            list.AddFirst(10);
-            list.AddFirst(15);
+            LList<int> list = new();
 
-            // Assert
-            Assert.That(list.First!.Value, Is.EqualTo(15));
-            Assert.That(list.Last!.Value, Is.EqualTo(5));
-        }
-
-        // Testing if First and Last pointers are pointing to the correct elements after adding to the end of the list
-        [Test]
-        public void FirstAndLast_AfterAddLast_AreCorrect()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
-
-            // Assert
-            Assert.That(list.First!.Value, Is.EqualTo(5));
-            Assert.That(list.Last!.Value, Is.EqualTo(15));
-        }
-
-        // Testing if First and Last pointers are pointing to the correct elements after removing the first item
-        [Test]
-        public void FirstAndLast_AfterRemoveFirst_AreCorrect()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
-
-            // Act
-            list.RemoveFirst();
-
-            // Assert
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(15));
-        }
-
-        // Testing if First and Last pointers are pointing to the correct elements after removing the last item
-        [Test]
-        public void FirstAndLast_AfterRemoveLast_AreCorrect()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
-
-            // Act
-            list.RemoveLast();
-
-            // Assert
-            Assert.That(list.First!.Value, Is.EqualTo(5));
-            Assert.That(list.Last!.Value, Is.EqualTo(10));
-        }
-
-        // Testing if First and Last pointers are pointing to null after clearing the list
-        [Test]
-        public void FirstAndLast_AfterClear_AreNull()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
-
-            // Act
-            list.Clear();
-
-            // Assert
+            Assert.That(list, !Is.Null);
             Assert.That(list.First, Is.Null);
             Assert.That(list.Last, Is.Null);
-        }
-    }
-
-    [TestFixture]
-    public class LListTests_Count
-    {
-        // Testing if Count is incremented correctly after adding items
-        [Test]
-        public void Count_AfterAddingItems_IsCorrect()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-
-            // Act
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
+            Assert.That(list, Is.Empty);
         }
 
-        // Testing if Count is decremented correctly after removing items
-        [Test]
-        public void Count_AfterRemovingItems_IsCorrect()
+        [TestCase(1, ExpectedResult = 1)]
+        [TestCase(-100, ExpectedResult = -100)]
+        [TestCase(int.MaxValue, ExpectedResult = int.MaxValue)]
+        public int Constructor_FirstNode(int value)
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
+            LList<int> list = new(value);
 
-            // Act
-            list.RemoveFirst();
-            list.RemoveLast();
+            Assert.That(list, !Is.Null);
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.First.Value, Is.EqualTo(value));
+            Assert.That(list.Last.Value, Is.EqualTo(value));
+            Assert.That(list, Has.Count.EqualTo(1));
 
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
+            return list.First.Value;
         }
 
-        // Testing if Count is correct after clearing the list
         [Test]
-        public void Count_AfterClearingList_IsZero()
+        public void Constructor_Enumerable_List()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
-
-            // Act
-            list.Clear();
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(0));
-        }
-
-        // Testing if Count remains zero for an empty list
-        [Test]
-        public void Count_EmptyList_IsZero()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(0));
-        }
-    }
-
-    [TestFixture]
-    public class LListTests_PrintList
-    {
-        [Test]
-        public void PrintList_Integers_FrontToBack()
-        {
-            LList<int> list = new LList<int>();
-            string result   = "[Front to back]: ";
-
-            for (int i = 0; i < 10; ++i)
+            List<int> list = [1, 2, 3, 4, 5];
+            LList<int> list2 = new(list);
+            
+            Assert.That(list2, Has.Count.EqualTo(5));
+            for (int i = 0; i < list2.Count; ++i)
             {
-                list.AddLast(i);
-                result += i.ToString() + " -> ";
+                Assert.That(list2[i], Is.EqualTo(i + 1));
             }
-
-            result += '\n';
-            string resultList = list.ListAsString(frontToBack: true);
-
-            Assert.That(resultList, Is.EqualTo(result));
         }
 
         [Test]
-        public void PrintList_Integers_BackToFront()
+        public void Constructor_Enumerable_Array()
         {
-            LList<int> list = new LList<int>();
-            string result   = "[Back to front]: ";
+            int[] list = [1, 2, 3, 4, 5];
+            LList<int> list2 = new(list);
 
-            for (int i = 0; i < 10; ++i)
+            Assert.That(list2, Has.Count.EqualTo(5));
+            Assert.That(list2, Has.Count.EqualTo(5));
+            for (int i = 0; i < list2.Count; ++i)
             {
-                list.AddFirst(i);
-                result += i.ToString() + " -> ";
+                Assert.That(list2[i], Is.EqualTo(i + 1));
             }
+        }
 
-            result += '\n';
-            string resultList = list.ListAsString(frontToBack: false);
+        [Test]
+        public void Constructor_Enumerable_Enumerable()
+        {
+            IEnumerable<int> list = [1, 2, 3, 4, 5];
+            LList<int> list2 = new(list);
 
-            Assert.That(resultList, Is.EqualTo(result));
+            Assert.That(list2, Has.Count.EqualTo(5));
+            Assert.That(list2, Has.Count.EqualTo(5));
+            for (int i = 0; i < list2.Count; ++i)
+            {
+                Assert.That(list2[i], Is.EqualTo(i + 1));
+            }
+        }
+
+        [Test]
+        public void Constructor_Enumerable_Null()
+        {
+            Assert.That(() => new LList<int>(null!), Throws.ArgumentNullException);
         }
     }
 
     [TestFixture]
     public class LListTests_AddFirst
     {
-        // Existing list is empty, adding the first item
         [Test]
-        public void AddFirst_EmptyList_AddsFirstItem()
+        public void AddFirst_EmptyList()
         {
-            // Arrange
             LList<int> list = new();
+            list.AddFirst(1);
 
-            // Act
-            list.AddFirst(10);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(10));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list, Has.Count.EqualTo(1));
         }
 
-        // Existing list has items, adding a new item to the beginning
         [Test]
-        public void AddFirst_ExistingItems_AddsItemAtBeginning()
+        public void AddFirst_WithFirstNode()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(20);
-            list.AddLast(30);
+            LList<int> list = new(1);
+            list.AddFirst(2);
 
-            // Act
-            list.AddFirst(10);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(30));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(2));
         }
 
-        // Adding a node that belongs to another list should throw InvalidOperationException
         [Test]
-        public void AddFirst_NodeFromAnotherList_ThrowsInvalidOperationException()
+        public void AddFirst_WithFirstNode_MultipleNodes()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            LList<int> list2 = new LList<int>();
-            var node = list1.AddFirst(10);
+            LList<int> list = new(1);
+            list.AddFirst(2);
+            list.AddFirst(3);
 
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list2.AddFirst(node));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(3));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
         }
 
-        // Adding an item and ensuring it becomes the first element
         [Test]
-        public void AddFirst_AddItem_ItemBecomesFirst()
+        public void AddFirst_Node_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(20);
-
-            // Act
-            list.AddFirst(10);
-
-            // Assert
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-        }
-
-        // Adding multiple items to the beginning of the list and checking their order
-        [Test]
-        public void AddFirst_MultipleItems_AddedInCorrectOrder()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddFirst(30);
-            list.AddFirst(20);
-
-            // Act
-            list.AddFirst(10);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.First.Next!.Value, Is.EqualTo(20));
-            Assert.That(list.Last!.Value, Is.EqualTo(30));
-        }
-
-        // Count should increase after adding an item
-        [Test]
-        public void AddFirst_CountIncreasesAfterAddingItem()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-
-            // Act
-            list.AddFirst(10);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
-        }
-
-        // First and Last pointers should be updated correctly
-        [Test]
-        public void AddFirst_UpdatePointers()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-
-            // Act
-            list.AddFirst(10);
-
-            // Assert
-            Assert.That(list.Last, Is.EqualTo(list.First));
-        }
-    
-        // Existing list is empty, adding the first node
-        [Test]
-        public void AddFirst_Node_EmptyList_AddsFirstNode()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = new LLNode<int>(10);
-
-            // Act
+            LList<int> list = new();
+            LLNode<int> node = new(1);
             list.AddFirst(node);
 
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(10));
-            Assert.That(list.First, Is.SameAs(node));
-            Assert.That(list.Last, Is.SameAs(node));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list, Has.Count.EqualTo(1));
         }
 
-        // Existing list has items, adding a new node to the beginning
         [Test]
-        public void AddFirst_Node_ExistingItems_AddsNodeAtBeginning()
+        public void AddFirst_NodeAlreadyAssigned_ShouldThrowInvalidOperation()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(20);
-            list.AddLast(30);
-            var node = new LLNode<int>(10);
+            LList<int> list = new(1);
 
-            // Act
+            Assert.That(() => list.AddFirst(list.First!), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void AddFirst_Node_WithFirstNode()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = new(2);
             list.AddFirst(node);
 
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(30));
-            Assert.That(list.First, Is.SameAs(node));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(2));
         }
 
-        // Adding a node and ensuring it becomes the first element
         [Test]
-        public void AddFirst_AddNode_NodeBecomesFirst()
+        public void AddFirst_Node_WithFirstNode_MultipleNodes()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = new LLNode<int>(10);
-
-            // Act
+            LList<int> list = new(1);
+            list.AddFirst(2);
+            LLNode<int> node = new(2);
             list.AddFirst(node);
 
-            // Assert
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-        }
-
-        // Adding multiple nodes to the beginning of the list and checking their order
-        [Test]
-        public void AddFirst_MultipleNodes_AddedInCorrectOrder()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node1 = new LLNode<int>(30);
-            var node2 = new LLNode<int>(20);
-            var node3 = new LLNode<int>(10);
-            list.AddFirst(node1);
-            list.AddFirst(node2);
-
-            // Act
-            list.AddFirst(node3);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.First.Next!.Value, Is.EqualTo(20));
-            Assert.That(list.Last!.Value, Is.EqualTo(30));
-        }
-
-        // Count should increase after adding a node
-        [Test]
-        public void AddFirst_CountIncreasesAfterAddingNode()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = new LLNode<int>(10);
-
-            // Act
-            list.AddFirst(node);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
         }
     }
 
     [TestFixture]
-    public class LListTests_AddLast
+    public class LListTest_AddLast
     {
-        // Existing list is empty, adding the first item
-        [Test]
-        public void AddLast_Item_EmptyList_AddsFirstItem()
+         [Test]
+        public void AddLast_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
+            LList<int> list = new();
+            list.AddLast(1);
 
-            // Act
-            list.AddLast(10);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(10));
-            Assert.That(list.First, Is.SameAs(list.Last));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list, Has.Count.EqualTo(1));
         }
 
-        // Existing list has items, adding a new item to the end
         [Test]
-        public void AddLast_Item_ExistingItems_AddsItemAtEnd()
+        public void AddLast_WithFirstNode()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(10);
-            list.AddLast(20);
+            LList<int> list = new(1);
+            list.AddLast(2);
 
-            // Act
-            list.AddLast(30);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(30));
-            Assert.That(list.First, Is.Not.SameAs(list.Last));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(1));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(2));
         }
 
-        // Adding a node that belongs to another list should throw InvalidOperationException
         [Test]
-        public void AddLast_NodeFromAnotherList_ThrowsInvalidOperationException()
+        public void AddLast_WithFirstNode_MultipleNodes()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            LList<int> list2 = new LList<int>();
-            var node = list1.AddLast(10);
+            LList<int> list = new(1);
+            list.AddLast(2);
+            list.AddLast(3);
 
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list2.AddLast(node));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(3));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
         }
 
-        // Adding an item and ensuring it becomes the last element
         [Test]
-        public void AddLast_AddItem_ItemBecomesLast()
+        public void AddLast_Node_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(10);
-
-            // Act
-            list.AddLast(20);
-
-            // Assert
-            Assert.That(list.Last!.Value, Is.EqualTo(20));
-        }
-
-        // Adding multiple items to the end of the list and checking their order
-        [Test]
-        public void AddLast_MultipleItems_AddedInCorrectOrder()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(10);
-            list.AddLast(20);
-
-            // Act
-            list.AddLast(30);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(30));
-            Assert.That(list.First, Is.Not.SameAs(list.Last));
-        }
-
-        // Count should increase after adding an item
-        [Test]
-        public void AddLast_CountIncreasesAfterAddingItem()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-
-            // Act
-            list.AddLast(10);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
-        }
-
-        // First and Last pointers should be updated correctly
-        [Test]
-        public void AddLast_UpdatePointers()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-
-            // Act
-            list.AddLast(10);
-
-            // Assert
-            Assert.That(list.First, Is.SameAs(list.Last));
-        }
-
-        // Existing list is empty, adding the first node
-        [Test]
-        public void AddLast_Node_EmptyList_AddsFirstNode()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = new LLNode<int>(10);
-
-            // Act
+            LList<int> list = new();
+            LLNode<int> node = new(1);
             list.AddLast(node);
 
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(10));
-            Assert.That(list.First, Is.SameAs(list.Last));
-            Assert.That(list.First, Is.SameAs(node));
-            Assert.That(list.Last, Is.SameAs(node));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list, Has.Count.EqualTo(1));
         }
 
-        // Existing list has items, adding a new node to the end
         [Test]
-        public void AddLast_Node_ExistingNodes_AddsNodeAtEnd()
+        public void AddLast_NodeAlreadyAssigned_ShouldThrowInvalidOperation()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node1 = new LLNode<int>(10);
-            var node2 = new LLNode<int>(20);
-            list.AddLast(node1);
+            LList<int> list = new(1);
 
-            // Act
-            list.AddLast(node2);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(2));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(20));
-            Assert.That(list.First, Is.Not.SameAs(list.Last));
-            Assert.That(list.First, Is.SameAs(node1));
-            Assert.That(list.Last, Is.SameAs(node2));
+            Assert.That(() => list.AddLast(list.First!), Throws.InvalidOperationException);
         }
 
-        // Adding a node and ensuring it becomes the last element
         [Test]
-        public void AddLast_AddNode_NodeBecomesLast()
+        public void AddLast_Node_WithFirstNode()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = new LLNode<int>(10);
-
-            // Act
+            LList<int> list = new(1);
+            LLNode<int> node = new(2);
             list.AddLast(node);
 
-            // Assert
-            Assert.That(list.Last!.Value, Is.EqualTo(10));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(1));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(2));
         }
 
-          // Adding multiple nodes to the end of the list and checking their order
         [Test]
-        public void AddLast_MultipleNodes_AddedInCorrectOrder()
+        public void AddLast_Node_WithFirstNode_MultipleNodes()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node1 = new LLNode<int>(10);
-            var node2 = new LLNode<int>(20);
-            list.AddLast(node1);
+            LList<int> list = new(1);
+            list.AddLast(2);
+            LLNode<int> node = new(2);
+            list.AddLast(node);
 
-            // Act
-            list.AddLast(node2);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(2));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(20));
-            Assert.That(list.First, Is.Not.SameAs(list.Last));
-            Assert.That(list.First, Is.SameAs(node1));
-            Assert.That(list.Last, Is.SameAs(node2));
-        }
-
-        // Count should increase after adding a node
-        [Test]
-        public void AddLast_CountIncreasesAfterAddingNode()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-
-            // Act
-            list.AddLast(new LLNode<int>(10));
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
         }
     }
 
     [TestFixture]
-    public class LListTests_AddBefore
+    public class LListTest_AddBefore
     {
-        // Adding a new item before the specified existing item in an empty list
         [Test]
-        public void AddBefore_Item_EmptyList_ThrowsInvalidOperationException()
+        public void AddBefore_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            LLNode<int> node = new LLNode<int>(5);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.AddBefore(node, 10));
+            LList<int> list = new();
+            Assert.That(() => list.AddBefore(list.First!, 1), Throws.InvalidOperationException);
         }
 
-        // Adding a new item before the specified existing item in a non-empty list
         [Test]
-        public void AddBefore_Item_ExistingItem_AddsItemBefore()
+        public void AddBefore_BeforeFirstNode()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            LLNode<int> node = list.AddLast(15);
+            LList<int> list = new(1);
+            list.AddBefore(list.First!, 2);
 
-            // Act
-            list.AddBefore(node, 10);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(5));
-            Assert.That(list.Last!.Value, Is.EqualTo(15));
-            Assert.That(list.First.Next!.Value, Is.EqualTo(10));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(2));
         }
 
-        // Adding a new item before the specified existing item when the item does not exist in the list
         [Test]
-        public void AddBefore_Item_ItemNotInList_ThrowsInvalidOperationException()
+        public void AddBefore_WithFirstNode_MultipleNodes()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(15);
+            LList<int> list = new(1);
+            LLNode<int> node = list.AddBefore(list.First!, 2);
+            list.AddBefore(node, 3);
 
-            LLNode<int> node = new LLNode<int>(20);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.AddBefore(node, 10));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(3));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
         }
 
-        // Adding a node before the specified existing node in an empty list
         [Test]
-        public void AddBefore_Node_EmptyList_ThrowsInvalidOperationException()
+        public void AddBefore_BeforeLastNode()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = new LLNode<int>(5);
+            LList<int> list = new(1);
+            list.AddFirst(2);
+            list.AddBefore(list.Last!, 3);
 
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.AddBefore(node, 10));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(3));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(3));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
         }
 
-        // Adding a new node before the specified existing node in a non-empty list
         [Test]
-        public void AddBefore_Node_ExistingNode_AddsNodeBefore()
+        public void AddBefore_Node_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            var node = list.AddLast(15);
-
-            // Act
-            list.AddBefore(node, 10);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(5));
-            Assert.That(list.Last!.Value, Is.EqualTo(15));
-            Assert.That(list.First.Next!.Value, Is.EqualTo(10));
+            LList<int> list = new();
+            Assert.That(() => list.AddBefore(list.First!, new LLNode<int>(2)), Throws.InvalidOperationException);
         }
 
-        // Adding a new node before the specified existing node when the node does not exist in the list
         [Test]
-        public void AddBefore_Node_NodeNotInList_ThrowsInvalidOperationException()
+        public void AddBefore_NodeAlreadyAssigned_ShouldThrowInvalidOperation()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            var node = list.AddLast(15);
+            LList<int> list = new(1);
 
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.AddBefore(new LLNode<int>(20), 10));
+            Assert.That(() => list.AddBefore(list.First!, list.Last!), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void AddBefore_ReferenceNodeDoesNotBelong_ShouldThrowInvalidOperation()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = new(2);
+
+            Assert.That(() => list.AddBefore(node, new LLNode<int>(3)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void AddBefore_NullNodes()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(() => list.AddBefore(null!, null!), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void AddBefore_Node_WithFirstNode()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = new(2);
+            list.AddBefore(list.First!, node);
+
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void AddBefore_Node_WithFirstNode_MultipleNodes()
+        {
+            LList<int> list = new(1);
+            LLNode<int> reference = list.AddFirst(2);
+            LLNode<int> node = new(2);
+            list.AddBefore(reference, node);
+
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
         }
     }
 
     [TestFixture]
     public class LListTests_AddAfter
     {
-        // Adding a new item after the specified existing item in an empty list
         [Test]
-        public void AddAfter_Item_EmptyList_ThrowsInvalidOperationException()
+        public void AddAfter_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            LLNode<int> node = new LLNode<int>(5);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.AddAfter(node, 10));
+            LList<int> list = new();
+            Assert.That(() => list.AddAfter(list.First!, 1), Throws.InvalidOperationException);
         }
 
-        // Adding a new item after the specified existing item in a non-empty list
         [Test]
-        public void AddAfter_Item_ExistingItem_AddsItemAfter()
+        public void AddAfter_AfterFirstNode()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            LLNode<int> node = list.AddLast(5);
-            list.AddLast(15);
+            LList<int> list = new(1);
+            list.AddAfter(list.First!, 2);
 
-            // Act
-            list.AddAfter(node, 10);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(5));
-            Assert.That(list.Last!.Value, Is.EqualTo(15));
-            Assert.That(list.First.Next!.Value, Is.EqualTo(10));
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(1));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(2));
         }
 
-        // Adding a new item after the specified existing item when the item does not exist in the list
         [Test]
-        public void AddAfter_Item_ItemNotInList_ThrowsInvalidOperationException()
+        public void AddAfter_WithFirstNode_MultipleNodes()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
+            LList<int> list = new(1);
+            LLNode<int> node = list.AddAfter(list.First!, 2);
+            list.AddAfter(node, 3);
+
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(3));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void AddAfter_AfterLastNode()
+        {
+            LList<int> list = new(1);
+            list.AddFirst(2);
+            list.AddAfter(list.Last!, 3);
+
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(3));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(1));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void AddAfter_Node_EmptyList()
+        {
+            LList<int> list = new();
+            Assert.That(() => list.AddAfter(list.First!, new LLNode<int>(2)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void AddAfter_NodeAlreadyAssigned_ShouldThrowInvalidOperation()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(() => list.AddAfter(list.First!, list.Last!), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void AddAfter_ReferenceNodeDoesNotBelong_ShouldThrowInvalidOperation()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = new(2);
+
+            Assert.That(() => list.AddAfter(node, new LLNode<int>(3)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void AddAfter_NullNodes()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(() => list.AddAfter(null!, null!), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void AddAfter_Node_WithFirstNode()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = new(2);
+            list.AddAfter(list.First!, node);
+
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(1));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void AddAfter_Node_WithFirstNode_MultipleNodes()
+        {
+            LList<int> list = new(1);
+            LLNode<int> reference = list.AddFirst(2);
+            LLNode<int> node = new(2);
+            list.AddAfter(reference, node);
+
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_AddAt
+    {
+        [Test]
+        public void AddAt_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.AddAt(0, 1), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void AddAt_IndexOutOfRange()
+        {
+            LList<int> list = new(1);
+
+            Assert.Throws<IndexOutOfRangeException>(() => list.AddAt(2, 2));
+        }
+
+        [Test]
+        public void AddAt_OneNode()
+        {
+            LList<int> list = new(1);
+            list.AddAt(0, 2);
+
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(1));
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void AddAt_MultipleNodes()
+        {
+            LList<int> list = new(1);
+            list.AddFirst(3);
+            list.AddAt(1, 2);
+
+            Assert.That(list, Has.Count.EqualTo(3));
+            Assert.That(list.First!.Value, Is.EqualTo(3));
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next.Next!.Value, Is.EqualTo(1));
+            Assert.That(list.Last.Previous.Previous!.Value, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void AddAt_MiddleOfList()
+        {
+            LList<int> list = new(1);
+            list.AddLast(2);
+            list.AddLast(3);
+            list.AddLast(4);
             list.AddLast(5);
-            list.AddLast(15);
 
-            LLNode<int> node = new LLNode<int>(20);
+            list.AddAt(3, 10);
 
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.AddAfter(node, 10));
+            Assert.That(list, Has.Count.EqualTo(6));
+            Assert.That(list[3], Is.EqualTo(10));
+            Assert.That(list[4], Is.EqualTo(4));
+            Assert.That(list[5], Is.EqualTo(5));
+            Assert.That(list.Last!.Previous!.Previous!.Value, Is.EqualTo(10));
         }
 
-        // Adding a node after the specified existing node in an empty list
         [Test]
-        public void AddAfter_Node_EmptyList_ThrowsInvalidOperationException()
+        public void AddAt_Node_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = new LLNode<int>(5);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.AddAfter(node, 10));
+            LList<int> list = new();
+            Assert.That(() => list.AddAt(0, new LLNode<int>(2)), Throws.InvalidOperationException);
         }
 
-        // Adding a new node after the specified existing node in a non-empty list
         [Test]
-        public void AddAfter_Node_ExistingNode_AddsNodeAfter()
+        public void AddAt_NodeAlreadyAssigned_ShouldThrowInvalidOperation()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
+            LList<int> list = new(1);
+
+            Assert.That(() => list.AddAt(0, list.Last!), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void AddAt_NullNodes()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(() => list.AddAt(0, null!), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void AddAt_Node_IndexOutOfRange()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = new(2);
+
+            Assert.Throws<IndexOutOfRangeException>(() => list.AddAt(2, node));
+        }
+
+        [Test]
+        public void AddAt_Node_WithFirstNode()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = new(2);
+            list.AddAt(0, node);
+
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void AddAt_Node_WithFirstNode_MultipleNodes()
+        {
+            LList<int> list = new(1);
+            list.AddFirst(2);
+            LLNode<int> node = new(2);
+            list.AddAt(0, node);
+
+            Assert.That(list.First, !Is.Null);
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.Last, !Is.Null);
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Previous, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Next, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(3));
+        }
+    
+        [Test]
+        public void AddAt_Node_MiddleOfList()
+        {
+             LList<int> list = new(1);
+            list.AddLast(2);
+            list.AddLast(3);
+            list.AddLast(4);
             list.AddLast(5);
-            var node = list.AddLast(15);
 
-            // Act
-            list.AddAfter(node, 10);
+            list.AddAt(3, new LLNode<int>(10));
 
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(3));
-            Assert.That(list.First!.Value, Is.EqualTo(5));
-            Assert.That(list.Last!.Value, Is.EqualTo(10));
-            Assert.That(list.First.Next!.Value, Is.EqualTo(15));
-        }
-
-        // Adding a new node after the specified existing node when the node does not exist in the list
-        [Test]
-        public void AddAfter_Node_NodeNotInList_ThrowsInvalidOperationException()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            var node = list.AddLast(15);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.AddAfter(new LLNode<int>(20), 10));
+            Assert.That(list, Has.Count.EqualTo(6));
+            Assert.That(list[3], Is.EqualTo(10));
+            Assert.That(list[4], Is.EqualTo(4));
+            Assert.That(list[5], Is.EqualTo(5));
+            Assert.That(list.Last!.Previous!.Previous!.Value, Is.EqualTo(10));
         }
     }
 
     [TestFixture]
     public class LListTests_RemoveFirst
     {
-        // Removing the first item from a non-empty list
         [Test]
-        public void RemoveFirst_NonEmptyList_RemovesFirstItem()
+        public void RemoveFirst_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
+            LList<int> list = new();
 
-            // Act
-            list.RemoveFirst();
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
-            Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(10));
+            Assert.That(list.RemoveFirst(), Is.False);
         }
 
-        // Removing the first item from an empty list should throw InvalidOperationException
         [Test]
-        public void RemoveFirst_EmptyList_ThrowsInvalidOperationException()
+        public void RemoveFirst_OneNode()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
+            LList<int> list = new(1);
+            bool removed = list.RemoveFirst();
 
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.RemoveFirst());
+            Assert.That(removed, Is.True);
+            Assert.That(list.IsEmpty(), Is.True);
+            Assert.That(list, Has.Count.EqualTo(0));
         }
 
-        // Removing the only item from a list
         [Test]
-        public void RemoveFirst_OnlyItem_RemovesItemAndMakesListEmpty()
+        public void RemoveFirst_MultipleNodes()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
+            LList<int> list = new(1);
+            list.AddFirst(2);
 
-            // Act
-            list.RemoveFirst();
+            bool removed = list.RemoveFirst();
 
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(0));
-            Assert.That(list.First, Is.Null);
-            Assert.That(list.Last, Is.Null);
+            Assert.That(removed, Is.True);
+            Assert.That(list.First, Is.SameAs(list.Last));
+            Assert.That(list.First.Value, Is.EqualTo(1));
+            Assert.That(list, Has.Count.EqualTo(1));
         }
     }
 
     [TestFixture]
     public class LListTests_RemoveLast
     {
-        // Removing the last item from a non-empty list
         [Test]
-        public void RemoveLast_NonEmptyList_RemovesLastItem()
+        public void RemoveLast_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
+            LList<int> list = new();
 
-            // Act
-            list.RemoveLast();
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
-            Assert.That(list.First!.Value, Is.EqualTo(5));
-            Assert.That(list.Last!.Value, Is.EqualTo(5));
+            Assert.That(list.RemoveLast(), Is.False);
         }
 
-        // Removing the last item from an empty list should throw InvalidOperationException
-        [Test]
-        public void RemoveLast_EmptyList_ThrowsInvalidOperationException()
+         [Test]
+        public void RemoveLast_OneNode()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
+            LList<int> list = new(1);
+            bool removed = list.RemoveLast();
 
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.RemoveLast());
+            Assert.That(removed, Is.True);
+            Assert.That(list.IsEmpty(), Is.True);
+            Assert.That(list, Has.Count.EqualTo(0));
         }
 
-        // Removing the only item from a list
         [Test]
-        public void RemoveLast_OnlyItem_RemovesItemAndMakesListEmpty()
+        public void RemoveLast_MultipleNodes()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
+            LList<int> list = new(1);
+            list.AddFirst(2);
 
-            // Act
-            list.RemoveLast();
+            bool removed = list.RemoveLast();
 
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(0));
-            Assert.That(list.First, Is.Null);
-            Assert.That(list.Last, Is.Null);
+            Assert.That(removed, Is.True);
+            Assert.That(list.First, Is.SameAs(list.Last));
+            Assert.That(list.First.Value, Is.EqualTo(2));
+            Assert.That(list, Has.Count.EqualTo(1));
         }
     }
 
     [TestFixture]
     public class LListTests_Remove
     {
-        // Removing an existing item from a non-empty list
         [Test]
-        public void Remove_Item_ExistingItem_RemovesItem()
+        public void Remove_Value_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
+            LList<int> list = new();
 
-            // Act
-            bool removed = list.Remove(5);
+            Assert.That(() => list.Remove(1), Throws.InvalidOperationException);
+        }
 
-            // Assert
+        [Test]
+        public void Remove_Value_OnlyOneNode()
+        {
+            LList<int> list = new(1);
+            bool removed = list.Remove(1);
+
             Assert.That(removed, Is.True);
-            Assert.That(list.Count, Is.EqualTo(1));
+            Assert.That(list.IsEmpty(), Is.True);
+            Assert.That(list.First, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(0));
+        }   
+
+        [Test]
+        public void Remove_Value_LastNode()
+        {
+            LList<int> list = new(1);
+            list.AddLast(2);
+            list.AddLast(3);
+
+            bool removed = list.Remove(3);
+
+            Assert.That(removed, Is.True);
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Remove_Value_MiddleNode()
+        {
+            LList<int> list = new(1);
+            list.AddLast(2);
+            list.AddLast(3);
+            list.AddLast(4);
+            list.AddLast(5);
+
+            bool removed = list.Remove(3);
+
+            Assert.That(removed, Is.True);
+            Assert.That(list, Has.Count.EqualTo(4));
+            Assert.That(list[0], Is.EqualTo(1));
+            Assert.That(list[1], Is.EqualTo(2));
+            Assert.That(list[2], Is.EqualTo(4));
+            Assert.That(list[3], Is.EqualTo(5));
+            Assert.That(list.First!.Next!.Next!.Value, Is.EqualTo(4));
+            Assert.That(list.Last!.Previous!.Previous!.Value, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Remove_Node_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.Remove(new LLNode<int>(1)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Remove_Node_NullNode()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(() => list.Remove(null!), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void Remove_Node_NodeDoesNotBelong()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(() => list.Remove(new LLNode<int>(1)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Remove_Node_OnlyOneNode()
+        {
+            LList<int> list = new(1);
+            bool removed = list.Remove(list.First!);
+
+            Assert.That(removed, Is.True);
+            Assert.That(list.IsEmpty(), Is.True);
+            Assert.That(list.First, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(0));
+        } 
+
+        [Test]
+        public void Remove_Node_LastNode()
+        {
+            LList<int> list = new(1);
+            list.AddLast(2);
+            LLNode<int> node = list.AddLast(3);
+
+            bool removed = list.Remove(node);
+
+            Assert.That(removed, Is.True);
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Remove_Node_MiddleNode()
+        {
+            LList<int> list = new(1);
+            list.AddLast(2);
+            LLNode<int> node = list.AddLast(3);
+            list.AddLast(4);
+            list.AddLast(5);
+
+            bool removed = list.Remove(node);
+
+            Assert.That(removed, Is.True);
+            Assert.That(list, Has.Count.EqualTo(4));
+            Assert.That(list[0], Is.EqualTo(1));
+            Assert.That(list[1], Is.EqualTo(2));
+            Assert.That(list[2], Is.EqualTo(4));
+            Assert.That(list[3], Is.EqualTo(5));
+            Assert.That(list.First!.Next!.Next!.Value, Is.EqualTo(4));
+            Assert.That(list.Last!.Previous!.Previous!.Value, Is.EqualTo(2));
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_RemoveAt
+    {
+        [Test]
+        public void RemoveAt_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.RemoveAt(0), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void RemoveAt_IndexOutOfRange()
+        {
+            LList<int> list = new(1);
+
+            Assert.Throws<IndexOutOfRangeException>(() => list.RemoveAt(10));
+        }
+
+        [Test]
+        public void RemoveAt_OnlyOneNode()
+        {
+            LList<int> list = new(1);
+            bool removed = list.RemoveAt(0);
+
+            Assert.That(removed, Is.True);
+            Assert.That(list.IsEmpty(), Is.True);
+            Assert.That(list.First, Is.Null);
+            Assert.That(list, Has.Count.EqualTo(0));
+        } 
+
+        [Test]
+        public void RemoveAt_LastNode()
+        {
+            LList<int> list = new(1);
+            list.AddLast(2);
+            list.AddLast(3);
+
+            bool removed = list.RemoveAt(2);
+
+            Assert.That(removed, Is.True);
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.Last!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void RemoveAt_MiddleNode()
+        {
+            LList<int> list = new(1);
+            list.AddLast(2);
+            list.AddLast(3);
+            list.AddLast(4);
+            list.AddLast(5);
+
+            bool removed = list.RemoveAt(2);
+
+            Assert.That(removed, Is.True);
+            Assert.That(list, Has.Count.EqualTo(4));
+            Assert.That(list[0], Is.EqualTo(1));
+            Assert.That(list[1], Is.EqualTo(2));
+            Assert.That(list[2], Is.EqualTo(4));
+            Assert.That(list[3], Is.EqualTo(5));
+            Assert.That(list.First!.Next!.Next!.Value, Is.EqualTo(4));
+            Assert.That(list.Last!.Previous!.Previous!.Value, Is.EqualTo(2));
+        }
+    }
+
+    [TestFixture]
+    public class LListTest_Clear
+    {
+        [Test]
+        public void Clear_EmptyList()
+        {
+            LList<int> list = new();
+            list.Clear();
+            
+            Assert.That(list, !Is.Null);
+            Assert.That(list, Has.Count.EqualTo(0));
+        }
+
+        [Test]
+        public void Clear_CorrectClearsAllNodes()
+        {
+            LList<int> list = new();
+            LLNode<int> node1 = list.AddLast(1);
+            LLNode<int> node2 = list.AddLast(2);
+
+            list.Clear();
+
+            Assert.That(list, Has.Count.EqualTo(0));
+            Assert.That(list.IsEmpty(), Is.True);
+            Assert.That(list.First, Is.Null);
+            Assert.That(list.Last, Is.Null);
+            Assert.That(node1.List, !Is.EqualTo(list));
+            Assert.That(node2.List, !Is.EqualTo(list));
+            Assert.That(node1.Value, Is.EqualTo(1));
+            Assert.That(node2.Value, Is.EqualTo(2));
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_Enumerator
+    {
+        [Test]
+        public void Enumerator_CorrectTraversal()
+        {
+            LList<int> list = new();
+            list.AddFirst(1);
+            list.AddFirst(1);
+            list.AddFirst(1);
+
+            Assert.That(list, Has.Count.EqualTo(3));
+
+            foreach (int item in list)
+            {
+                Assert.That(item, !Is.Null);
+                Assert.That(item, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void Enumerator_IndexOutOfRange_ShouldThrowIndexOutOfRange()
+        {
+            LList<int> list = new();
+            for (int i = 5; i >= 0; --i)
+            {
+                list.AddFirst(i);
+            }
+
+            Assert.Throws<IndexOutOfRangeException>(() => list.GetValue(10));
+        }
+
+        [Test]
+        public void Enumerator_EmptyList_ShouldThrowInvalidOperation()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list[1], Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Enumerator_Operator_CorrectTraversal()
+        {
+            LList<int> list = new();
+            for (int i = 5; i >= 0; --i)
+            {
+                list.AddFirst(i);
+            }
+
+            Assert.That(list, Has.Count.EqualTo(6));
+
+            for (int i = 0; i <= 5; ++i)
+            {
+                Assert.That(list[i], Is.EqualTo(i));
+            }
+        }
+
+        [Test]
+        public void Enumerator_Operator_SetValue_FirstIndex()
+        {
+            LList<int> list = new(1);
+            list[0] = 10;
+
+            Assert.That(list, Has.Count.EqualTo(1));
+            Assert.That(list[0], Is.EqualTo(10));
+        }
+
+        [Test]
+        public void Enumerator_Operator_SetValue_LastIndex()
+        {
+            LList<int> list = new(1);
+            list.AddFirst(2);
+            list[1] = 10;
+
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(list[0], Is.EqualTo(2));
+            Assert.That(list[1], Is.EqualTo(10));
+        }
+    
+        [Test]
+        public void Enumerator_GetNode_IndexOutOfRange_ShouldThrowIndexOutOfRange()
+        {
+            LList<int> list = new(1);
+
+            Assert.Throws<IndexOutOfRangeException>(() => list.GetNode(10));
+        }
+
+        [Test]
+        public void Enumerator_GetNode_EmptyList_ShouldThrowInvalidOperation()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.GetNode(1), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Enumerator_GetNode_ReturnsCorrectNode()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(list.GetNode(0), !Is.Null);
+            Assert.That(list.GetNode(0).Value, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Enumerator_SetNode_EmptyList_ShouldThrowInvalidOperation()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.SetNode(0, new LLNode<int>(1)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Enumerator_SetNode_IndexOutOfRange_ShouldThrowIndexOutOfRange()
+        {
+            LList<int> list = new(1);
+
+            Assert.Throws<IndexOutOfRangeException>(() => list.SetNode(10, new LLNode<int>(1)));
+        }
+
+        [Test]
+        public void Enumerator_SetNode_NullNode_ShouldThrowArgumentNullException()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(() => list.SetNode(0, null!), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void Enumerator_SetNode_SetCorrectNode()
+        {
+            LList<int> list = new(1);
+            list.SetNode(0, new LLNode<int>(10));
+
+            Assert.That(list, Has.Count.EqualTo(1));
             Assert.That(list.First!.Value, Is.EqualTo(10));
             Assert.That(list.Last!.Value, Is.EqualTo(10));
         }
 
-        // Removing a non-existing item from a list
         [Test]
-        public void Remove_Item_NonExistingItem_ReturnsFalse()
+        public void Enumerator_SetNode_MultipleNode_UpdatesCorrectNodes()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
+            LList<int> list = new(1);
+            list.AddFirst(2);
+            list.AddFirst(3);
 
-            // Act
-            bool removed = list.Remove(15);
+            list.SetNode(0, new LLNode<int>(10));
 
-            // Assert
-            Assert.That(removed, Is.False);
-            Assert.That(list.Count, Is.EqualTo(2));
-            Assert.That(list.First!.Value, Is.EqualTo(5));
-            Assert.That(list.Last!.Value, Is.EqualTo(10));
-        }
-
-        // Removing an item from an empty list should return false
-        [Test]
-        public void Remove_Item_EmptyList_ReturnsFalse()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-
-            // Act
-            bool removed = list.Remove(5);
-
-            // Assert
-            Assert.That(removed, Is.False);
-            Assert.That(list.Count, Is.EqualTo(0));
-            Assert.That(list.First, Is.Null);
-            Assert.That(list.Last, Is.Null);
-        }
-
-        // Removing the only item from a list
-        [Test]
-        public void Remove_Item_OnlyItem_RemovesItemAndMakesListEmpty()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-
-            // Act
-            bool removed = list.Remove(5);
-
-            // Assert
-            Assert.That(removed, Is.True);
-            Assert.That(list.Count, Is.EqualTo(0));
-            Assert.That(list.First, Is.Null);
-            Assert.That(list.Last, Is.Null);
-        }
-
-        // Removing a node from a non-empty list
-        [Test]
-        public void Remove_Node_ExistingNode_RemovesNode()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node1 = list.AddLast(5);
-            var node2 = list.AddLast(10);
-
-            // Act
-            list.Remove(node1);
-
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(1));
+            Assert.That(list, Has.Count.EqualTo(3));
             Assert.That(list.First!.Value, Is.EqualTo(10));
-            Assert.That(list.Last!.Value, Is.EqualTo(10));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next.Next!.Value, Is.EqualTo(1));
+            Assert.That(list.Last!.Value, Is.EqualTo(1));
         }
 
-        // Removing a node that doesn't belong to the list should throw InvalidOperationException
         [Test]
-        public void Remove_Node_NotInList_ThrowsInvalidOperationException()
+        public void Enumerator_SetNode_Duplicates_ShouldStillSet()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            LList<int> list2 = new LList<int>();
-            var node1 = list1.AddLast(5);
-            var node2 = list2.AddLast(10);
+            LList<int> list = new(1);
+            LLNode<int> node = list.AddFirst(2);
 
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list1.Remove(node2));
+            list.SetNode(1, node);
+
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(list.First!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.Last!.Value, Is.EqualTo(2));
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_IndexOf
+    {
+        [Test]
+        public void IndexOf_EmptyList_ShouldThrowInvalidOperation()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.IndexOf(1), Throws.InvalidOperationException);
         }
 
-        // Removing a node from an empty list should throw InvalidOperationException
         [Test]
-        public void Remove_Node_EmptyList_ThrowsInvalidOperationException()
+        public void IndexOf_ReturnsCorrectIndex()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = new LLNode<int>(5);
+            LList<int> list = new(1);
+            list.AddFirst(2);
 
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list.Remove(node));
+            int index = list.IndexOf(1);
+
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(index, Is.EqualTo(1));
         }
 
-        // Removing the only node from a list
         [Test]
-        public void Remove_Node_OnlyNode_RemovesNodeAndMakesListEmpty()
+        public void IndexOf_InvalidIndex_ReturnsNegativeOne()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = list.AddLast(5);
+            LList<int> list = new(1);
+            list.AddFirst(2);
 
-            // Act
-            list.Remove(node);
+            int index = list.IndexOf(3);
 
-            // Assert
-            Assert.That(list.Count, Is.EqualTo(0));
-            Assert.That(list.First, Is.Null);
-            Assert.That(list.Last, Is.Null);
+            Assert.That(index, Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void IndexOf_MultipleValues_ReturnsCorrectIndex()
+        {
+            LList<int> list = new();
+            list.AddFirst(2);
+            list.AddFirst(3);
+            list.AddFirst(2);
+            list.AddFirst(1);
+
+            int index = list.IndexOf(2);
+
+            Assert.That(index, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void LastIndexOf_EmptyList_ShouldThrowInvalidOperation()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.LastIndexOf(1), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void LastIndexOf_ReturnsCorrectIndex()
+        {
+            LList<int> list = new(1);
+            list.AddFirst(2);
+
+            int index = list.LastIndexOf(1);
+
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(index, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void LastIndexOf_InvalidIndex_ReturnsNegativeOne()
+        {
+            LList<int> list = new(1);
+            list.AddFirst(2);
+
+            int index = list.LastIndexOf(3);
+
+            Assert.That(index, Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void LastIndexOf_MultipleValues_ReturnsCorrectIndex()
+        {
+            LList<int> list = new();
+            list.AddFirst(2);
+            list.AddFirst(3);
+            list.AddFirst(2);
+            list.AddFirst(1);
+
+            int index = list.LastIndexOf(2);
+
+            Assert.That(index, Is.EqualTo(3));
+        }
+    
+        [Test]
+        public void IndexOf_Node_EmptyList_ShouldThrowInvalidOperation()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.IndexOf(new LLNode<int>(1)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void IndexOf_Node_ReturnsCorrectIndex()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = list.AddFirst(2);
+
+            int index = list.IndexOf(node);
+
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(index, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void IndexOf_Node_InvalidIndex_ReturnsNegativeOne()
+        {
+            LList<int> list = new(1);
+            list.AddFirst(2);
+
+            int index = list.IndexOf(new LLNode<int>(3));
+
+            Assert.That(index, Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void IndexOf_Node_MultipleValues_ReturnsCorrectIndex()
+        {
+            LList<int> list = new();
+            list.AddFirst(2);
+            list.AddFirst(3);
+            list.AddFirst(2);
+            list.AddFirst(1);
+
+            int index = list.IndexOf(new LLNode<int>(2));
+
+            Assert.That(index, Is.EqualTo(1));
+        }
+    
+        [Test]
+        public void LastIndexOf_Node_EmptyList_ShouldThrowInvalidOperation()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.LastIndexOf(new LLNode<int>(1)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void LastIndexOf_Node_ReturnsCorrectIndex()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = list.AddFirst(2);
+
+            int index = list.LastIndexOf(node);
+
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(index, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void LastIndexOf_Node_InvalidIndex_ReturnsNegativeOne()
+        {
+            LList<int> list = new(1);
+            list.AddFirst(2);
+
+            int index = list.LastIndexOf(new LLNode<int>(3));
+
+            Assert.That(index, Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void LastIndexOf_Node_MultipleValues_ReturnsCorrectIndex()
+        {
+            LList<int> list = new();
+            list.AddFirst(2);
+            list.AddFirst(3);
+            list.AddFirst(2);
+            list.AddFirst(1);
+
+            int index = list.LastIndexOf(new LLNode<int>(2));
+
+            Assert.That(index, Is.EqualTo(3));
         }
     }
 
     [TestFixture]
     public class LListTests_Contains
     {
-        // Testing if Contains returns true for an item present in the list
         [Test]
-        public void Contains_ItemPresent_ReturnsTrue()
+        public void Contains_Value_EmptyList_ReturnsFalse()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
+            LList<int> list = new();
 
-            // Act & Assert
-            Assert.That(list.Contains(10), Is.True);
+            Assert.That(list.Contains(1), Is.False);
         }
 
-        // Testing if Contains returns false for an item not present in the list
         [Test]
-        public void Contains_ItemNotPresent_ReturnsFalse()
+        public void Contains_Value_ValueExists_ReturnsTrue()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
+            LList<int> list = new(1);
 
-            // Act & Assert
-            Assert.That(list.Contains(20), Is.False);
+            Assert.That(list.Contains(1), Is.True);
         }
 
-        // Testing if Contains returns false for an empty list
         [Test]
-        public void Contains_EmptyList_ReturnsFalse()
+        public void Contains_Value_MultipleValuesExists_ReturnsTrue()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
+            LList<int> list = new(1);
+            list.AddFirst(1);
+            list.AddFirst(2);
 
-            // Act & Assert
-            Assert.That(list.Contains(5), Is.False);
-        }
-    }
-
-    [TestFixture]
-    public class LListTests_LinearSearch
-    {
-        // Testing if LinearSearch finds the first occurrence of an item in the list
-        [Test]
-        public void LinearSearch_FindFirst_OccurrenceFound_ReturnsNode()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
-            list.AddLast(10);
-
-            // Act
-            var node = list.LinearSearch(10, findFirst: true);
-
-            // Assert
-            Assert.That(node, Is.Not.Null);
-            Assert.That(node!.Value, Is.EqualTo(10));
-            Assert.That(node.Previous!.Value, Is.EqualTo(5));
-            Assert.That(node.Next!.Value, Is.EqualTo(15));
+            Assert.That(list.Contains(1), Is.True);
         }
 
-        // Testing if LinearSearch returns null when finding the first occurrence of an item not in the list
         [Test]
-        public void LinearSearch_FindFirst_ItemNotInList_ReturnsNull()
+        public void Contains_Value_ValueDoesNotExists_ReturnsFalse()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
+            LList<int> list = new(1);
+            list.AddFirst(2);
 
-            // Act
-            var node = list.LinearSearch(20, findFirst: true);
-
-            // Assert
-            Assert.That(node, Is.Null);
+            Assert.That(list.Contains(3), Is.False);
         }
 
-        // Testing if LinearSearch finds the last occurrence of an item in the list
         [Test]
-        public void LinearSearch_FindLast_OccurrenceFound_ReturnsNode()
+        public void Contains_Node_EmptyList_ReturnsFalse()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
-            list.AddLast(10);
+            LList<int> list = new();
 
-            // Act
-            var node = list.LinearSearch(10, findFirst: false);
-
-            // Assert
-            Assert.That(node, Is.Not.Null);
-            Assert.That(node!.Value, Is.EqualTo(10));
-            Assert.That(node.Previous!.Value, Is.EqualTo(15));
-            Assert.That(node.Next, Is.Null);
+            Assert.That(list.Contains(new LLNode<int>(1)), Is.False);
         }
 
-        // Testing if LinearSearch returns null when finding the last occurrence of an item not in the list
         [Test]
-        public void LinearSearch_FindLast_ItemNotInList_ReturnsNull()
+        public void Contains_Node_ValueExistsButDoesNotBelong_ReturnsFalse()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(5);
-            list.AddLast(10);
-            list.AddLast(15);
+            LList<int> list = new(1);
 
-            // Act
-            var node = list.LinearSearch(20, findFirst: false);
+            Assert.That(list.Contains(new LLNode<int>(1)), Is.False);
+        }
 
-            // Assert
-            Assert.That(node, Is.Null);
+        [Test]
+        public void Contains_Node_NodeExistsAndBelongs_ReturnsTrue()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = list.AddFirst(2);
+
+            Assert.That(list.Contains(node), Is.True);
+            Assert.That(list.Contains(list.First!), Is.True);
+        }
+
+        [Test]
+        public void Contains_Node_MultipleValuesExists_ReturnsTrue()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = list.AddFirst(1);
+            list.AddFirst(2);
+
+            Assert.That(list.Contains(node), Is.True);
+        }
+
+        [Test]
+        public void Contains_Node_NodeExistsButDoesNotBelong_ReturnsFalse()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = new(1);
+
+            Assert.That(list.Contains(node), Is.False);
+        }
+
+        [Test]
+        public void Contains_Node_ValueDoesNotExists_ReturnsFalse()
+        {
+            LList<int> list = new(1);
+            list.AddFirst(2);
+
+            Assert.That(list.Contains(new LLNode<int>(3)), Is.False);
         }
     }
 
     [TestFixture]
-    public class LListTests_Cycle
+    public class LListTests_Find
     {
-        // Testing if HasCycle returns true when a cycle is present in the list
         [Test]
-        public void HasCycle_CyclePresent_ReturnsTrue()
+        public void Find_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node1 = list.AddLast(5);
-            var node2 = list.AddLast(10);
-            var node3 = list.AddLast(15);
-            node3.Next = node1; // Creating a cycle
+            LList<int> list = new();
 
-            // Act
-            bool hasCycle = list.HasCycle(node1);
-
-            // Assert
-            Assert.That(hasCycle, Is.True);
+            Assert.That(() => list.Find(1), Throws.InvalidOperationException);
         }
 
-        // Testing if HasCycle returns false when no cycle is present in the list
         [Test]
-        public void HasCycle_NoCycle_ReturnsFalse()
+        public void Find_ValueExists_OnlyOneNode()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node1 = list.AddLast(5);
-            var node2 = list.AddLast(10);
-            var node3 = list.AddLast(15);
-
-            // Act
-            bool hasCycle = list.HasCycle(node1);
-
-            // Assert
-            Assert.That(hasCycle, Is.False);
+            LList<int> list = new(1);
+            LLNode<int>? node = list.Find(1);
+            
+            Assert.That(node, !Is.Null);
+            Assert.That(node.Value, Is.EqualTo(1));
         }
 
-        // Testing if HasCycle throws InvalidOperationException when the input node belongs to another list
         [Test]
-        public void HasCycle_NodeBelongsToAnotherList_ThrowsInvalidOperationException()
+        public void Find_ValueExists_MultipleNode_FindsFirstNode()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            LList<int> list2 = new LList<int>();
-            var node = list2.AddLast(5);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => list1.HasCycle(node));
+            LList<int> list = new(1);
+            list.AddFirst(1);
+            LLNode<int>? node = list.Find(1);
+            
+            Assert.That(node, !Is.Null);
+            Assert.That(node.Value, Is.EqualTo(1));
+            Assert.That(node, Is.SameAs(list.First));
         }
 
-        // Testing if HasCycle returns false for a single-node list
         [Test]
-        public void HasCycle_SingleNodeList_ReturnsFalse()
+        public void Find_ValueDoesNotExists_ReturnsNull()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = list.AddLast(5);
+            LList<int> list = new(1);
+            LLNode<int>? node = list.Find(2);
 
-            // Act
-            bool hasCycle = list.HasCycle(node);
+            Assert.That(node, Is.Null);
+        }
+        
+    }
 
-            // Assert
-            Assert.That(hasCycle, Is.False);
+    [TestFixture]
+    public class LListTests_Overrides
+    {
+        [Test]
+        public void Equals_Empty()
+        {
+            LList<int> list1 = new();
+            LList<int> list2 = new();
+
+            Assert.That(list1.Equals(list2), Is.True);
         }
 
-        // Testing if HasCycle returns true for a cycle starting from the first node
         [Test]
-        public void HasCycle_CycleStartingFromFirstNode_ReturnsTrue()
+        public void Equals_SameLists_ReturnsTrue()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node1 = list.AddLast(5);
-            var node2 = list.AddLast(10);
-            var node3 = list.AddLast(15);
-            node3.Next = node1; // Creating a cycle
+            LList<int> list1 = new(1);
+            list1.AddLast(2);
+            LList<int> list2 = new(2);
+            list2.AddFirst(1);
 
-            // Act
-            bool hasCycle = list.HasCycle(node1);
-
-            // Assert
-            Assert.That(hasCycle, Is.True);
+            Assert.That(list1.Equals(list2), Is.True);
         }
 
-        // Testing if HasCycle returns true for a cycle starting from a middle node
         [Test]
-        public void HasCycle_CycleStartingFromMiddleNode_ReturnsTrue()
+        public void Equals_DifferentLists_ReturnsFalse()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node1 = list.AddLast(5);
-            var node2 = list.AddLast(10);
-            var node3 = list.AddLast(15);
-            var node4 = list.AddLast(20);
-            var node5 = list.AddLast(25);
-            node5.Next = node2; // Creating a cycle
+            LList<int> list1 = new(1);
+            list1.AddLast(2);
+            LList<int> list2 = new(2);
+            list2.AddLast(1);
 
-            // Act
-            bool hasCycle = list.HasCycle(node2);
-
-            // Assert
-            Assert.That(hasCycle, Is.True);
+            Assert.That(list1.Equals(list2), Is.False);
         }
 
-        // Testing if HasCycle returns false for a non-cyclic list with nodes pointing to null
         [Test]
-        public void HasCycle_NonCyclicListWithNodesPointingToNull_ReturnsFalse()
+        public void Equals_DifferentLengths_ReturnsFalse()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node1 = list.AddLast(5);
-            var node2 = list.AddLast(10);
-            var node3 = list.AddLast(15);
+            LList<int> list1 = new(1);
+            list1.AddLast(2);
+            LList<int> list2 = new(1);
 
-            // Act
-            bool hasCycle = list.HasCycle(node1);
+            Assert.That(list1.Equals(list2), Is.False);
+        }
 
-            // Assert
-            Assert.That(hasCycle, Is.False);
+        [Test]
+        public void ToString_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(list.ToString(), Is.EqualTo("Empty list."));
+        }
+
+        [Test]
+        public void ToString_CorrectString()
+        {
+            LList<int> list = new(1);
+            list.AddLast(2);
+            list.AddLast(3);
+
+            Assert.That(list.ToString(), Is.EqualTo("1, 2, 3, "));
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_ToEnumerable
+    {
+        [Test]
+        public void ToArray_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(list.ToArray(), Is.Null);
+        }
+
+        [Test]
+        public void ToArray_CorrectResult()
+        {
+            LList<int> list = new(1);
+            list.AddLast(2);
+            list.AddLast(3);
+
+            int[] array = list.ToArray()!;
+
+            Assert.That(array.Length, Is.EqualTo(3));
+            Assert.That(array[0], Is.EqualTo(list.First!.Value));
+            Assert.That(array[1], Is.EqualTo(list.First.Next!.Value));
+            Assert.That(array[2], Is.EqualTo(list.First.Next.Next!.Value));
+        }
+
+        [Test]
+        public void ToList_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(list.ToList(), Is.Null);
+        }
+
+        [Test]
+        public void ToList_CorrectResult()
+        {
+            LList<int> list = new(1);
+            list.AddLast(2);
+            list.AddLast(3);
+
+            List<int> list2 = list.ToList()!;
+
+            Assert.That(list2.Count, Is.EqualTo(3));
+            Assert.That(list2[0], Is.EqualTo(list.First!.Value));
+            Assert.That(list2[1], Is.EqualTo(list.First.Next!.Value));
+            Assert.That(list2[2], Is.EqualTo(list.First.Next.Next!.Value));
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_Min
+    {
+        [Test]
+        public void Min_Value_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.MinValue(), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Min_Value_OnlyOneNode()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(list.MinValue(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Min_Value_MultipleNodes()
+        {
+            LList<int> list = new(1);
+            list.AddLast(5);
+            list.AddLast(-10);
+
+            Assert.That(list.MinValue(), Is.EqualTo(-10));
+        }
+
+        [Test]
+        public void Min_Node_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.MinNode(), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Min_Node_OnlyOneNode()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(list.MinNode(), Is.EqualTo(list.First!));
+        }
+
+        [Test]
+        public void Min_Node_MultipleNodes()
+        {
+            LList<int> list = new(1);
+            list.AddLast(5);
+            LLNode<int> node = list.AddLast(-10);
+
+            Assert.That(list.MinNode(), Is.EqualTo(node));
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_Max
+    {
+        [Test]
+        public void Max_Value_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.MaxValue(), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Max_Value_OnlyOneNode()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(list.MaxValue(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Max_Value_MultipleNodes()
+        {
+            LList<int> list = new(1);
+            list.AddLast(5);
+            list.AddLast(-10);
+
+            Assert.That(list.MaxValue(), Is.EqualTo(5));
+        }
+
+        [Test]
+        public void Max_Node_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(() => list.MaxNode(), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Max_Node_OnlyOneNode()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(list.MaxNode(), Is.EqualTo(list.First!));
+        }
+
+        [Test]
+        public void Max_Node_MultipleNodes()
+        {
+            LList<int> list = new(1);
+            LLNode<int> node = list.AddLast(5);
+            list.AddLast(-10);
+
+            Assert.That(list.MaxNode(), Is.EqualTo(node));
+        }
+    
+        [Test]
+        public void Max_Node_DuplicateNodes()
+        {
+            LList<int> list = new();
+            LLNode<int> node1 = list.AddLast(1);
+            LLNode<int> node2 = list.AddFirst(1);
+
+            Assert.That(list.MaxNode(), Is.SameAs(node2));
         }
     }
 
     [TestFixture]
     public class LListTests_Reverse
     {
-        // Testing if Reverse method reverses the order of the list correctly
         [Test]
-        public void Reverse_ReversesListCorrectly()
+        public void Reverse_EmptyList()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            list.AddLast(2);
-            list.AddLast(3);
+            LList<int> list = new();
 
-            // Act
-            var newFirst = list.Reverse();
+            Assert.That(() => list.Reverse(), Throws.InvalidOperationException);
+        }
 
-            // Assert
-            Assert.That(list.First!.Value, Is.EqualTo(3));
-            Assert.That(list.First!.Next!.Value, Is.EqualTo(2));
+        [Test]
+        public void Reverse_OneNodeOnly()
+        {
+            LList<int> list = new(1);
+            list.Reverse();
+
+            Assert.That(list.First!.Value, Is.EqualTo(1));
+            Assert.That(list.First, Is.SameAs(list.Last));
+        }
+
+        [Test]
+        public void Reverse_CorrectlyReversal()
+        {
+            LList<int> list = new([1, 2, 3, 4, 5]);
+            list.Reverse();
+
+            Assert.That(list.First!.Value, Is.EqualTo(5));
+            Assert.That(list.First.Next!.Value, Is.EqualTo(4));
+            Assert.That(list.First.Next.Next!.Value, Is.EqualTo(3));
+            Assert.That(list.First.Next.Next.Next!.Value, Is.EqualTo(2));
+            Assert.That(list.First.Next.Next.Next.Next!.Value, Is.EqualTo(1));
             Assert.That(list.Last!.Value, Is.EqualTo(1));
-            Assert.That(newFirst.Previous, Is.Null);
-        }
-
-        // Testing if Reverse method returns the first node of the reversed list
-        [Test]
-        public void Reverse_ReturnsFirstNodeOfReversedList()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            list.AddLast(2);
-            list.AddLast(3);
-
-            // Act
-            var newFirst = list.Reverse();
-
-            // Assert
-            Assert.That(newFirst, Is.EqualTo(list.First));
-            Assert.That(list.First!.Value, Is.EqualTo(3));
-            Assert.That(list.First!.Next!.Value, Is.EqualTo(2));
-            Assert.That(list.Last!.Value, Is.EqualTo(1));
-            Assert.That(newFirst.Previous, Is.Null);
-        }
-
-        // Testing if Reverse throws InvalidOperationException for an empty list
-        [Test]
-        public void Reverse_EmptyList_ThrowsInvalidOperationException()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-
-            // Assert
-            Assert.Throws<InvalidOperationException>(() => list.Reverse());
-        }
-
-        // Testing if Reverse returns the only node in a single-node list
-        [Test]
-        public void Reverse_SingleNodeList_ReturnsFirstNode()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = list.AddLast(5);
-
-            // Act
-            var newFirst = list.Reverse();
-
-            // Assert
-            Assert.That(newFirst, Is.EqualTo(node));
-            Assert.That(newFirst.Previous, Is.Null);
-            Assert.That(newFirst.Next, Is.Null);
+            Assert.That(list.Last.Previous!.Value, Is.EqualTo(2));
+            Assert.That(list.Last.Previous.Previous!.Value, Is.EqualTo(3));
+            Assert.That(list.Last.Previous.Previous.Previous!.Value, Is.EqualTo(4));
+            Assert.That(list.Last.Previous.Previous.Previous.Previous!.Value, Is.EqualTo(5));
         }
     }
 
     [TestFixture]
-    public class LListTests_Swap
+    public class LListTests_Concat
     {
-        // Testing if Swap method swaps two nodes correctly
         [Test]
-        public void Swap_SwapsNodesCorrectly()
+        public void Concat_BothListEmpty()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node1 = list.AddLast(1);
-            var node2 = list.AddLast(2);
-            var node3 = list.AddLast(3);
+            LList<int> list1 = new();
+            LList<int> list2 = new();
 
-            Assert.That(node1.Previous, Is.Null);
-
-            // Act
-            list.Swap(node1, node3);
-
-            // Assert
-            Assert.That(list.First!.Value, Is.EqualTo(3));
-            Assert.That(list.First!.Next!.Value, Is.EqualTo(2));
-            Assert.That(list.First!.Next!.Next!.Value, Is.EqualTo(1));
-            Assert.That(list.Last!.Value, Is.EqualTo(1));
-            Assert.That(node1.Next, Is.Null);
-            Assert.That(node1.Previous, Is.EqualTo(node2));
-            Assert.That(node3.Previous, Is.Null);
+            Assert.That(() => list1.Concat(list2), Throws.InvalidOperationException);
         }
 
-        // Testing if Swap method throws InvalidOperationException for nodes not in the current list
         [Test]
-        public void Swap_NodeNotInList_ThrowsInvalidOperationException()
+        public void Concat_NullList()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            LList<int> list2 = new LList<int>();
-            var node1 = list1.AddLast(1);
-            var node2 = list2.AddLast(2);
+            LList<int> list1 = new(1);
 
-            // Assert
-            Assert.Throws<InvalidOperationException>(() => list1.Swap(node1, node2));
-            Assert.Throws<InvalidOperationException>(() => list2.Swap(node2, node1));
+            Assert.That(() => list1.Concat(null!), Throws.ArgumentNullException);
         }
-    }
 
-    [TestFixture]
-    public class LListTests_Append
-    {
-        // Testing if Append method appends another list correctly
         [Test]
-        public void Append_AppendsListCorrectly()
+        public void Concat_FirstListEmpty()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            list1.AddLast(1);
-            list1.AddLast(2);
+            LList<int> list1 = new();
+            LList<int> list2 = new(1);
 
-            LList<int> list2 = new LList<int>();
-            list2.AddLast(3);
-            list2.AddLast(4);
+            list1.Concat(list2);
 
-            // Act
-            list1.Append(list2);
-
-            // Assert
-            Assert.That(list1.Count, Is.EqualTo(4));
+            Assert.That(list1, Has.Count.EqualTo(1));
             Assert.That(list1.First!.Value, Is.EqualTo(1));
-            Assert.That(list1.Last!.Value, Is.EqualTo(4));
-            Assert.That(list1.First.Next!.Value, Is.EqualTo(2));
-            Assert.That(list1.Last.Previous!.Value, Is.EqualTo(3));
-        }
-
-        // Testing if Append method throws InvalidOperationException when either list is empty
-        [Test]
-        public void Append_EitherListEmpty_ThrowsInvalidOperationException()
-        {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            LList<int> list2 = new LList<int>();
-            list1.AddLast(1);
-
-            // Assert
-            Assert.Throws<InvalidOperationException>(() => list1.Append(list2));
-            Assert.Throws<InvalidOperationException>(() => list2.Append(list1));
-        }
-    }
-
-    [TestFixture]
-    public class LListTests_ToList
-    {
-        // Testing if CopyTo method copies values to the array correctly
-        [Test]
-        public void CopyTo_CopiesValuesToArrayCorrectly()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            list.AddLast(2);
-            list.AddLast(3);
-            int[] array = new int[3];
-
-            // Act
-            list.CopyTo(array, 0);
-
-            // Assert
-            Assert.That(array, Is.EqualTo(new int[] { 1, 2, 3 }));
-        }
-
-        // Testing if CopyTo method throws ArgumentNullException for null array
-        [Test]
-        public void CopyTo_NullArray_ThrowsArgumentNullException()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-
-            // Assert
-            Assert.Throws<ArgumentNullException>(() => list.CopyTo(null!, 0));
-        }
-
-        // Testing if CopyTo method throws ArgumentOutOfRangeException for negative index
-        [Test]
-        public void CopyTo_NegativeIndex_ThrowsArgumentOutOfRangeException()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            int[] array = new int[1];
-
-            // Assert
-            Assert.Throws<ArgumentOutOfRangeException>(() => list.CopyTo(array, -1));
-        }
-
-        // Testing if CopyTo method throws ArgumentException for insufficient array capacity
-        [Test]
-        public void CopyTo_InsufficientCapacity_ThrowsArgumentException()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            list.AddLast(2);
-            list.AddLast(3);
-            int[] array = new int[2];
-
-            // Assert
-            Assert.Throws<ArgumentException>(() => list.CopyTo(array, 0));
-        }
-    }
-
-    [TestFixture]
-    public class LListTests_GetMiddle
-    {
-        // Testing GetMiddleNode method for a list with odd number of elements
-        [Test]
-        public void GetMiddleNode_OddList_ReturnsMiddleNode()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            list.AddLast(2);
-            list.AddLast(3);
-            list.AddLast(4);
-            list.AddLast(5);
-
-            // Act
-            var middleNode = list.GetMiddleNode();
-
-            // Assert
-            Assert.That(middleNode!.Value, Is.EqualTo(3));
-        }
-
-        // Testing GetMiddleNode method for a list with even number of elements
-        [Test]
-        public void GetMiddleNode_EvenList_ReturnsMiddleNode()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            list.AddLast(2);
-            list.AddLast(3);
-            list.AddLast(4);
-
-            // Act
-            var middleNode = list.GetMiddleNode();
-
-            // Assert
-            Assert.That(middleNode!.Value, Is.EqualTo(2));
-        }
-
-        // Testing GetMiddleNode method throws InvalidOperationException for an empty list
-        [Test]
-        public void GetMiddleNode_EmptyList_ThrowsInvalidOperationException()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-
-            // Assert
-            Assert.Throws<InvalidOperationException>(() => list.GetMiddleNode());
-        }
-
-        // Testing GetMiddleNode method for a node in the list
-        [Test]
-        public void GetMiddleNode_NodeInList_ReturnsMiddleNode()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            var node = list.AddLast(1);
-            list.AddLast(2);
-            list.AddLast(3);
-            list.AddLast(4);
-
-            // Act
-            var middleNode = list.GetMiddleNode(node);
-
-            // Assert
-            Assert.That(middleNode!.Value, Is.EqualTo(2));
-        }
-
-        // Testing GetMiddleNode method for a null node
-        [Test]
-        public void GetMiddleNode_NullNode_ReturnsNull()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            list.AddLast(2);
-            list.AddLast(3);
-
-            // Act
-            var middleNode = list.GetMiddleNode(null!);
-
-            // Assert
-            Assert.That(middleNode, Is.Null);
+            Assert.That(list1.First, Is.SameAs(list1.Last));
         }
 
         [Test]
-        public void GetMiddleNode_BetweenTwoNodes_EvenNodes()
+        public void Concat_SecondListEmpty()
         {
-            LList<int> list = new LList<int>();
-            LLNode<int> first = list.AddFirst(1);
-            list.AddLast(2);
-            LLNode<int> second = list.AddLast(3);
-            list.AddLast(4);
+            LList<int> list1 = new(1);
+            LList<int> list2 = new();
 
-            var middleNode = list.GetMiddleNode(first, second);
+            list1.Concat(list2);
 
-            Assert.That(middleNode!.Value, Is.EqualTo(2));
+            Assert.That(list1, Has.Count.EqualTo(1));
+            Assert.That(list1.First!.Value, Is.EqualTo(1));
+            Assert.That(list1.First, Is.SameAs(list1.Last));
         }
 
         [Test]
-        public void GetMiddleNode_BetweenTwoNodes_OddNodes()
+        public void Concat_CorrectResult_ToBackOfList()
         {
-            LList<int> list = new LList<int>();
-            LLNode<int> first = list.AddFirst(1);
-            list.AddLast(2);
-            list.AddLast(5);
-            LLNode<int> second = list.AddLast(3);
-            list.AddLast(4);
+            LList<int> list1 = new(1);
+            LList<int> list2 = new(2);
 
-            var middleNode = list.GetMiddleNode(first, second);
+            list1.Concat(list2, toBackOfList: true);
 
-            Assert.That(middleNode!.Value, Is.EqualTo(5));
+            Assert.That(list1, Has.Count.EqualTo(2));
+            Assert.That(list1.First!.Value, Is.EqualTo(1));
+            Assert.That(list1.Last!.Value, Is.EqualTo(2));
+            Assert.That(list2.IsEmpty(), Is.True);
         }
 
         [Test]
-        public void GetMiddleNode_BetweenTwoNodes_EndBeforeStart()
+        public void Concat_CorrectResult_ToFrontOfList()
         {
-            LList<int> list = new LList<int>();
-            LLNode<int> first = list.AddFirst(1);
-            list.AddLast(2);
-            LLNode<int> second = list.AddLast(3);
-            list.AddLast(4);
+            LList<int> list1 = new(1);
+            LList<int> list2 = new(2);
 
-            var middleNode = list.GetMiddleNode(second, first);
+            list1.Concat(list2, toBackOfList: false);
 
-            Assert.That(middleNode!.Value, Is.EqualTo(2));
-        }
-    }
-
-    [TestFixture]
-    public class LListTests_SortAndMerge
-    {
-        // Testing SortAndMerge method for ascending order
-        [Test]
-        public void SortAndMerge_AscendingOrder_ReturnsMergedSortedLinkedList()
-        {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            list1.AddLast(1);
-            list1.AddLast(3);
-            list1.AddLast(5);
-
-            LList<int> list2 = new LList<int>();
-            list2.AddLast(2);
-            list2.AddLast(4);
-            list2.AddLast(6);
-
-            // Act
-            var mergedList = list1.SortAndMerge(list1.First, list2.First);
-
-            // Assert
-            Assert.That(mergedList!.Value, Is.EqualTo(1));
-            Assert.That(mergedList.Next!.Previous!.Value, Is.EqualTo(1));
-            Assert.That(mergedList.Next!.Value, Is.EqualTo(2));
-            Assert.That(mergedList.Next.Next!.Previous!.Value, Is.EqualTo(2));
-            Assert.That(mergedList.Next.Next!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next!.Previous!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next!.Value, Is.EqualTo(4));
-            Assert.That(mergedList.Next.Next.Next.Next!.Previous!.Value, Is.EqualTo(4));
-            Assert.That(mergedList.Next.Next.Next.Next!.Value, Is.EqualTo(5));
-            Assert.That(mergedList.Next.Next.Next.Next.Next!.Previous!.Value, Is.EqualTo(5));
-            Assert.That(mergedList.Next.Next.Next.Next.Next!.Value, Is.EqualTo(6));
+            Assert.That(list1, Has.Count.EqualTo(2));
+            Assert.That(list1.First!.Value, Is.EqualTo(2));
+            Assert.That(list1.Last!.Value, Is.EqualTo(1));
+            Assert.That(list2.IsEmpty(), Is.True);
         }
 
-        // Testing SortAndMerge method for descending order
         [Test]
-        public void SortAndMerge_DescendingOrder_ReturnsMergedSortedLinkedList()
+        public void Concat_EmptyFirstList_MultipleNodeInSecondList_ToBackOfList()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            list1.AddLast(5);
-            list1.AddLast(3);
-            list1.AddLast(1);
+            LList<int> list1 = new();
+            LList<int> list2 = new([0, 1, 2, 3, 4, 5]);
 
-            LList<int> list2 = new LList<int>();
-            list2.AddLast(6);
-            list2.AddLast(4);
-            list2.AddLast(2);
+            list1.Concat(list2, toBackOfList: true);
 
-            // Act
-            var mergedList = list1.SortAndMerge(list1.First, list2.First, ascendingOrder: false);
-
-            // Assert
-            Assert.That(mergedList!.Value, Is.EqualTo(6));
-            Assert.That(mergedList.Next!.Previous!.Value, Is.EqualTo(6));
-            Assert.That(mergedList.Next!.Value, Is.EqualTo(5));
-            Assert.That(mergedList.Next.Next!.Previous!.Value, Is.EqualTo(5));
-            Assert.That(mergedList.Next.Next!.Value, Is.EqualTo(4));
-            Assert.That(mergedList.Next.Next.Next!.Previous!.Value, Is.EqualTo(4));
-            Assert.That(mergedList.Next.Next.Next!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next.Next!.Previous!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next.Next!.Value, Is.EqualTo(2));
-            Assert.That(mergedList.Next.Next.Next.Next.Next!.Previous!.Value, Is.EqualTo(2));
-            Assert.That(mergedList.Next.Next.Next.Next.Next!.Value, Is.EqualTo(1));
+            Assert.That(list1, Has.Count.EqualTo(6));
+            for (int i = 0; i < list1.Count; ++i)
+            {
+                Assert.That(list1[i], Is.EqualTo(i));
+            }
         }
 
-        // Testing SortAndMerge method when one list is empty
         [Test]
-        public void SortAndMerge_OneListEmpty_ReturnsNonEmptyList()
+        public void Concat_EmptyFirstList_MultipleNodeInSecondList_ToFrontOfList()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            list1.AddLast(1);
-            list1.AddLast(3);
-            list1.AddLast(5);
+            LList<int> list1 = new();
+            LList<int> list2 = new([0, 1, 2, 3, 4, 5]);
 
-            LList<int> list2 = new LList<int>();
+            list1.Concat(list2, toBackOfList: false);
 
-            // Act
-            var mergedList1 = list1.SortAndMerge(list1.First, list2.First);
-            var mergedList2 = list1.SortAndMerge(list2.First, list1.First);
-
-            // Assert
-            Assert.That(mergedList1!.Value, Is.EqualTo(1));
-            Assert.That(mergedList1.Next!.Value, Is.EqualTo(3));
-            Assert.That(mergedList1.Next.Next!.Value, Is.EqualTo(5));
-
-            Assert.That(mergedList2!.Value, Is.EqualTo(1));
-            Assert.That(mergedList2.Next!.Value, Is.EqualTo(3));
-            Assert.That(mergedList2.Next.Next!.Value, Is.EqualTo(5));
+            Assert.That(list1, Has.Count.EqualTo(6));
+            for (int i = 0; i < list1.Count; ++i)
+            {
+                Assert.That(list1[i], Is.EqualTo(i));
+            }
         }
 
-        // Testing SortAndMerge method when both lists are empty
         [Test]
-        public void SortAndMerge_BothListsEmpty_ReturnsNull()
+        public void Concat_EmptySecondList_MultipleNodeInFirstList_ToBackOfList()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            LList<int> list2 = new LList<int>();
+            LList<int> list2 = new();
+            LList<int> list1 = new([0, 1, 2, 3, 4, 5]);
 
-            // Act
-            var mergedList = list1.SortAndMerge(list1.First, list2.First);
+            list1.Concat(list2, toBackOfList: true);
 
-            // Assert
-            Assert.That(mergedList, Is.Null);
+            Assert.That(list1, Has.Count.EqualTo(6));
+            for (int i = 0; i < list1.Count; ++i)
+            {
+                Assert.That(list1[i], Is.EqualTo(i));
+            }
+        }
+
+        [Test]
+        public void Concat_EmptySecondList_MultipleNodeInFirstList_ToFrontOfList()
+        {
+            LList<int> list2 = new();
+            LList<int> list1 = new([0, 1, 2, 3, 4, 5]);
+
+            list1.Concat(list2, toBackOfList: false);
+
+            Assert.That(list1, Has.Count.EqualTo(6));
+            for (int i = 0; i < list1.Count; ++i)
+            {
+                Assert.That(list1[i], Is.EqualTo(i));
+            }
+        }
+
+        [Test]
+        public void Concat_MultipleNodesInBothList_ToBackOfList()
+        {
+            LList<int> list1 = new([0, 1, 2, 3, 4]);
+            LList<int> list2 = new([5, 6, 7, 8, 9, 10]);
+
+            list1.Concat(list2, toBackOfList: true);
+            Assert.That(list1, Has.Count.EqualTo(11));
+            for (int i = 0; i < list1.Count; ++i)
+            {
+                Assert.That(list1[i], Is.EqualTo(i));
+            }
+        }
+
+        [Test]
+        public void Concat_MultipleNodesInBothList_ToFrontOfList()
+        {
+            LList<int> list2 = new([0, 1, 2, 3, 4]);
+            LList<int> list1 = new([5, 6, 7, 8, 9, 10]);
+
+            list1.Concat(list2, toBackOfList: false);
+            Assert.That(list1, Has.Count.EqualTo(11));
+            for (int i = 0; i < list1.Count; ++i)
+            {
+                Assert.That(list1[i], Is.EqualTo(i));
+            }
+        }
+
+        [Test]
+        public void Concat_DuplicateValues()
+        {
+            LList<int> list1 = new([1, 2, 2, 3]);
+            LList<int> list2 = new([3, 2, 2, 1]);
+
+            list1.Concat(list2, toBackOfList: true);
+
+            Assert.That(list1, Has.Count.EqualTo(8));
+            Assert.That(list1[0], Is.EqualTo(1));
+            Assert.That(list1[1], Is.EqualTo(2));
+            Assert.That(list1[2], Is.EqualTo(2));
+            Assert.That(list1[3], Is.EqualTo(3));
+            Assert.That(list1[4], Is.EqualTo(3));
+            Assert.That(list1[5], Is.EqualTo(2));
+            Assert.That(list1[6], Is.EqualTo(2));
+            Assert.That(list1[7], Is.EqualTo(1));
         }
     }
 
@@ -1807,331 +2008,166 @@ public class LinkedList_Tests
     public class LListTests_MergeSort
     {
         [Test]
-        public void MergeSort_AscendingOrder_UniqueValues()
+        public void MergeSort_EmptyList()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            list1.AddLast(1);
-            list1.AddLast(5);
-            list1.AddLast(3);
-            list1.AddLast(2);
-            list1.AddLast(6);
-            list1.AddLast(4);
+            LList<int> list = new();
 
-            var mergedList = list1.MergeSort(list1.First, ascendingOrder: true);
-
-            Assert.That(mergedList, !Is.Null);
-            Assert.That(mergedList.Value, Is.EqualTo(1));
-            Assert.That(mergedList.Next!.Previous!.Value, Is.EqualTo(1));
-            Assert.That(mergedList.Next!.Value, Is.EqualTo(2));
-            Assert.That(mergedList.Next.Next!.Previous!.Value, Is.EqualTo(2));
-            Assert.That(mergedList.Next.Next!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next!.Previous!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next!.Value, Is.EqualTo(4));
-            Assert.That(mergedList.Next.Next.Next.Next!.Previous!.Value, Is.EqualTo(4));
-            Assert.That(mergedList.Next.Next.Next.Next!.Value, Is.EqualTo(5));
-            Assert.That(mergedList.Next.Next.Next.Next.Next!.Previous!.Value, Is.EqualTo(5));
-            Assert.That(mergedList.Next.Next.Next.Next.Next!.Value, Is.EqualTo(6));
+            Assert.That(() => list.MergeSort(), Throws.InvalidOperationException);
         }
 
         [Test]
-        public void MergeSort_AscendingOrder_NonUniqueValues()
+        public void MergeSort_OneNodeOnly()
         {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            list1.AddLast(1);
-            list1.AddLast(5);
-            list1.AddLast(3);
-            list1.AddLast(1);
-            list1.AddLast(6);
-            list1.AddLast(3);
-
-            var mergedList = list1.MergeSort(list1.First, ascendingOrder: true);
-
-            Assert.That(mergedList, !Is.Null);
-            Assert.That(mergedList.Value, Is.EqualTo(1));
-            Assert.That(mergedList.Next!.Value, Is.EqualTo(1));
-            Assert.That(mergedList.Next.Next!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next.Next!.Value, Is.EqualTo(5));
-            Assert.That(mergedList.Next.Next.Next.Next.Next!.Value, Is.EqualTo(6));
-        }
-
-        [Test]
-        public void MergeSort_DescendingOrder_UniqueValues()
-        {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            list1.AddLast(1);
-            list1.AddLast(5);
-            list1.AddLast(3);
-            list1.AddLast(2);
-            list1.AddLast(6);
-            list1.AddLast(4);
-
-            var mergedList = list1.MergeSort(list1.First, ascendingOrder: false);
-
-            Assert.That(mergedList, !Is.Null);
-            Assert.That(mergedList.Value, Is.EqualTo(6));
-            Assert.That(mergedList.Next!.Value, Is.EqualTo(5));
-            Assert.That(mergedList.Next!.Previous!.Value, Is.EqualTo(6));
-            Assert.That(mergedList.Next.Next!.Value, Is.EqualTo(4));
-            Assert.That(mergedList.Next.Next.Next!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next.Next!.Value, Is.EqualTo(2));
-            Assert.That(mergedList.Next.Next.Next.Next.Next!.Value, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void MergeSort_DescendingOrder_NonUniqueValues()
-        {
-            // Arrange
-            LList<int> list1 = new LList<int>();
-            list1.AddLast(1);
-            list1.AddLast(5);
-            list1.AddLast(3);
-            list1.AddLast(1);
-            list1.AddLast(6);
-            list1.AddLast(3);
-
-            var mergedList = list1.MergeSort(list1.First, ascendingOrder: false);
-
-            Assert.That(mergedList, !Is.Null);
-            Assert.That(mergedList.Value, Is.EqualTo(6));
-            Assert.That(mergedList.Next!.Value, Is.EqualTo(5));
-            Assert.That(mergedList.Next.Next!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next!.Previous!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next!.Value, Is.EqualTo(3));
-            Assert.That(mergedList.Next.Next.Next.Next!.Value, Is.EqualTo(1));
-            Assert.That(mergedList.Next.Next.Next.Next.Next!.Value, Is.EqualTo(1));
-        }
-    }
-
-    [TestFixture]
-    public class LListTests_BinarySearch
-    {
-        [Test]
-        public void BinarySearch_ReturnsNodeWithValue()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            list.AddLast(2);
-            list.AddLast(2);
-            list.AddLast(3);
-            list.AddLast(4);
-            list.AddLast(4);
-            list.AddLast(4);
-            list.AddLast(5);
-
-            // Act
-            var foundNode = list.BinarySearch(2);
-
-            // Assert
-            Assert.That(foundNode!.Value, Is.EqualTo(2));
-        }
-
-        // Testing BinarySearch method for finding the last occurrence
-        [Test]
-        public void BinarySearch_Unsorted()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(2);
-            list.AddLast(1);
-            list.AddLast(2);
-            list.AddLast(4);
-            list.AddLast(4);
-            list.AddLast(5);
-            list.AddLast(4);
-            list.AddLast(3);
-
-            // Act
-            var foundNode = list.BinarySearch(4);
-
-            // Assert
+            LList<int> list = new(1);
+            list.MergeSort();
+            
             Assert.That(list.First!.Value, Is.EqualTo(1));
-            Assert.That(foundNode!.Value, Is.EqualTo(4));
+            Assert.That(list.First, Is.SameAs(list.Last));
         }
 
-        // Testing BinarySearch method for non-existing value
         [Test]
-        public void BinarySearch_NonExistingValue_ReturnsNull()
+        public void MergeSort_CorrectSorting_Ascending()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
+            LList<int> list = new();
+            list.AddLast(2);
+            list.AddLast(5);
+            list.AddLast(1);
+            list.AddLast(3);
+            list.AddLast(4);
+
+            list.MergeSort(isAscending: true);
+
+            Assert.That(list, Has.Count.EqualTo(5));
+            for (int i = 0; i < 5; ++i)
+            {
+                Assert.That(list[i], Is.EqualTo(i + 1));
+            }
+        }
+
+        [Test]
+        public void MergeSort_CorrectSorting_Descending()
+        {
+            LList<int> list = new();
+            list.AddLast(2);
+            list.AddLast(5);
+            list.AddLast(1);
+            list.AddLast(3);
+            list.AddLast(4);
+
+            list.MergeSort(isAscending: false);
+
+            Assert.That(list, Has.Count.EqualTo(5));
+            for (int i = 0; i < 5; ++i)
+            {
+                Assert.That(list[i], Is.EqualTo(5 - i));
+            }
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_IsSorted
+    {
+        [Test]
+        public void IsSorted_EmptyList()
+        {
+            LList<int> list = new();
+
+            Assert.That(list.IsSorted(), Is.True);
+        }
+
+        [Test]
+        public void IsSorted_OneNodeOnly()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(list.IsSorted(), Is.True);
+        }
+
+        [Test]
+        public void IsSorted_MultipleNodes_NotSorted()
+        {
+            LList<int> list = new();
+            list.AddLast(2);
+            list.AddFirst(3);
+            list.AddLast(1);
+
+            Assert.That(list.IsSorted(), Is.False);
+        }
+
+        [Test]
+        public void IsSorted_MultipleNodes_Ascending_Sorted()
+        {
+            LList<int> list = new();
             list.AddLast(1);
             list.AddLast(2);
             list.AddLast(3);
+
+            Assert.That(list.IsSorted(isAscending: true), Is.True);
+        }
+
+        [Test]
+        public void IsSorted_MultipleNodes_Descending_Sorted()
+        {
+            LList<int> list = new();
+            list.AddLast(3);
+            list.AddLast(2);
+            list.AddLast(1);
+
+            Assert.That(list.IsSorted(isAscending: false), Is.True);
+        }
+
+        [Test]
+        public void IsSorted_DuplicateNodes_Ascending_Sorted()
+        {
+            LList<int> list = new();
+            list.AddLast(1);
+            list.AddLast(1);
+            list.AddLast(2);
+            list.AddLast(3);
+
+            Assert.That(list.IsSorted(isAscending: true), Is.True);
+        }
+
+        [Test]
+        public void IsSorted_DuplicateNodes_Descending_Sorted()
+        {
+            LList<int> list = new();
+            list.AddLast(3);
+            list.AddLast(2);
+            list.AddLast(2);
+            list.AddLast(1);
+
+            Assert.That(list.IsSorted(isAscending: false), Is.True);
+        }
+
+        [Test]
+        public void IsSorted_MergeSorted_Ascending()
+        {
+            LList<int> list = new();
+            list.AddFirst(2);
             list.AddLast(4);
-            list.AddLast(5);
+            list.AddFirst(5);
+            list.AddLast(1);
+            list.AddFirst(3);
 
-            // Act
-            var foundNode = list.BinarySearch(6);
+            list.MergeSort(isAscending: true);
 
-            // Assert
-            Assert.That(foundNode, Is.Null);
+            Assert.That(list.IsSorted(isAscending: true), Is.True);
         }
 
-        // Testing BinarySearch method for an empty list
         [Test]
-        public void BinarySearch_EmptyList_ReturnsNull()
+        public void IsSorted_MergeSorted_Descending()
         {
-            // Arrange
-            LList<int> list = new LList<int>();
+            LList<int> list = new();
+            list.AddFirst(2);
+            list.AddLast(4);
+            list.AddFirst(5);
+            list.AddLast(1);
+            list.AddFirst(3);
 
-            // Act
-            var foundNode = list.BinarySearch(1);
+            list.MergeSort(isAscending: false);
 
-            // Assert
-            Assert.That(foundNode, Is.Null);
+            Assert.That(list.IsSorted(isAscending: false), Is.True);
         }
     }
-
-    [TestFixture]
-    public class LListTests_MinMax
-    {
-        [Test]
-        public void Min_ReturnsNodeWithValue()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(15);
-            list.AddLast(10);
-            list.AddLast(5);
-            list.AddLast(1);
-            list.AddLast(2);
-
-            var max = list.Min();
-
-            // Assert
-            Assert.That(max!.Value, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void Min_ListUntouched()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(22);
-            list.AddLast(10);
-            list.AddLast(1);
-            list.AddLast(15);
-            list.AddLast(5);
-
-            var max = list.Min();
-
-            // Assert
-            Assert.That(list.First!.Value, Is.EqualTo(22));
-            Assert.That(max!.Value, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void Max_ReturnsNodeWithValue()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            list.AddLast(10);
-            list.AddLast(5);
-            list.AddLast(15);
-            list.AddLast(2);
-
-            var max = list.Max();
-
-            // Assert
-            Assert.That(max!.Value, Is.EqualTo(15));
-        }
-
-        [Test]
-        public void Max_ListUntouched()
-        {
-            // Arrange
-            LList<int> list = new LList<int>();
-            list.AddLast(1);
-            list.AddLast(10);
-            list.AddLast(5);
-            list.AddLast(15);
-            list.AddLast(22);
-
-            var max = list.Max();
-
-            // Assert
-            Assert.That(list.First!.Value, Is.EqualTo(1));
-            Assert.That(max!.Value, Is.EqualTo(22));
-        }
-    }
-
-    [TestFixture]
-    public class LListTests_QuickSort
-    {
-        // // Testing QuickSort method for sorting a list in ascending order
-        // [Test]
-        // public void QuickSort_AscendingOrder_ReturnsSortedLinkedList()
-        // {
-        //     // Arrange
-        //     LList<int> list = new LList<int>();
-        //     list.AddLast(3);
-        //     list.AddLast(2);
-        //     list.AddLast(1);
-        //     list.AddLast(5);
-        //     list.AddLast(4);
-
-        //     // Act
-        //     var sortedList = list.QuickSort();
-
-        //     // Assert
-        //     Assert.That(sortedList!.Value, Is.EqualTo(1));
-        //     Assert.That(sortedList.Next!.Value, Is.EqualTo(2));
-        //     Assert.That(sortedList.Next.Next!.Value, Is.EqualTo(3));
-        //     Assert.That(sortedList.Next.Next.Next!.Value, Is.EqualTo(4));
-        //     Assert.That(sortedList.Next.Next.Next.Next!.Value, Is.EqualTo(5));
-        // }
-
-        // // Testing QuickSort method for sorting a list in descending order
-        // [Test]
-        // public void QuickSort_DescendingOrder_ReturnsSortedLinkedList()
-        // {
-        //     // Arrange
-        //     LList<int> list = new LList<int>();
-        //     list.AddLast(3);
-        //     list.AddLast(2);
-        //     list.AddLast(1);
-        //     list.AddLast(5);
-        //     list.AddLast(4);
-
-        //     // Act
-        //     var sortedList = list.QuickSort();
-        //     var currentNode = sortedList;
-
-        //     // Move to the last node
-        //     while (currentNode.Next != null)
-        //     {
-        //         currentNode = currentNode.Next;
-        //     }
-
-        //     // Assert
-        //     Assert.That(currentNode.Value, Is.EqualTo(5));
-        //     Assert.That(currentNode.Previous!.Value, Is.EqualTo(4));
-        //     Assert.That(currentNode.Previous.Previous!.Value, Is.EqualTo(3));
-        //     Assert.That(currentNode.Previous.Previous.Previous!.Value, Is.EqualTo(2));
-        //     Assert.That(currentNode.Previous.Previous.Previous.Previous!.Value, Is.EqualTo(1));
-        // }
-
-        // // Testing QuickSort method for an empty list
-        // [Test]
-        // public void QuickSort_EmptyList_ReturnsNull()
-        // {
-        //     // Arrange
-        //     LList<int> list = new LList<int>();
-
-        //     // Act
-        //     var sortedList = list.QuickSort();
-
-        //     // Assert
-        //     Assert.That(sortedList, Is.Null);
-        // }
-    }
-
-
-
 }

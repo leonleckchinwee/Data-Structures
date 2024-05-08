@@ -1,45 +1,36 @@
 namespace DSA.LinkedLists;
 
-public class LLNode<T> where T : notnull, IComparable<T>
+/// <summary>
+/// Node for linked-lists.
+/// This node accepts null value for reference types.
+/// </summary>
+public class LLNode<T>(T value) where T : IComparable<T>
 {
     #region Properties
 
     /// <summary>
     /// Gets the value contained in this node.
     /// </summary>
-    public T Value { get; set; }
+    public T Value = value;
 
     /// <summary>
     /// Gets the next node in the list.
     /// </summary>
-    public LLNode<T>? Next { get; set; }
+    public LLNode<T>? Next = null;
 
     /// <summary>
     /// Gets the previous node in the list.
     /// </summary>
-    public LLNode<T>? Previous { get; set; }
+    public LLNode<T>? Previous = null;
 
     /// <summary>
     /// Gets the list that this node belongs to.
     /// </summary>
-    public LList<T>? List { get; internal set; }
+    public LList<T>? List = null;
 
     #endregion
 
-    #region Constructor
-    
-    /// <summary>
-    /// Initializes a new instance containing the specified value.
-    /// </summary>
-    public LLNode(T value)
-    {
-        Value    = value;
-        Next     = null;
-        Previous = null;
-        List     = null;
-    }
-
-    #endregion
+    public int CompareTo(LLNode<T> other) => Value.CompareTo(other.Value);
 
     #region Overrides
 
@@ -77,51 +68,17 @@ public class LLNode<T> where T : notnull, IComparable<T>
 
     #endregion
 
-    #region Operators
-
-    /// <summary>
-    /// Determines whether left node's value is smaller or equal to right node's value.
-    /// </summary>
-    public static bool operator <= (LLNode<T>? left, LLNode<T>? right)
+    public static LLNode<T> Copy(LLNode<T> node)
     {
-        if (left == null || right == null)
-            return false;
+        ArgumentNullException.ThrowIfNull(node, "Cannot copy null node.");
 
-        return left.Value.CompareTo(right.Value) <= 0;
+        LLNode<T> newNode = new(node.Value) 
+        {
+            Next     = node.Next,
+            Previous = node.Previous,
+            List     = node.List
+        };
+
+        return newNode;
     }
-
-    /// <summary>
-    /// Determines whether left node's value is greater or equal to right node's value.
-    /// </summary>
-    public static bool operator >= (LLNode<T>? left, LLNode<T>? right)
-    {
-        if (left == null || right == null)
-            return false;
-
-        return left.Value.CompareTo(right.Value) >= 0;
-    }
-
-    /// <summary>
-    /// Determines whether left node's value is smaller than right node's value.
-    /// </summary>
-    public static bool operator < (LLNode<T>? left, LLNode<T>? right)
-    {
-        if (left == null || right == null)
-            return false;
-
-        return left.Value.CompareTo(right.Value) < 0;
-    }
-
-    /// <summary>
-    /// Determines whether left node's value is greater than right node's value.
-    /// </summary>
-    public static bool operator > (LLNode<T>? left, LLNode<T>? right)
-    {
-        if (left == null || right == null)
-            return false;
-
-        return left.Value.CompareTo(right.Value) > 0;
-    }
-
-    #endregion
 }
