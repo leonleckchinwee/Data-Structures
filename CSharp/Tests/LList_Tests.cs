@@ -1823,188 +1823,6 @@ public class LinkedList_Tests
     }
 
     [TestFixture]
-    public class LListTests_Concat
-    {
-        [Test]
-        public void Concat_BothListEmpty()
-        {
-            LList<int> list1 = new();
-            LList<int> list2 = new();
-
-            Assert.That(() => list1.Concat(list2), Throws.InvalidOperationException);
-        }
-
-        [Test]
-        public void Concat_NullList()
-        {
-            LList<int> list1 = new(1);
-
-            Assert.That(() => list1.Concat(null!), Throws.ArgumentNullException);
-        }
-
-        [Test]
-        public void Concat_FirstListEmpty()
-        {
-            LList<int> list1 = new();
-            LList<int> list2 = new(1);
-
-            list1.Concat(list2);
-
-            Assert.That(list1, Has.Count.EqualTo(1));
-            Assert.That(list1.First!.Value, Is.EqualTo(1));
-            Assert.That(list1.First, Is.SameAs(list1.Last));
-        }
-
-        [Test]
-        public void Concat_SecondListEmpty()
-        {
-            LList<int> list1 = new(1);
-            LList<int> list2 = new();
-
-            list1.Concat(list2);
-
-            Assert.That(list1, Has.Count.EqualTo(1));
-            Assert.That(list1.First!.Value, Is.EqualTo(1));
-            Assert.That(list1.First, Is.SameAs(list1.Last));
-        }
-
-        [Test]
-        public void Concat_CorrectResult_ToBackOfList()
-        {
-            LList<int> list1 = new(1);
-            LList<int> list2 = new(2);
-
-            list1.Concat(list2, toBackOfList: true);
-
-            Assert.That(list1, Has.Count.EqualTo(2));
-            Assert.That(list1.First!.Value, Is.EqualTo(1));
-            Assert.That(list1.Last!.Value, Is.EqualTo(2));
-            Assert.That(list2.IsEmpty(), Is.True);
-        }
-
-        [Test]
-        public void Concat_CorrectResult_ToFrontOfList()
-        {
-            LList<int> list1 = new(1);
-            LList<int> list2 = new(2);
-
-            list1.Concat(list2, toBackOfList: false);
-
-            Assert.That(list1, Has.Count.EqualTo(2));
-            Assert.That(list1.First!.Value, Is.EqualTo(2));
-            Assert.That(list1.Last!.Value, Is.EqualTo(1));
-            Assert.That(list2.IsEmpty(), Is.True);
-        }
-
-        [Test]
-        public void Concat_EmptyFirstList_MultipleNodeInSecondList_ToBackOfList()
-        {
-            LList<int> list1 = new();
-            LList<int> list2 = new([0, 1, 2, 3, 4, 5]);
-
-            list1.Concat(list2, toBackOfList: true);
-
-            Assert.That(list1, Has.Count.EqualTo(6));
-            for (int i = 0; i < list1.Count; ++i)
-            {
-                Assert.That(list1[i], Is.EqualTo(i));
-            }
-        }
-
-        [Test]
-        public void Concat_EmptyFirstList_MultipleNodeInSecondList_ToFrontOfList()
-        {
-            LList<int> list1 = new();
-            LList<int> list2 = new([0, 1, 2, 3, 4, 5]);
-
-            list1.Concat(list2, toBackOfList: false);
-
-            Assert.That(list1, Has.Count.EqualTo(6));
-            for (int i = 0; i < list1.Count; ++i)
-            {
-                Assert.That(list1[i], Is.EqualTo(i));
-            }
-        }
-
-        [Test]
-        public void Concat_EmptySecondList_MultipleNodeInFirstList_ToBackOfList()
-        {
-            LList<int> list2 = new();
-            LList<int> list1 = new([0, 1, 2, 3, 4, 5]);
-
-            list1.Concat(list2, toBackOfList: true);
-
-            Assert.That(list1, Has.Count.EqualTo(6));
-            for (int i = 0; i < list1.Count; ++i)
-            {
-                Assert.That(list1[i], Is.EqualTo(i));
-            }
-        }
-
-        [Test]
-        public void Concat_EmptySecondList_MultipleNodeInFirstList_ToFrontOfList()
-        {
-            LList<int> list2 = new();
-            LList<int> list1 = new([0, 1, 2, 3, 4, 5]);
-
-            list1.Concat(list2, toBackOfList: false);
-
-            Assert.That(list1, Has.Count.EqualTo(6));
-            for (int i = 0; i < list1.Count; ++i)
-            {
-                Assert.That(list1[i], Is.EqualTo(i));
-            }
-        }
-
-        [Test]
-        public void Concat_MultipleNodesInBothList_ToBackOfList()
-        {
-            LList<int> list1 = new([0, 1, 2, 3, 4]);
-            LList<int> list2 = new([5, 6, 7, 8, 9, 10]);
-
-            list1.Concat(list2, toBackOfList: true);
-            Assert.That(list1, Has.Count.EqualTo(11));
-            for (int i = 0; i < list1.Count; ++i)
-            {
-                Assert.That(list1[i], Is.EqualTo(i));
-            }
-        }
-
-        [Test]
-        public void Concat_MultipleNodesInBothList_ToFrontOfList()
-        {
-            LList<int> list2 = new([0, 1, 2, 3, 4]);
-            LList<int> list1 = new([5, 6, 7, 8, 9, 10]);
-
-            list1.Concat(list2, toBackOfList: false);
-            Assert.That(list1, Has.Count.EqualTo(11));
-            for (int i = 0; i < list1.Count; ++i)
-            {
-                Assert.That(list1[i], Is.EqualTo(i));
-            }
-        }
-
-        [Test]
-        public void Concat_DuplicateValues()
-        {
-            LList<int> list1 = new([1, 2, 2, 3]);
-            LList<int> list2 = new([3, 2, 2, 1]);
-
-            list1.Concat(list2, toBackOfList: true);
-
-            Assert.That(list1, Has.Count.EqualTo(8));
-            Assert.That(list1[0], Is.EqualTo(1));
-            Assert.That(list1[1], Is.EqualTo(2));
-            Assert.That(list1[2], Is.EqualTo(2));
-            Assert.That(list1[3], Is.EqualTo(3));
-            Assert.That(list1[4], Is.EqualTo(3));
-            Assert.That(list1[5], Is.EqualTo(2));
-            Assert.That(list1[6], Is.EqualTo(2));
-            Assert.That(list1[7], Is.EqualTo(1));
-        }
-    }
-
-    [TestFixture]
     public class LListTests_MergeSort
     {
         [Test]
@@ -2170,4 +1988,311 @@ public class LinkedList_Tests
             Assert.That(list.IsSorted(isAscending: false), Is.True);
         }
     }
+
+    [TestFixture]
+    public class LListTests_Split
+    {
+        [Test]
+        public void Split_EmptyList()
+        {
+            LList<int> list = new();
+            
+            Assert.That(() => list.Split(1), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Split_ValueNotInList()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(() => list.Split(2), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Split_FirstNode()
+        {
+            LList<int> list = new([1, 2, 3]);
+            LList<int> list2 = list.Split(1);
+
+            Assert.That(list, Has.Count.EqualTo(0));
+            Assert.That(list2, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void Split_LastNode()
+        {
+            LList<int> list = new([1, 2, 3]);
+            LList<int> list2 = list.Split(3);
+
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(list2, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void Split_MiddleNode()
+        {
+            LList<int> list = new([1, 2, 3, 4, 5, 6]);
+            LList<int> list2 = list.Split(4);
+
+            Assert.That(list, Has.Count.EqualTo(3));
+            Assert.That(list2, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void Split_Node_EmptyList()
+        {
+            LList<int> list = new();
+            
+            Assert.That(() => list.Split(new LLNode<int>(1)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Split_Node_NodeNotInList()
+        {
+            LList<int> list = new(1);
+
+            Assert.That(() => list.Split(new LLNode<int>(2)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Split_Node_Node_FirstNode()
+        {
+            LList<int> list = new([1, 2, 3]);
+            LList<int> list2 = list.Split(list.First!);
+
+            Assert.That(list, Has.Count.EqualTo(0));
+            Assert.That(list2, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void Split_Node_LastNode()
+        {
+            LList<int> list = new([1, 2, 3]);
+            LList<int> list2 = list.Split(list.Last!);
+
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(list2, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void Split_Node_MiddleNode()
+        {
+            LList<int> list = new([1, 2, 3, 4, 5, 6]);
+            LLNode<int> node = list.GetNode(3)!;
+            LList<int> list2 = list.Split(node);
+
+            Assert.That(list, Has.Count.EqualTo(3));
+            Assert.That(list2, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void SplitAt_EmptyList()
+        {
+            LList<int> list = new();
+            
+            Assert.That(() => list.SplitAt(1), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void SplitAt_NodeNotInList()
+        {
+            LList<int> list = new(1);
+
+            Assert.Throws<IndexOutOfRangeException>(() => list.SplitAt(3));
+        }
+
+        [Test]
+        public void SplitAt_FirstNode()
+        {
+            LList<int> list = new([1, 2, 3]);
+            LList<int> list2 = list.SplitAt(0);
+
+            Assert.That(list, Has.Count.EqualTo(0));
+            Assert.That(list2, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void SplitAt_LastNode()
+        {
+            LList<int> list = new([1, 2, 3]);
+            LList<int> list2 = list.SplitAt(2);
+
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(list2, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void SplitAt_MiddleNode()
+        {
+            LList<int> list = new([1, 2, 3, 4, 5, 6]);
+            LList<int> list2 = list.SplitAt(3);
+
+            Assert.That(list, Has.Count.EqualTo(3));
+            Assert.That(list2, Has.Count.EqualTo(3));
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_MergeTwoLists
+    {
+        [Test]
+        public void Merge_BothListEmpty()
+        {
+            LList<int> list1 = new();
+            LList<int> list2 = new();
+
+            Assert.That(() => LList<int>.Merge(list1, list2), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void Merge_OneListNull()
+        {
+            LList<int> list1 = null!;
+            LList<int> list2 = new();
+
+            Assert.That(() => LList<int>.Merge(list1, list2), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void Merge_SecondListEmpty_FirstListInFront()
+        {
+            LList<int> list1 = new([1, 2, 3]);
+            LList<int> list2 = new();
+
+            LList<int> list3 = LList<int>.Merge(list1, list2, firstListInFront: true);
+
+            Assert.That(list3, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void Merge_FirstListEmpty_FirstListInFront()
+        {
+            LList<int> list2 = new([1, 2, 3]);
+            LList<int> list1 = new();
+
+            LList<int> list3 = LList<int>.Merge(list1, list2, firstListInFront: true);
+
+            Assert.That(list3, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void Merge_BothList_FirstListInFront()
+        {
+            LList<int> list1 = new([1, 2, 3]);
+            LList<int> list2 = new([4, 5, 6]);
+
+            LList<int> list3 = LList<int>.Merge(list1, list2, firstListInFront: true);
+
+            Assert.That(list3, Has.Count.EqualTo(6));
+        }
+
+        [Test]
+        public void Merge_BothList_FirstListAtBack()
+        {
+            LList<int> list1 = new([1, 2, 3]);
+            LList<int> list2 = new([4, 5, 6]);
+
+            LList<int> list3 = LList<int>.Merge(list1, list2, firstListInFront: false);
+
+            Assert.That(list3, Has.Count.EqualTo(6));
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_Append
+    {
+        [Test]
+        public void Append_NullCollection()
+        {
+            LList<int> list = new();
+            
+            Assert.That(() => list.Append(null!), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void Append_EmptyList()
+        {
+            LList<int> list = new();
+            list.Append([1, 2, 3]);
+
+            Assert.That(list, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void Append_Array()
+        {
+            LList<int> list = new(1);
+            list.Append([2, 3, 4, 5]);
+
+            Assert.That(list, Has.Count.EqualTo(5));
+        }
+
+        [Test]
+        public void Append_LinkedList()
+        {
+            LList<int> list = new(1);
+            list.Append(new LList<int>([2, 3, 4, 5]));
+
+            Assert.That(list, Has.Count.EqualTo(5));
+        }
+
+        [Test]
+        public void Append_List()
+        {
+            LList<int> list = new(1);
+            list.Append(new List<int>() { 2, 3, 4, 5});
+
+            Assert.That(list, Has.Count.EqualTo(5));
+        }
+    }
+
+    [TestFixture]
+    public class LListTests_Prepend
+    {
+        [Test]
+        public void Prepend_NullCollection()
+        {
+            LList<int> list = new();
+            
+            Assert.That(() => list.Prepend(null!), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void Prepend_EmptyList()
+        {
+            LList<int> list = new();
+            list.Prepend([1, 2, 3]);
+
+            Assert.That(list, Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void Prepend_Array()
+        {
+            LList<int> list = new(1);
+            list.Prepend([2, 3, 4, 5]);
+
+            Assert.That(list, Has.Count.EqualTo(5));
+        }
+
+        [Test]
+        public void Prepend_LinkedList()
+        {
+            LList<int> list = new(1);
+            list.Prepend(new LList<int>([2, 3, 4, 5]));
+
+            Assert.That(list, Has.Count.EqualTo(5));
+        }
+
+        [Test]
+        public void Prepend_List()
+        {
+            LList<int> list = new(1);
+            list.Prepend(new List<int>() { 2, 3, 4, 5});
+
+            Assert.That(list, Has.Count.EqualTo(5));
+        }
+    }
+
+
 }

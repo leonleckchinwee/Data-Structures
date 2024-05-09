@@ -845,93 +845,150 @@ public class LList<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Concatenates the specified list to this list. 
+    /// Split the list into 2. This list contains the nodes before the specified value,
+    /// and the output list contains the value specified and all the nodes after it.
     /// </summary>
-    /// <param name="list">Other list to concatenate with.</param>
-    /// <param name="toBackOfList">Concat to either back or front of list.</param>
-    /// <remarks>Note that the specified list will become empty, and all its nodes
-    /// will be added to this list instead.</remarks>
-    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <param name="value">Value to split at.</param>
+    /// <returns>A new list with nodes at and after the specified value.</returns>
     /// <exception cref="InvalidOperationException">List is empty.</exception>
-    public void Concat(LList<T> list, bool toBackOfList = true)
+    /// <exception cref="InvalidOperationException">Value not found in the list.</exception>
+    public LList<T> Split(T value)
     {
-        ThrowIfNull(list);
+        ThrowIfEmpty(this);
 
-        if (IsEmpty() && list.IsEmpty())
-            throw new InvalidOperationException("Both list cannot be empty.");
-
-        // Add to back of this list
-        if (toBackOfList)
+        LLNode<T>? node = m_Head;
+        LLNode<T>? otherNode = null;
+        while (node != null)
         {
-            LLNode<T> secondHalf = list.m_Head!;
-            while (secondHalf != null)
+            // Find the first node containing the specified value
+            if (node.Value.Equals(value))
             {
-                list.Remove(secondHalf);
-                secondHalf.List = null;
-
-                AddLast(secondHalf.Value);
-
-                secondHalf = secondHalf.Next!;
-            }
-        }
-        // Add to front of this list
-        else
-        {
-            LList<T> newList    = new();
-            LLNode<T> firstHalf = list.First!;
-
-            // First half of new list containing elements from other list
-            while (firstHalf != null)
-            {
-                list.Remove(firstHalf);
-                firstHalf.List = null;
-
-                newList.AddLast(firstHalf.Value);
-
-                firstHalf = firstHalf.Next!;
+                otherNode = node;
+                break;
             }
 
-            LLNode<T> secondHalf = m_Head!;
-
-            // Second half of new list containing elements from this list
-            while (secondHalf != null)
-            {
-                Remove(secondHalf);
-                secondHalf.List = null;
-
-                newList.AddLast(secondHalf.Value);
-
-                secondHalf = secondHalf.Next!;
-            }
-
-            m_Count = newList.m_Count;
-            m_Head = newList.First;
+            node = node.Next!;
         }
 
-        UpdateTail();
+        // Value not found in this list
+        if (otherNode == null)
+        {
+            throw new InvalidOperationException("Value is not in the list.");
+        }
 
-        list.m_Head = null;
-        list.m_Tail = null;
+        LList<T> otherList = new();
+        while (otherNode != null)
+        {
+            Remove(otherNode);
+            otherNode.List = null;
+
+            otherList.AddLast(otherNode.Value);
+
+            otherNode = otherNode.Next!;
+        }
+
+        return otherList;
     }
 
-    public void Split(T value)
+    /// <summary>
+    /// Split the list into 2. This list contains the nodes before the specified node, and
+    /// the output list contains the node specified and all the nodes after it.
+    /// </summary>
+    /// <param name="node">Node to split at.</param>
+    /// <returns>A new list with nodes at and after the specified node.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="InvalidOperationException">Node does not belong to this list.</exception>
+    public LList<T> Split(LLNode<T> node)
     {
-        throw new NotImplementedException();
+        ThrowIfEmpty(this);
+        ThrowIfNull(node);
+        ThrowIfNodeDoesNotBelong(this, node);
+
+        LList<T> otherList = new();
+        while (node != null)
+        {
+            Remove(node);
+            node.List = null;
+
+            otherList.AddLast(node.Value);
+
+            node = node.Next!;
+        }
+
+        return otherList;
     }
 
-    public void Split(LLNode<T> node)
+    /// <summary>
+    /// Split list into 2. This list contains the nodes before the specified index, and
+    /// the output list contains nodes at and after the specified index.
+    /// </summary>
+    /// <param name="index">Index to split at.</param>
+    /// <returns>A new list with nodes at and after the specified index.</returns>
+    /// <exception cref="InvalidOperationException">List is empty.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    public LList<T> SplitAt(int index)
     {
-        throw new NotImplementedException();
+        ThrowIfEmpty(this);
+        ThrowIfIndexOutOfRange(this, index);
+
+        LLNode<T> node = GetNode(index)!;
+        LList<T> otherList = new();
+        while (node != null)
+        {
+            Remove(node);
+            node.List = null;
+
+            otherList.AddLast(node.Value);
+
+            node = node.Next!;
+        }
+
+        return otherList;
     }
 
-    public void SplitAt(int index)
+    /// <summary>
+    /// Append a non-null collection to the back of the list.
+    /// </summary>
+    /// <param name="collection">Collection to append.</param>
+    /// <exception cref="ArgumentNullException">Collection is null.</exception>
+    /// <exception cref="InvalidOperationException">Collection is empty.</exception>
+    public void Append(IEnumerable<T> collection)
     {
-        throw new NotImplementedException();
+        ThrowIfNull(collection);
+        ThrowIfEmpty(collection);
+
+        foreach (T item in collection)
+        {
+            AddLast(item);
+        }
     }
 
-    public void Merge(LList<T> list1, LList<T> list2)
+    /// <summary>
+    /// Prepend a non-null collection to the front of the list.
+    /// </summary>
+    /// <param name="collection"></param>
+    /// <exception cref="ArgumentNullException">Collection is null.</exception>
+    /// <exception cref="InvalidOperationException">Collection is empty.</exception>
+    public void Prepend(IEnumerable<T> collection)
     {
-        throw new NotImplementedException();
+        ThrowIfNull(collection);
+        ThrowIfEmpty(collection);
+
+        int index = 0;
+        LLNode<T> node = null!;
+        foreach (T item in collection)
+        {
+            if (index == 0)
+            {
+                node = AddFirst(item);
+                ++index;
+            }
+            else
+            {
+                node = AddAfter(node, item);
+            }
+        }
     }
 
     #endregion
@@ -1440,13 +1497,76 @@ public class LList<T> : IEnumerable<T> where T : IComparable<T>
 
     #endregion
 
+    #region Static Methods
+
+    /// <summary>
+    /// Merge 2 list into 1.
+    /// </summary>
+    /// <param name="list1">First list.</param>
+    /// <param name="list2">Second list.</param>
+    /// <param name="firstListInFront">Determines which list is at front of list.</param>
+    /// <returns>A new list with nodes from both specified lists.</returns>
+    /// <exception cref="ArgumentNullException">List is null.</exception>
+    /// <exception cref="InvalidOperationException"></exception>
+    public static LList<T> Merge(LList<T> list1, LList<T> list2, bool firstListInFront = true)
+    {
+        ThrowIfNull(list1);
+        ThrowIfNull(list2);
+        ThrowIfBothEmpty(list1, list2);
+
+        LList<T> newList = new();
+
+        // First specified list at front
+        if (firstListInFront)
+        {
+            LLNode<T> node = list1.First!;
+            while (node != null)
+            {
+                newList.AddLast(node.Value);
+
+                node = node.Next!;
+            }
+
+            node = list2.First!;
+            while (node != null)
+            {
+                newList.AddLast(node.Value);
+
+                node = node.Next!;
+            }
+        }
+        // Second specified list at front
+        else
+        {
+            LLNode<T> node = list2.First!;
+            while (node != null)
+            {
+                newList.AddLast(node.Value);
+
+                node = node.Next!;
+            }
+
+            node = list1.First!;
+            while (node != null)
+            {
+                newList.AddLast(node.Value);
+
+                node = node.Next!;
+            }
+        }
+
+        return newList;
+    }
+
+    #endregion
+
     #region Exceptions
 
     /// <summary>
     /// Throws if object specified is null.
     /// </summary>
     /// <param name="value">Value to check</param>
-    /// <exception cref="ArgumentNullException">Node is null.</exception>
+    /// <exception cref="ArgumentNullException">Object is null.</exception>
     private static void ThrowIfNull(object? value)
     {
         ArgumentNullException.ThrowIfNull(value, "Argument is null.");
@@ -1457,10 +1577,22 @@ public class LList<T> : IEnumerable<T> where T : IComparable<T>
     /// </summary>
     /// <param name="list">List to check.</param>
     /// <exception cref="InvalidOperationException">List is empty.</exception>
-    private static void ThrowIfEmpty(LList<T> list)
+    private static void ThrowIfEmpty(IEnumerable<T> list)
     {
-        if (list.IsEmpty())
-            throw new InvalidOperationException("List is empty.");
+        if (!list.Any())
+            throw new InvalidOperationException(nameof(list));
+    }
+
+    /// <summary>
+    /// Throws if both lists are empty.
+    /// </summary>
+    /// <param name="list1">First list to check.</param>
+    /// <param name="list2">Second list to check.</param>
+    /// <exception cref="InvalidOperationException">Both lists are empty.</exception>
+    private static void ThrowIfBothEmpty(LList<T> list1, LList<T> list2)
+    {
+        if (list1.IsEmpty() && list2.IsEmpty())
+        throw new InvalidOperationException("Both list is empty.");
     }
 
     /// <summary>
