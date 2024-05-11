@@ -1,49 +1,38 @@
-﻿using System.Collections;
+using System.Collections;
 
-namespace DSA.Queues;
+namespace DSA.Stacks;
 
 /// <summary>
-/// Represents a first-in, last-out collection of items.
-/// This generic queue is implemented as a circular array.
+/// Represents a last-in, first-out collection of items.
 /// This class accepts null value for reference types.
 /// This class allows for duplicate values.
 /// </summary>
-public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
+public class MyStack<T> : IEnumerable<T> where T : IComparable<T>
 {
     #region Properties
 
     /// <summary>
-    /// Private property for the default capacity of the queue.
+    /// Private property for the default capacity of the stack.
     /// </summary>
     private readonly int m_DefaultCapacity = 16;
 
     /// <summary>
-    /// Private property containing the array holding all the items in the queue.
+    /// Private property containing the array holding all the items in the stack.
     /// </summary>
     private T[] m_Items;
 
     /// <summary>
-    /// Private property containing the pointer to the start of the queue.
-    /// </summary>
-    private int m_Head;
-
-    /// <summary>
-    /// Private property containing the pointer to the back of the queue.
-    /// </summary>
-    private int m_Tail;
-
-    /// <summary>
-    /// Private property containing the number of items in the queue.
+    /// Private property containing the number of items in the stack.
     /// </summary>
     private int m_Count;
 
     /// <summary>
-    /// Private property containing the max capacity of the queue.
+    /// Private property containing the max capacity of the stack.
     /// </summary>
     private int m_MaxCount;
 
     /// <summary>
-    /// Gets the number of items in the queue.
+    /// Gets the number of items in the stack.
     /// </summary>
     public int Count => m_Count;
 
@@ -68,24 +57,14 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
 
     #region Constructors
 
-    /// <summary>
-    /// Initializes a new empty queue with default capacity (16).
-    /// </summary>
-    public MyQueue()
+    public MyStack()
     {
         m_MaxCount = m_DefaultCapacity;
         m_Items    = new T[m_MaxCount];
         m_Count    = 0;
-        m_Head     = 0;
-        m_Tail     = 0;
     }
 
-    /// <summary>
-    /// Initializes a new empty queue with specified capacity.
-    /// </summary>
-    /// <param name="capacity">Capacity of the queue.</param>
-    /// <exception cref="ArgumentOutOfRangeException">Capacity is negative.</exception>
-    public MyQueue(int capacity)
+    public MyStack(int capacity)
     {
         ThrowIfNegative(capacity);
         ThrowIfTooLarge(capacity);
@@ -93,27 +72,15 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
         m_MaxCount = capacity;
         m_Items    = new T[m_MaxCount];
         m_Count    = 0;
-        m_Head     = 0;
-        m_Tail     = 0;
     }
 
-    /// <summary>
-    /// Initializes a new queue with items copied from the specified collection.
-    /// </summary>
-    /// <param name="collection">Collection to copy from.</param>
-    /// <remarks>
-    /// The capacity of the queue will be the same as the number of items in the queue.
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">Collection is null.</exception>
-    public MyQueue(IEnumerable<T> collection)
+    public MyStack(IEnumerable<T> collection)
     {
         ThrowIfNull(collection);
 
         m_MaxCount = collection.Count();
         m_Items    = new T[m_MaxCount];
         m_Count    = m_MaxCount;
-        m_Head     = 0;
-        m_Tail     = m_Count;
 
         int index = 0;
         foreach (T item in collection)
@@ -125,51 +92,54 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
 
     #endregion
 
-    #region Enqueue, Dequeue, Peek, Clear
+    #region Push, Pop, Peek, Clear
 
     /// <summary>
-    /// Inserts an item into the end of the queue.
+    /// Push an item to the top of the stack.
     /// </summary>
-    /// <param name="item">Item to insert.</param>
-    /// <remarks>The capacity of the queue will double in size when needed.</remarks>
-    public void Enqueue(T item)
+    /// <param name="item">Item to push.</param>
+    public void Push(T item)
     {
-        if (IsFull())
+        if (m_Count < m_Items.Length)
+        {
+            m_Items[m_Count] = item;
+            ++m_Count;
+        }
+        else
         {
             EnsureCapacity(m_Count + 1);
+            m_Items[m_Count] = item;
+            ++m_Count;
         }
-
-        m_Items[m_Tail] = item;
-        
-        MoveIndex(ref m_Tail);
-
-        ++m_Count;
     }
 
     /// <summary>
-    /// Removes and returns the item at the start of the queue.
+    /// Remove and return the item at the top of the stack.
     /// </summary>
-    /// <returns>Item at the start of the queue.</returns>
-    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
-    public T Dequeue()
+    /// <returns>Item at the top of the stack.</returns>
+    /// <exception cref="InvalidOperationException">Stack is empty.</exception>
+    public T Pop()
     {
         ThrowIfEmpty(m_Count);
 
-        T removed = m_Items[m_Head];
-        m_Items[m_Head] = default!;
+        int tempCount = m_Count - 1;
 
-        MoveIndex(ref m_Head);
+        T[] copy = m_Items;
+        T item   = copy[tempCount];
 
-        --m_Count;
-        return removed;
+        copy[tempCount] = default!;
+
+        m_Count = tempCount;
+
+        return item;
     }
 
     /// <summary>
-    /// Attempts to remove and return the item at the start of the queue.
+    /// Attempts to remove and return the item at the top of the stack.
     /// </summary>
-    /// <param name="item">Item at the start of the queue.</param>
+    /// <param name="item">Item at the top of the stack.</param>
     /// <returns>True if item is removed successfully; otherwise false.</returns>
-    public bool TryDequeue(out T item)
+    public bool TryPop(out T item)
     {
         if (IsEmpty())
         {
@@ -177,32 +147,38 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
             return false;
         }
 
-        item = m_Items[m_Head];
+        int tempCount = m_Count - 1;
 
-        MoveIndex(ref m_Head);
+        T[] copy = m_Items;
+        item   = copy[tempCount];
 
-        --m_Count;
+        copy[tempCount] = default!;
+
+        m_Count = tempCount;
+
         return true;
     }
 
     /// <summary>
-    /// Returns the item at the start of the queue. 
-    /// The queue remains unchanged.
+    /// Returns the item at the start of the stack. 
+    /// The stack remains unchanged.
     /// </summary>
-    /// <returns>Item at the start of the queue.</returns>
-    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    /// <returns>Item at the start of the stack.</returns>
+    /// <exception cref="InvalidOperationException">Stack is empty.</exception>
     public T Peek()
     {
         ThrowIfEmpty(m_Count);
 
-        return m_Items[m_Head];
+        T[] copy = m_Items;
+
+        return copy[m_Count - 1];
     }
 
     /// <summary>
-    /// Attempts to return the item at the start of the queue. 
-    /// The queue remains unchanged.
+    /// Attempts to return the item at the start of the stack. 
+    /// The stack remains unchanged.
     /// </summary>
-    /// <param name="item">Item at the start of the queue.</param>
+    /// <param name="item">Item at the start of the stack.</param>
     /// <returns>True if item exists and returned successully; otherwise false.</returns>
     public bool TryPeek(out T item)
     {
@@ -212,12 +188,14 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
             return false;
         }
 
-        item = m_Items[m_Head];
+        T[] copy = m_Items;
+        item = copy[m_Count - 1];
+
         return true;
     }
 
     /// <summary>
-    /// Clears the entire queue.
+    /// Clears the entire stack..
     /// </summary>
     public void Clear()
     {
@@ -226,25 +204,6 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
             Array.Clear(m_Items, 0, m_Count);
             m_Count = 0;
         }
-        
-        m_Head  = 0;
-        m_Tail  = 0;
-    }
-
-    /// <summary>
-    /// Private method to move the index of the queue.
-    /// </summary>
-    /// <param name="index">Index to move.</param>
-    /// <remarks>This method preserves the queue as a circular array.</remarks>
-    private void MoveIndex(ref int index)
-    {
-        int tempIndex = index + 1;
-        if (tempIndex == m_Items.Length)
-        {
-            tempIndex = 0;
-        }   
-
-        index = tempIndex;
     }
 
     #endregion
@@ -252,11 +211,11 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     #region Search
 
     /// <summary>
-    /// Determines if the specified item is in the queue.
+    /// Determines if the specified item is in the stack.
     /// </summary>
     /// <param name="item">Item to find.</param>
     /// <returns>True if item is found; otherwise false.</returns>
-    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    /// <exception cref="InvalidOperationException">Stack is empty.</exception>
     public bool Contains(T item)
     {
         ThrowIfEmpty(m_Count);
@@ -271,10 +230,10 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Finds and returns the minimum value in the queue.
+    /// Finds and returns the minimum value in the stack.
     /// </summary>
-    /// <returns>Minimum value in the queue.</returns>
-    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    /// <returns>Minimum value in the stack.</returns>
+    /// <exception cref="InvalidOperationException">Stack is empty.</exception>
     public T MinValue()
     {
         ThrowIfEmpty(m_Count);
@@ -290,10 +249,10 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Finds and returns the maximum value in the queue.
+    /// Finds and returns the maximum value in the stack.
     /// </summary>
-    /// <returns>Maximum value in the queue.</returns>
-    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    /// <returns>Maximum value in the stack.</returns>
+    /// <exception cref="InvalidOperationException">Stack is empty.</exception>
     public T MaxValue()
     {
         ThrowIfEmpty(m_Count);
@@ -313,27 +272,27 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     #region Get, Set, Index
 
     /// <summary>
-    /// Returns the value at the specified index of the queue.
+    /// Returns the value at the specified index of the stack.
     /// </summary>
     /// <param name="index">Index to get value from.</param>
     /// <returns>Value at specified index.</returns>
-    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    /// <exception cref="InvalidOperationException">Stack is empty.</exception>
     /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
     public T GetValue(int index)
     {
         ThrowIfEmpty(m_Count);
         ThrowIfIndexOutOfRange(index, m_Count - 1);
 
-        return m_Items[index];
+        return m_Items[index];  
     }
 
     /// <summary>
     /// Replaces the existing value with the specified value 
-    /// at the specified index of the queue.
+    /// at the specified index of the stack.
     /// </summary>
     /// <param name="index">Index to set value at.</param>
     /// <param name="value">Value to set.</param>
-    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    /// <exception cref="InvalidOperationException">Stack is empty.</exception>
     /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
     public void SetValue(int index, T value)
     {
@@ -344,11 +303,11 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Gets the first index of the value if it exists in the queue.
+    /// Gets the first index of the value if it exists in the stack.
     /// </summary>
     /// <param name="item">Value to find index of.</param>
     /// <returns>Index of the item if found; otherwise -1.</returns>
-    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    /// <exception cref="InvalidOperationException">Stack is empty.</exception>
     public int IndexOf(T item)
     {
         ThrowIfEmpty(m_Count);
@@ -363,11 +322,11 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Gets the last index of the value if it exists in the queue.
+    /// Gets the last index of the value if it exists in the stack.
     /// </summary>
     /// <param name="item">Value to find index of.</param>
     /// <returns>Index of the item if found; otherwise -1.</returns>
-    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    /// <exception cref="InvalidOperationException">Stack is empty.</exception>
     public int LastIndexOf(T item)
     {
         ThrowIfEmpty(m_Count);
@@ -386,7 +345,7 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     #region Capacity
 
     /// <summary>
-    /// Ensures the capacity of the queue is at least the specified capacity.
+    /// Ensures the capacity of the stack is at least the specified capacity.
     /// </summary>
     /// <param name="capacity">The minimum capacity to ensure.</param>
     /// <returns>New capacity of the queue.</returns>
@@ -407,9 +366,9 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Trims the excess spaces in the queue.
+    /// Trims the excess spaces in the stack.
     /// </summary>
-    /// <remarks>This method if attempt to reduce the size of the queue by 10%.</remarks>
+    /// <remarks>This method if attempt to reduce the size of the stack by 10%.</remarks>
     public void TrimExcess()
     {
         int halfCapacity = (int)(m_MaxCount * 0.9f);
@@ -422,7 +381,7 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Private method to expand the current max capacity of the queue by double the size.
+    /// Private method to expand the current max capacity of the stack by double the size.
     /// </summary>
     /// <param name="capacity">Minimum capacity to expand to.</param>
     private void ExpandCapacity(int capacity)
@@ -439,34 +398,8 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
             newCapacity = capacity;
         }
 
-        SetCapacity(newCapacity);
-    }
-
-    /// <summary>
-    /// Private method to set the capacity of the queue.
-    /// </summary>
-    /// <param name="capacity">Capacity of the queue.</param>
-    private void SetCapacity(int capacity)
-    {
-        T[] copy = new T[capacity];
-
-        if (m_Count > 0)
-        {
-            if (m_Head < m_Tail)
-            {
-                Array.Copy(m_Items, m_Head, copy, 0, m_Count);
-            }   
-            else
-            {
-                Array.Copy(m_Items, m_Head, copy, 0, m_Items.Length - m_Head);
-                Array.Copy(m_Items, 0, copy, m_Items.Length - m_Head, m_Tail);
-            }
-        }
-
-        m_Items    = copy;
-        m_MaxCount = capacity;
-        m_Head     = 0;
-        m_Tail     = (m_Count == m_MaxCount) ? 0 : m_Count; 
+        m_MaxCount = newCapacity;
+        Array.Resize(ref m_Items, newCapacity);
     }
 
     #endregion
@@ -474,27 +407,27 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     #region Utilities
 
     /// <summary>
-    /// Determines if the queue is empty.
+    /// Determines if the stack is empty.
     /// </summary>
-    /// <returns>True if list is empty; otherwise false.</returns>
+    /// <returns>True if stack is empty; otherwise false.</returns>
     public bool IsEmpty()
     {
         return m_Count == 0;
     }
 
     /// <summary>
-    /// Determines if the queue is full.
+    /// Determines if the stack is full.
     /// </summary>
-    /// <returns>True if list is full; otherwise false.</returns>
+    /// <returns>True if stack is full; otherwise false.</returns>
     public bool IsFull()
     {
         return m_Count == m_MaxCount;
     }
 
     /// <summary>
-    /// Copies all elements from the queue into an array.
+    /// Copies all elements from the stack into an array.
     /// </summary>
-    /// <returns>Array containing all the values from the queue.</returns>
+    /// <returns>Array containing all the values from the stack.</returns>
     public T[] ToArray()
     {
         if (IsEmpty())
@@ -505,9 +438,9 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Copies all elements from the queue into a list.
+    /// Copies all elements from the stack into a list.
     /// </summary>
-    /// <returns>List containing all the values from the queue.</returns>
+    /// <returns>List containing all the values from the stack.</returns>
     public List<T> ToList()
     {
         if (IsEmpty())
@@ -517,12 +450,13 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
         return copy;
     }
 
+
     #endregion
 
-    #region Enumerator
+    #region Enumerators
 
     /// <summary>
-    /// Gets the enumerator for this queue.
+    /// Gets the enumerator for this stack.
     /// </summary>
     /// <returns>Enumerator.</returns>
     public IEnumerator<T> GetEnumerator()
@@ -534,7 +468,7 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Gets the enumerator for this queue.
+    /// Gets the enumerator for this stack.
     /// </summary>
     /// <returns>Enumerator.</returns>
     IEnumerator IEnumerable.GetEnumerator()

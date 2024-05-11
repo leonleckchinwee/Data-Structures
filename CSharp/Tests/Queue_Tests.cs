@@ -310,7 +310,7 @@ public class Queue_Tests
             int capacity = q.MaxCount;
 
             Assert.That(initial, Is.EqualTo(0));
-            Assert.That(capacity, Is.EqualTo(1));
+            Assert.That(capacity, Is.EqualTo(16));
         }
 
         [Test]
