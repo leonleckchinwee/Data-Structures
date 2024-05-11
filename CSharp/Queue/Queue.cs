@@ -3,322 +3,498 @@
 namespace DSA.Queues;
 
 /// <summary>
-/// This is the implementation of a generic queue as a circular array.
-/// (First-in, First-out)
+/// Represents a first-in, last-out collection of items.
+/// This generic queue is implemented as a circular array.
 /// </summary>
-/// <remarks>This queue accepts null as a valid value for reference types 
-/// and allows duplicate elements.</remarks>
-public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection, IEnumerable
+public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
 {
     #region Properties
 
     /// <summary>
-    /// Default queue capacity.
+    /// Private property for the default capacity of the queue.
     /// </summary>
-    private readonly int DefaultCapacity = 16;
+    private readonly int m_DefaultCapacity = 16;
 
     /// <summary>
-    /// Holds all the items of the queue in an internal array.
+    /// Private property containing the array holding all the items in the queue.
     /// </summary>
-    private T[] Items;
+    private T[] m_Items;
 
     /// <summary>
-    /// The index of the first item.
+    /// Private property containing the pointer to the start of the queue.
     /// </summary>
-    private int Head;
+    private int m_Head;
 
     /// <summary>
-    /// The index of the next available position to enqueue.
+    /// Private property containing the pointer to the back of the queue.
     /// </summary>
-    private int Tail;
+    private int m_Tail;
 
     /// <summary>
-    /// The max capacity of the queue.
+    /// Private property containing the max capacity of the queue.
     /// </summary>
-    private int MaxCapacity;
+    private int m_MaxCount;
 
     /// <summary>
-    /// The number of items currently in queue.
+    /// Private property containing the number of items in the queue.
     /// </summary>
-    private int CurrentCount;
+    private int m_Count;
 
     /// <summary>
-    /// The max capacity of the queue.
+    /// Gets the number of items in the queue.
     /// </summary>
-    public int MaxCount => MaxCapacity;
+    public int Count => m_Count;
 
     /// <summary>
-    /// The number of items currently in queue.
+    /// Gets the max capacity of the queue.
     /// </summary>
-    public int Count    => CurrentCount;
+    public int MaxCount => m_MaxCount;
 
-    // Interface overrides (unused & unimplemented)
-    public bool IsSynchronized => false;
-    public object SyncRoot     => this;
+    /// <summary>
+    /// Square bracket operator for accessing value at specified index.
+    /// </summary>
+    /// <param name="index">Index of value.</param>
+    /// <returns>Value at the specified index.</returns>
+    /// <remarks>This list is zero-index.</remarks>
+    public T this[int index]
+    {
+        get => GetValue(index);
+        set => SetValue(index, value);
+    }
 
     #endregion
 
     #region Constructors
 
     /// <summary>
-    /// Initializes a new instance of an empty queue with default capacity of 16.
+    /// Initializes a new empty queue with default capacity (16).
     /// </summary>
-    public Queue()
+    public MyQueue()
     {
-        Items        = new T[DefaultCapacity];
-        MaxCapacity  = DefaultCapacity;
-        CurrentCount = 0;
-        Head         = 0;
-        Tail         = -1;
+        m_MaxCount = m_DefaultCapacity;
+        m_Items    = new T[m_MaxCount];
+        m_Count    = 0;
+        m_Head     = 0;
+        m_Tail     = 0;
     }
 
     /// <summary>
-    /// Initializes a new instance of an empty queue with specified capacity.
+    /// Initializes a new empty queue with specified capacity.
     /// </summary>
-    /// <param name="capacity">The max capacity.</param>
+    /// <param name="capacity">Capacity of the queue.</param>
     /// <exception cref="ArgumentOutOfRangeException">Capacity is negative.</exception>
-    public Queue(int capacity)
+    public MyQueue(int capacity)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 0, nameof(capacity));
+        ThrowIfNegative(capacity);
+        ThrowIfTooLarge(capacity);
 
-        Items        = new T[capacity];
-        MaxCapacity  = capacity;
-        CurrentCount = 0;
-        Head         = 0;
-        Tail         = -1;
+        m_MaxCount = capacity;
+        m_Items    = new T[m_MaxCount];
+        m_Count    = 0;
+        m_Head     = 0;
+        m_Tail     = 0;
     }
 
     /// <summary>
-    /// Initializes a new instance of queue that contains elements copied from the specified collection
-    /// and has the capacity equal to the number of elements copied.
+    /// Initializes a new queue with items copied from the specified collection.
     /// </summary>
-    /// <param name="collection">The collection whose elements are copied to the new queue.</param>
-    /// <exception cref="ArgumentNullException">Collection is null.</exception>
-    public Queue(IEnumerable<T> collection)
+    /// <param name="collection">Collection to copy from.</param>
+    /// <remarks>
+    /// The capacity of the queue will be the same as the number of items in the queue.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Collection is null.</exception>
+    public MyQueue(IEnumerable<T> collection)
     {
-        ArgumentNullException.ThrowIfNull(collection, nameof(collection));
+        ThrowIfNull(collection);
 
-        int capacity = collection.Count();
-        MaxCapacity  = capacity;
-        CurrentCount = capacity;
+        m_MaxCount = collection.Count();
+        m_Items    = new T[m_MaxCount];
+        m_Count    = m_MaxCount;
+        m_Head     = 0;
+        m_Tail     = m_Count;
 
-        int index    = 0;
-        Items        = new T[capacity];
-
+        int index = 0;
         foreach (T item in collection)
         {
-            Items[index++] = item;
+            m_Items[index] = item;
+            ++index;
         }
-
-        Head = 0;
-        Tail = CurrentCount - 1;
     }
 
     #endregion
 
-    #region Core
+    #region Enqueue, Dequeue, Peek, Clear
 
     /// <summary>
-    /// Adds an object to the end of the queue.
+    /// Inserts an item into the end of the queue.
     /// </summary>
-    /// <param name="item">The object to add.</param>
-    /// <remarks></remarks>
+    /// <param name="item">Item to insert.</param>
+    /// <remarks>The capacity of the queue will double in size when needed.</remarks>
     public void Enqueue(T item)
     {
-        if (CurrentCount == MaxCapacity)
-            EnsureCapacity(MaxCapacity + 1);
+        if (IsFull())
+        {
+            EnsureCapacity(m_Count + 1);
+        }
 
-        Tail        = (Tail + 1) % MaxCapacity;
-        Items[Tail] = item;
+        m_Items[m_Tail] = item;
+        
+        MoveIndex(ref m_Tail);
 
-        ++CurrentCount;
+        ++m_Count;
     }
 
     /// <summary>
-    /// Removes and return the object at the beginning of the queue.
+    /// Removes and returns the item at the start of the queue.
     /// </summary>
-    /// <returns>The object that was removed.</returns>
-    /// <exception cref="InvalidOperationException">The queue is empty.</exception>
-    /// <remarks>The capacity remains unchanged, hence the removed object will become its default value.</remarks>
+    /// <returns>Item at the start of the queue.</returns>
+    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
     public T Dequeue()
     {
-        if (CurrentCount == 0)
-            throw new InvalidOperationException("Queue is empty.");
+        ThrowIfEmpty(m_Count);
 
-        T item      = Items[Head];
-        Items[Head] = default!;
-        Head        = (Head + 1) % MaxCapacity;
+        T removed = m_Items[m_Head];
+        m_Items[m_Head] = default!;
 
-        --CurrentCount;
-        return item;
+        MoveIndex(ref m_Head);
+
+        --m_Count;
+        return removed;
     }
 
     /// <summary>
-    /// Returns the object at the beginning of the queue without removing it.
+    /// Attempts to remove and return the item at the start of the queue.
     /// </summary>
-    /// <returns>The object at the beginning of the queue.</returns>
-    /// <exception cref="InvalidOperationException">The queue is empty.</exception>
-    public T Peek()
-    {
-        if (CurrentCount == 0)
-            throw new InvalidOperationException("The queue is empty.");
-
-        return Items[Head];
-    }
-
-    /// <summary>
-    /// Removes the object at the beginning of the queue, and copies it to the item parameter.
-    /// </summary>
-    /// <param name="item">The object that was removed.</param>
-    /// <returns>True if the object is successfully removed; false if the queue is empty.</returns>
+    /// <param name="item">Item at the start of the queue.</param>
+    /// <returns>True if item is removed successfully; otherwise false.</returns>
     public bool TryDequeue(out T item)
     {
-        if (CurrentCount == 0)
+        if (IsEmpty())
         {
             item = default!;
             return false;
         }
 
-        item      = Items[Head];
-        Items[Head] = default!;
-        Head        = (Head + 1) % MaxCapacity;
+        item = m_Items[m_Head];
 
-        --CurrentCount;
+        MoveIndex(ref m_Head);
+
+        --m_Count;
         return true;
     }
 
     /// <summary>
-    /// Returns a value that indicates whether there is an object at the beginning of the queue.
-    /// If one is present, it will be copied to the item parameter. The object is not removed from the queue.
+    /// Returns the item at the start of the queue. 
+    /// The queue remains unchanged.
     /// </summary>
-    /// <param name="item">Object at the beginning of the queue; otherwise, the default value of T.</param>
-    /// <returns>True if there is an object at the beginning of the queue; false if queue is empty.</returns>
+    /// <returns>Item at the start of the queue.</returns>
+    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    public T Peek()
+    {
+        ThrowIfEmpty(m_Count);
+
+        return m_Items[m_Head];
+    }
+
+    /// <summary>
+    /// Attempts to return the item at the start of the queue. 
+    /// The queue remains unchanged.
+    /// </summary>
+    /// <param name="item">Item at the start of the queue.</param>
+    /// <returns>True if item exists and returned successully; otherwise false.</returns>
     public bool TryPeek(out T item)
     {
-        if (CurrentCount == 0)
+        if (IsEmpty())
         {
             item = default!;
             return false;
         }
 
-        item = Items[Head];
+        item = m_Items[m_Head];
         return true;
     }
 
     /// <summary>
-    /// Removes all objects from the queue.
+    /// Clears the entire queue.
     /// </summary>
     public void Clear()
     {
-        Array.Clear(Items, 0, Count);
+        if (m_Count != 0)
+        {
+            Array.Clear(m_Items, 0, m_Count);
+            m_Count = 0;
+        }
         
-        CurrentCount = 0;
-        Head         = 0;
-        Tail         = 0;
+        m_Head  = 0;
+        m_Tail  = 0;
     }
 
     /// <summary>
-    /// Ensures that the capacity of the queue is at least the specified capacity.
+    /// Private method to move the index of the queue.
     /// </summary>
-    /// <param name="capacity">The minimum capacity to ensure.</param>
-    /// <returns>The new capacity of this queue.</returns>
-    /// <remarks>The capacity will always be power of 2.</remarks>
-    public int EnsureCapacity(int capacity)
+    /// <param name="index">Index to move.</param>
+    /// <remarks>This method preserves the queue as a circular array.</remarks>
+    private void MoveIndex(ref int index)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 0, nameof(capacity));
+        int tempIndex = index + 1;
+        if (tempIndex == m_Items.Length)
+        {
+            tempIndex = 0;
+        }   
 
-        if (MaxCapacity >= capacity)
-            return MaxCapacity;
-
-        int powerOfTwoCapacity = PowerOfTwo(capacity);
-        MaxCapacity            = powerOfTwoCapacity;
-        
-        Array.Resize(ref Items, MaxCapacity);
-
-        return MaxCapacity;
-    }
-
-    public void TrimExcess()
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool Contains(T item)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Get the array underlying the queue.
-    /// </summary>
-    /// <returns>Array containing all the items.</returns>
-    public T[] ToArray()
-    {
-        return Items;
+        index = tempIndex;
     }
 
     #endregion
 
-    #region Interface Overrides
-
-    public override string ToString()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override bool Equals(object? obj)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override int GetHashCode()
-    {
-        throw new NotImplementedException();
-    }
+    #region Search
 
     /// <summary>
-    /// Copies the elements of the collection to an array, starting at a particular array index.
+    /// Determines if the specified item is in the queue.
     /// </summary>
-    /// <param name="array">One-dimensional array that is the destination.</param>
-    /// <param name="index">The zero-based index in array to begin copying.</param>
-    /// <exception cref="ArgumentNullException">Array is null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Index is out of range.</exception>
-    /// <exception cref="ArgumentException">Array is multi-dimensional.</exception>
-    /// <exception cref="ArgumentException">Insufficient space.</exception>
-    /// <exception cref="ArgumentException">Type mismatch.</exception>
-    public void CopyTo(Array array, int index)
+    /// <param name="item">Item to find.</param>
+    /// <returns>True if item is found; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    public bool Contains(T item)
     {
-        // Exceptions
+        ThrowIfEmpty(m_Count);
+
+        for (int i = 0; i < m_Count; ++i)
         {
-            ArgumentNullException.ThrowIfNull(array, "Array is null.");
-            
-            if (index < 0 || index >= array.Length)
-                throw new ArgumentOutOfRangeException(nameof(index), "Index out of range.");
-
-            if (array.Rank != 1)
-                throw new ArgumentException("The array is multi-dimensional.");
-
-            if (array.Length - index < CurrentCount)
-                throw new ArgumentException("The destination array is not large enough.");
-
-            if (array.GetType().GetElementType() != typeof(T))
-                throw new ArgumentException("The array type does not match.");
+            if (m_Items[i].Equals(item))
+                return true;
         }
 
-        Array.Copy(Items, 0, array, index, Count);
+        return false;
+    }
+
+    #endregion
+
+    #region Get, Set, Index
+
+    /// <summary>
+    /// Returns the value at the specified index of the queue.
+    /// </summary>
+    /// <param name="index">Index to get value from.</param>
+    /// <returns>Value at specified index.</returns>
+    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    public T GetValue(int index)
+    {
+        ThrowIfEmpty(m_Count);
+        ThrowIfIndexOutOfRange(index, m_Count - 1);
+
+        return m_Items[index];
     }
 
     /// <summary>
-    /// Returns an enumerator that iterates through the queue.
+    /// Replaces the existing value with the specified value 
+    /// at the specified index of the queue.
     /// </summary>
-    /// <returns>Enumerator</returns>
+    /// <param name="index">Index to set value at.</param>
+    /// <param name="value">Value to set.</param>
+    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    public void SetValue(int index, T value)
+    {
+        ThrowIfEmpty(m_Count);
+        ThrowIfIndexOutOfRange(index, m_Count - 1);
+
+        m_Items[index] = value;
+    }
+
+    /// <summary>
+    /// Gets the first index of the value if it exists in the list.
+    /// </summary>
+    /// <param name="item">Value to find index of.</param>
+    /// <returns>Index of the item if found; otherwise -1.</returns>
+    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    public int IndexOf(T item)
+    {
+        ThrowIfEmpty(m_Count);
+
+        for (int i = 0; i < m_Count; ++i)
+        {
+            if (m_Items[i].Equals(item))
+                return i;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Gets the last index of the value if it exists in the list.
+    /// </summary>
+    /// <param name="item">Value to find index of.</param>
+    /// <returns>Index of the item if found; otherwise -1.</returns>
+    /// <exception cref="InvalidOperationException">Queue is empty.</exception>
+    public int LastIndexOf(T item)
+    {
+        ThrowIfEmpty(m_Count);
+
+        for (int i = m_Count - 1; i >= 0; --i)
+        {
+            if (m_Items[i].Equals(item))
+                return i;
+        }
+
+        return -1;
+    }
+
+    #endregion
+
+    #region Capacity
+
+    /// <summary>
+    /// Ensures the capacity of the queue is at least the specified capacity.
+    /// </summary>
+    /// <param name="capacity">The minimum capacity to ensure.</param>
+    /// <returns>New capacity of the queue.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Capacity is negative.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Capacity is too large.</exception>
+    public int EnsureCapacity(int capacity)
+    {
+        ThrowIfNegative(capacity);
+        ThrowIfTooLarge(capacity);
+
+        // Only resize if specified capacity is larger than current capacity
+        if (m_MaxCount < capacity)
+        {
+            ExpandCapacity(capacity);
+        }
+
+        return m_MaxCount;
+    }
+
+    /// <summary>
+    /// Trims the excess spaces in the queue.
+    /// </summary>
+    /// <remarks>This method if attempt to reduce the size of the queue by 10%.</remarks>
+    public void TrimExcess()
+    {
+        int halfCapacity = (int)(m_MaxCount * 0.9f);
+
+        if (m_Count <= halfCapacity)
+        {
+            m_MaxCount = halfCapacity;
+            Array.Resize(ref m_Items, m_MaxCount);
+        }
+    }
+
+    /// <summary>
+    /// Private method to expand the current max capacity of the queue by double the size.
+    /// </summary>
+    /// <param name="capacity">Minimum capacity to expand to.</param>
+    private void ExpandCapacity(int capacity)
+    {
+        int newCapacity = m_MaxCount * 2;
+
+        if (newCapacity > Array.MaxLength)
+        {
+            newCapacity = Array.MaxLength;
+        }
+
+        if (newCapacity < capacity)
+        {
+            newCapacity = capacity;
+        }
+
+        SetCapacity(newCapacity);
+    }
+
+    /// <summary>
+    /// Private method to set the capacity of the queue.
+    /// </summary>
+    /// <param name="capacity">Capacity of the queue.</param>
+    private void SetCapacity(int capacity)
+    {
+        T[] copy = new T[capacity];
+
+        if (m_Count > 0)
+        {
+            if (m_Head < m_Tail)
+            {
+                Array.Copy(m_Items, m_Head, copy, 0, m_Count);
+            }   
+            else
+            {
+                Array.Copy(m_Items, m_Head, copy, 0, m_Items.Length - m_Head);
+                Array.Copy(m_Items, 0, copy, m_Items.Length - m_Head, m_Tail);
+            }
+        }
+
+        m_Items    = copy;
+        m_MaxCount = capacity;
+        m_Head     = 0;
+        m_Tail     = (m_Count == m_MaxCount) ? 0 : m_Count; 
+    }
+
+    #endregion
+
+    #region Utilities
+
+    /// <summary>
+    /// Determines if the queue is empty.
+    /// </summary>
+    /// <returns>True if list is empty; otherwise false.</returns>
+    public bool IsEmpty()
+    {
+        return m_Count == 0;
+    }
+
+    /// <summary>
+    /// Determines if the queue is full.
+    /// </summary>
+    /// <returns>True if list is full; otherwise false.</returns>
+    public bool IsFull()
+    {
+        return m_Count == m_MaxCount;
+    }
+
+    /// <summary>
+    /// Copies all elements from the queue into an array.
+    /// </summary>
+    /// <returns>Array containing all the values from the queue.</returns>
+    public T[] ToArray()
+    {
+        if (IsEmpty())
+            return [];
+
+        T[] copy = m_Items;
+        return copy;
+    }
+
+    /// <summary>
+    /// Copies all elements from the queue into a list.
+    /// </summary>
+    /// <returns>List containing all the values from the queue.</returns>
+    public List<T> ToList()
+    {
+        if (IsEmpty())
+            return [];
+
+        List<T> copy = m_Items.ToList();
+        return copy;
+    }
+
+    #endregion
+
+    #region Enumerator
+
+    /// <summary>
+    /// Gets the enumerator for this queue.
+    /// </summary>
+    /// <returns>Enumerator.</returns>
     public IEnumerator<T> GetEnumerator()
     {
-        return new QueueEnumerator(this);
+        foreach (T item in m_Items)
+        {
+            yield return item;
+        }
     }
 
     /// <summary>
-    /// Returns an enumerator that iterates through the queue.
+    /// Gets the enumerator for this queue.
     /// </summary>
     /// <returns>Enumerator.</returns>
     IEnumerator IEnumerable.GetEnumerator()
@@ -328,68 +504,60 @@ public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection, IEn
 
     #endregion
 
-    #region Private
+    #region Exceptions
 
     /// <summary>
-    /// Returns the next larger integer thats power of 2.
+    /// Throws if object is null.
     /// </summary>
-    /// <param name="number">Reference number.</param>
-    /// <returns>Power of 2 result.</returns>
-    private int PowerOfTwo(int number)
+    /// <param name="item">Item to check.</param>
+    /// <exception cref="InvalidOperationException">Object is null.</exception>
+    private static void ThrowIfNull(object? item)
     {
-        --number;
-
-        number |= number >> 1;
-        number |= number >> 2;
-        number |= number >> 4;
-        number |= number >> 8;
-        number |= number >> 16;
-
-        return number + 1;
+        if (item == null)
+            throw new InvalidOperationException(nameof(item));
     }
 
     /// <summary>
-    /// IEnumerable<T> Interface
+    /// Throws if item is negative.
     /// </summary>
-    private class QueueEnumerator : IEnumerator<T>
+    /// <param name="item">Item to check.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Item is negative.</exception>
+    private static void ThrowIfNegative(int item)
     {
-        private readonly Queue<T> Queue;
-        private int Index;
+        ArgumentOutOfRangeException.ThrowIfNegative(item);
+    }
 
-        object IEnumerator.Current => Current!;
+    /// <summary>
+    /// Throws if item is too large.
+    /// </summary>
+    /// <param name="item">Item to check.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Item is too large.</exception>
+    private static void ThrowIfTooLarge(int item)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(item, int.MaxValue, nameof(item));
+    }
 
-        public QueueEnumerator(Queue<T> Queue)
-        {
-            this.Queue = Queue;
-            Index      = -1;
-        }
+    /// <summary>
+    /// Throws if item is zero.
+    /// </summary>
+    /// <param name="item">Item to check.</param>
+    /// <exception cref="InvalidOperationException">Item is empty.</exception>
+    private static void ThrowIfEmpty(int item)
+    {
+        if (item == 0)
+            throw new InvalidOperationException(nameof(item));
+    }
 
-        public T Current
-        {
-            get
-            {
-                if (Index < 0 || Index >= Queue.Count)
-                    throw new IndexOutOfRangeException();
-
-                return Queue.ToArray()[(Queue.Head + Index) % Queue.MaxCapacity];
-            }
-        }
-
-        public bool MoveNext()
-        {
-            ++Index;
-            return Index < Queue.Count;
-        }
-
-        public void Reset()
-        {
-            Index = -1;
-        }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+    /// <summary>
+    /// Throws if index is out of range.
+    /// </summary>
+    /// <param name="index">Index to check.</param>
+    /// <param name="count">Count to check.</param>
+    /// <exception cref="IndexOutOfRangeException">Index out of range.</exception>
+    private static void ThrowIfIndexOutOfRange(int index, int count)
+    {
+        if (index < 0 || index > count)
+            throw new IndexOutOfRangeException(nameof(index));
     }
 
     #endregion

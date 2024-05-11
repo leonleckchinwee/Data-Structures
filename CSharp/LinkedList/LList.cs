@@ -6,6 +6,7 @@ namespace DSA.LinkedLists;
 /// Doubly linked-list class.
 /// This class accepts null value for reference types.
 /// This class allows for duplicate values.
+/// This class does not contain cycles as it does not contain duplicate nodes.
 /// </summary>
 public class LList<T> : IEnumerable<T> where T : IComparable<T>
 {
@@ -996,7 +997,7 @@ public class LList<T> : IEnumerable<T> where T : IComparable<T>
     #region Get, Set, Index
 
     /// <summary>
-    /// Returns the value at the specified index of the tree.
+    /// Returns the value at the specified index of the list.
     /// </summary>
     /// <param name="index">Index to get value from.</param>
     /// <returns>Value at specified index.</returns>
@@ -1027,7 +1028,7 @@ public class LList<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Returns the node at the specified index of the tree.
+    /// Returns the node at the specified index of the list.
     /// </summary>
     /// <param name="index">Index to get node from.</param>
     /// <returns>Node at specified index.</returns>
@@ -1335,7 +1336,7 @@ public class LList<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Copies all elements from the list into an array.
+    /// Copies all elements from the linked-list into an array.
     /// </summary>
     /// <returns>Array containing all the values from the list.</returns>
     public T[]? ToArray()
@@ -1359,7 +1360,7 @@ public class LList<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     /// <summary>
-    /// Copies all elements from the list into a list.
+    /// Copies all elements from the linked-list into a list.
     /// </summary>
     /// <returns>List containing all the values from the list.</returns>
     public List<T>? ToList()
@@ -1376,11 +1377,6 @@ public class LList<T> : IEnumerable<T> where T : IComparable<T>
             current = current.Next!;
         }
         return list;
-    }
-
-    public bool HasCycle()
-    {
-        throw new NotImplementedException();
     }
 
     /// <summary>

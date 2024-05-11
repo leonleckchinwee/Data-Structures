@@ -1,143 +1,62 @@
-using System.Collections;
-
 namespace DSA.Queues.Tests;
 
 public class Queue_Tests
 {
     [TestFixture]
-    public class QueueTests_Constructors
+    public class QueueTests_Constructor
     {
         [Test]
-        public void DefaultConstructor_InitializesQueueWithDefaultCapacity()
+        public void Constructor_EmptyQueue()
         {
-            // Arrange
-            const int expectedDefaultCapacity = 16;
+            MyQueue<int> queue = new();
 
-            // Act
-            var queue = new Queue<int>();
-
-            // Assert
-            Assert.That(queue.MaxCount, Is.EqualTo(expectedDefaultCapacity));
+            Assert.That(queue, !Is.Null);
             Assert.That(queue.Count, Is.EqualTo(0));
+            Assert.That(queue.MaxCount, Is.EqualTo(16));
         }
 
-        [TestCase(0)]
-        [TestCase(10)]
-        [TestCase(100)]
-        public void CapacityConstructor_InitializesQueueWithGivenCapacity(int capacity)
+        [Test]
+        public void Constructor_SpecifiedCapacity()
         {
-            // Act
-            var queue = new Queue<int>(capacity);
+            MyQueue<int> queue = new(20);
 
-            // Assert
-            Assert.That(queue.MaxCount, Is.EqualTo(capacity));
+            Assert.That(queue, !Is.Null);
             Assert.That(queue.Count, Is.EqualTo(0));
+            Assert.That(queue.MaxCount, Is.EqualTo(20));
         }
 
         [Test]
-        public void CapacityConstructor_ThrowsArgumentOutOfRangeException_WhenCapacityIsNegative()
+        public void Constructor_SpecifiedCapacity_NegativeCapacity()
         {
-            // Arrange
-            int capacity = -1;
-
-            // Act & Assert
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Queue<int>(capacity));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new MyQueue<int>(-1));
         }
 
         [Test]
-        public void CollectionConstructor_InitializesQueueWithCollectionItems()
+        public void Constructor_EnumeratorNull()
         {
-            // Arrange
-            List<int> collection = new List<int> { 1, 2, 3, 4, 5 };
-
-            // Act
-            var queue = new Queue<int>(collection);
-
-            // Assert
-            Assert.That(queue.Count, Is.EqualTo(collection.Count));
-            Assert.That(queue.MaxCount, Is.EqualTo(collection.Count));
-            CollectionAssert.AreEqual(collection, queue.ToArray());
+            Assert.Throws<InvalidOperationException>(() => new MyQueue<int>(null!));
         }
 
         [Test]
-        public void CollectionConstructor_ThrowsArgumentNullException_WhenCollectionIsNull()
+        public void Constructor_Enumerator_Array()
         {
-            // Arrange
-            IEnumerable<int> collection = null!;
+            MyQueue<int> queue = new([1, 2, 3]);
 
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => new Queue<int>(collection));
-        }
-    }
-
-    [TestFixture]
-    public class QueueTests_EnsureCapacity
-    {
-        [TestCase(0)]
-        [TestCase(1)]
-        [TestCase(2)]
-        [TestCase(3)]
-        [TestCase(4)]
-        public void EnsureCapacity_SetsCapacityToPowerOfTwoWhenRequestedCapacityIsLessThanCurrentCapacity(int requestedCapacity)
-        {
-            // Arrange
-            var queue = new Queue<int>(2);
-            int expectedCapacity = requestedCapacity == 3 ? 4 : Math.Max(requestedCapacity, 2);
-
-            // Act
-            queue.EnsureCapacity(requestedCapacity);
-
-            // Assert
-            Assert.That(queue.MaxCount, Is.EqualTo(expectedCapacity));
-        }
-
-        [TestCase(5)]
-        [TestCase(6)]
-        [TestCase(7)]
-        [TestCase(8)]
-        public void EnsureCapacity_SetsCapacityToPowerOfTwoWhenRequestedCapacityIsMoreThanCurrentCapacity(int requestedCapacity)
-        {
-            // Arrange
-            var queue = new Queue<int>(2);
-            int expectedCapacity = 8;
-
-            // Act
-            queue.EnsureCapacity(requestedCapacity);
-
-            // Assert
-            Assert.That(queue.MaxCount, Is.EqualTo(expectedCapacity));
-        }
-
-        [TestCase(9)]
-        [TestCase(10)]
-        [TestCase(11)]
-        [TestCase(12)]
-        [TestCase(13)]
-        [TestCase(14)]
-        [TestCase(15)]
-        [TestCase(16)]
-        public void EnsureCapacity_SetsCapacityToNextPowerOfTwoWhenRequestedCapacityIsGreaterThanCurrentCapacity(int requestedCapacity)
-        {
-            // Arrange
-            var queue = new Queue<int>(2);
-            int expectedCapacity = 16;
-
-            // Act
-            queue.EnsureCapacity(requestedCapacity);
-
-            // Assert
-            Assert.That(queue.MaxCount, Is.EqualTo(expectedCapacity));
+            Assert.That(queue, !Is.Null);
+            Assert.That(queue.Count, Is.EqualTo(3));
+            Assert.That(queue.MaxCount, Is.EqualTo(3));
+            Assert.That(queue.ToArray(), Is.EquivalentTo(new int[] {1, 2, 3}));
         }
 
         [Test]
-        public void EnsureCapacity_ThrowsArgumentOutOfRangeException_WhenRequestedCapacityIsNegative()
+        public void Constructor_Enumerator_List()
         {
-            // Arrange
-            var queue = new Queue<int>();
-            int requestedCapacity = -1;
+            MyQueue<int> queue = new(new List<int>() {1, 2, 3});
 
-            // Act & Assert
-            Assert.Throws<ArgumentOutOfRangeException>(() => queue.EnsureCapacity(requestedCapacity));
+            Assert.That(queue, !Is.Null);
+            Assert.That(queue.Count, Is.EqualTo(3));
+            Assert.That(queue.MaxCount, Is.EqualTo(3));
+            Assert.That(queue.ToArray(), Is.EquivalentTo(new int[] {1, 2, 3}));
         }
     }
 
@@ -145,84 +64,32 @@ public class Queue_Tests
     public class QueueTests_Enqueue
     {
         [Test]
-        public void Enqueue_AddsItemToQueueWhenQueueIsEmpty()
+        public void Enqueue_Empty_EnqueueOne()
         {
-            // Arrange
-            var queue = new Queue<int>();
-            int item = 42;
+            MyQueue<int> q= new(2);
+            q.Enqueue(1);
 
-            // Act
-            queue.Enqueue(item);
-
-            // Assert
-            Assert.That(queue.Count, Is.EqualTo(1));
-            Assert.That(queue.ToArray()[0], Is.EqualTo(item));
+            Assert.That(q.ToArray(), Is.EquivalentTo(new int[] { 1, 0 }));
         }
 
         [Test]
-        public void Enqueue_AddsItemToQueueWhenQueueIsNotFull()
+        public void Enqueue_NeedToResize()
         {
-            // Arrange
-            var queue = new Queue<int>(4);
-            queue.Enqueue(1);
-            queue.Enqueue(2);
+            MyQueue<int> q = new(2);
+            q.Enqueue(1);
+            q.Enqueue(2);
 
-            int item = 3;
+            int capacity1 = q.MaxCount;
+            int[] array1 = q.ToArray()!;
 
-            // Act
-            queue.Enqueue(item);
+            q.Enqueue(3);
+            int capacity2 = q.MaxCount;
+            int[] array2 = q.ToArray()!;
 
-            // Assert
-            Assert.That(queue.Count, Is.EqualTo(3));
-            Assert.That(queue.ToArray()[2], Is.EqualTo(item));
-        }
-
-        [Test]
-        public void Enqueue_DoublesSizeWhenQueueIsFull()
-        {
-            // Arrange
-            var queue = new Queue<int>(2);
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-
-            int item = 3;
-            int expectedCapacity = 4;
-
-            // Act
-            queue.Enqueue(item);
-
-            // Assert
-            Assert.That(queue.Count, Is.EqualTo(3));
-            Assert.That(queue.MaxCount, Is.EqualTo(expectedCapacity));
-            Assert.That(queue.ToArray(), Is.EqualTo(new[] { 1, 2, 3, 0 }));
-        }
-
-        [Test]
-        public void Enqueue_Strings()
-        {
-            var queue = new Queue<string>(4);
-            queue.Enqueue("One");
-            queue.Enqueue("Two");
-
-            Assert.That(queue.Count, Is.EqualTo(2));
-            Assert.That(queue.MaxCount, Is.EqualTo(4));
-            Assert.That(queue.ToArray(), Is.EqualTo(new[] { "One", "Two", null, null }));
-        }
-
-        [Test]
-        public void Enqueue_LargeSize()
-        {
-            var queue = new Queue<int>(100);
-
-            for (int i = 0; i < 100; ++i)
-            {
-                queue.Enqueue(i);
-            }
-            queue.Enqueue(100);
-
-            Assert.That(queue.Count, Is.EqualTo(101));
-            Assert.That(queue.MaxCount, Is.EqualTo(128));
-            Assert.That(queue.ToArray()[100], Is.EqualTo(100));
+            Assert.That(capacity1, Is.EqualTo(2));
+            Assert.That(capacity2, Is.EqualTo(4));
+            Assert.That(array1, Is.EquivalentTo(new int[] { 1, 2 }));
+            Assert.That(array2, Is.EquivalentTo(new int[] { 1, 2, 3, 0 }));
         }
     }
 
@@ -230,342 +97,490 @@ public class Queue_Tests
     public class QueueTests_Dequeue
     {
         [Test]
-        public void Dequeue_RemovesItemFromQueueWhenQueueIsNotEmpty()
+        public void Dequeue_Empty()
         {
-            // Arrange
-            var queue = new Queue<int>(3);
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
+            MyQueue<int> q = new();
 
-            // Act
-            int dequeuedItem = queue.Dequeue();
-
-            // Assert
-            Assert.That(dequeuedItem, Is.EqualTo(1));
-            Assert.That(queue.Count, Is.EqualTo(2));
-            Assert.That(queue.ToArray(), Is.EqualTo(new[] { 0, 2, 3 }));
+            Assert.Throws<InvalidOperationException>(() => q.Dequeue());
         }
 
         [Test]
-        public void Dequeue_WrapsAroundWhenHeadReachesEnd()
+        public void Dequeue_One()
         {
-            // Arrange
-            var queue = new Queue<int>(4);
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
-            queue.Enqueue(4);
-            queue.Dequeue();
-            queue.Dequeue();
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            int item = q.Dequeue();
 
-            // Act
-            int dequeuedItem = queue.Dequeue();
-
-            // Assert
-            Assert.That(dequeuedItem, Is.EqualTo(3));
-            Assert.That(queue.Count, Is.EqualTo(1));
-            Assert.That(queue.ToArray(), Is.EqualTo(new[] { 0, 0, 0, 4 }));
-        }  
-
-        [Test]
-        public void Dequeue_WrapsAroundWhenHeadReachesEnd_Empty()
-        {
-            // Arrange
-            var queue = new Queue<int>(4);
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
-            queue.Enqueue(4);
-            queue.Dequeue();
-            queue.Dequeue();
-
-            // Act
-            int dequeuedItem1 = queue.Dequeue();
-            var dequeuedItem2 = queue.Dequeue();
-
-            // Assert
-            Assert.That(dequeuedItem1, Is.EqualTo(3));
-            Assert.That(dequeuedItem2, Is.EqualTo(4));
-            Assert.That(queue.Count, Is.EqualTo(0));
-            Assert.That(queue.ToArray(), Is.EqualTo(new[] { 0, 0, 0, 0 }));
-        } 
-
-        [Test]
-        public void Dequeue_ThrowsInvalidOperationException_WhenQueueIsEmpty()
-        {
-            // Arrange
-            var queue = new Queue<int>();
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => queue.Dequeue());
-        }
-    }
-
-    [TestFixture]
-    public class QueueTests_CopyTo
-    {
-        [Test]
-        public void CopyTo_CopiesQueueItemsToArray()
-        {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
-
-            int[] array = new int[3];
-
-            // Act
-            queue.CopyTo(array, 0);
-
-            // Assert
-            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, array);
+            Assert.That(item, Is.EqualTo(1));
+            Assert.That(q.Count, Is.EqualTo(0));
+            Assert.That(q.MaxCount, Is.EqualTo(16));
         }
 
         [Test]
-        public void CopyTo_CopiesQueueItemsToArrayAtSpecifiedIndex()
+        public void Dequeue_Two()
         {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            q.Enqueue(2);
 
-            int[] array = new int[5];
+            int item = q.Dequeue();
 
-            // Act
-            queue.CopyTo(array, 2);
-
-            // Assert
-            CollectionAssert.AreEqual(new int[] { 0, 0, 1, 2, 3 }, array);
+            Assert.That(item, Is.EqualTo(1));
+            Assert.That(q.Count, Is.EqualTo(1));
+            Assert.That(q.MaxCount, Is.EqualTo(16));
         }
 
         [Test]
-        public void CopyTo_ThrowsArgumentNullException_WhenArrayIsNull()
+        public void Dequeue_Three()
         {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            q.Enqueue(2);
 
-            Array array = null!;
+            int item = q.Dequeue();
+            q.Enqueue(3);
 
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => queue.CopyTo(array, 0));
+            int item2 = q.Dequeue();
+
+            Assert.That(item, Is.EqualTo(1));
+            Assert.That(item2, Is.EqualTo(2));
+            Assert.That(q.Count, Is.EqualTo(1));
+            Assert.That(q.MaxCount, Is.EqualTo(16));
         }
 
         [Test]
-        public void CopyTo_ThrowsArgumentOutOfRangeException_WhenIndexIsNegative()
+        public void TryDequeue_Empty()
         {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
+            MyQueue<int> q = new();
+            bool removed = q.TryDequeue(out var item);
 
-            int[] array = new int[3];
-            int index = -1;
-
-            // Act & Assert
-            Assert.Throws<ArgumentOutOfRangeException>(() => queue.CopyTo(array, index));
+            Assert.That(removed, Is.False);
+            Assert.That(item, Is.EqualTo(0));
         }
 
         [Test]
-        public void CopyTo_ThrowsArgumentOutOfRangeException_WhenIndexIsBeyondArrayLength()
+        public void TryDequeue_One()
         {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            bool removed = q.TryDequeue(out var item);
 
-            int[] array = new int[3];
-            int index = 4;
-
-            // Act & Assert
-            Assert.Throws<ArgumentOutOfRangeException>(() => queue.CopyTo(array, index));
+            Assert.That(removed, Is.True);
+            Assert.That(item, Is.EqualTo(1));
+            Assert.That(q.Count, Is.EqualTo(0));
+            Assert.That(q.MaxCount, Is.EqualTo(16));
         }
 
         [Test]
-        public void CopyTo_ThrowsArgumentException_WhenArrayIsNotLargeEnough()
+        public void TryDequeue_Two()
         {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            q.Enqueue(2);
 
-            int[] array = new int[2];
-            int index = 0;
+            bool removed = q.TryDequeue(out var item);
 
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => queue.CopyTo(array, index));
-        }
-
-    }
-
-    [TestFixture]
-    public class QueueTests_Enumerators
-    {
-        [Test]
-        public void GetEnumerator_ReturnsEnumeratorForQueue()
-        {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
-
-            // Act
-            IEnumerator<int> enumerator = queue.GetEnumerator();
-
-            // Assert
-            int[] expectedItems = [1, 2, 3];
-            int index = 0;
-            while (enumerator.MoveNext())
-            {
-                Assert.That(enumerator.Current, Is.EqualTo(expectedItems[index++]));
-            }
-            Assert.That(index, Is.EqualTo(expectedItems.Length));
+            Assert.That(removed, Is.True);
+            Assert.That(item, Is.EqualTo(1));
+            Assert.That(q.Count, Is.EqualTo(1));
+            Assert.That(q.MaxCount, Is.EqualTo(16));
         }
 
         [Test]
-        public void NonGenericGetEnumerator_ReturnsEnumeratorForQueue()
+        public void TryDequeue_Three()
         {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            q.Enqueue(2);
 
-            // Act
-            IEnumerator enumerator = ((IEnumerable)queue).GetEnumerator();
+            bool removed1 = q.TryDequeue(out var item);
+            q.Enqueue(3);
 
-            // Assert
-            int[] expectedItems = [1, 2, 3];
-            int index = 0;
-            while (enumerator.MoveNext())
-            {
-                Assert.That(enumerator.Current, Is.EqualTo(expectedItems[index++]));
-            }
-            Assert.That(index, Is.EqualTo(expectedItems.Length));
-        }
+            bool removed2 = q.TryDequeue(out var item2);
 
-        [Test]
-        public void GetEnumerator_ReturnsDistinctEnumerators()
-        {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
-
-            // Act
-            IEnumerator<int> enumerator1 = queue.GetEnumerator();
-            IEnumerator<int> enumerator2 = queue.GetEnumerator();
-
-            // Assert
-            Assert.That(enumerator1, Is.Not.EqualTo(enumerator2));
-        }
-
-        [Test]
-        public void GetEnumerator_EnumeratesQueueInCorrectOrder()
-        {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Dequeue();
-            queue.Enqueue(3);
-
-            // Act
-            IEnumerator<int> enumerator = queue.GetEnumerator();
-
-            // Assert
-            int[] expectedItems = [2, 3];
-            int index = 0;
-            while (enumerator.MoveNext())
-            {
-                Assert.That(enumerator.Current, Is.EqualTo(expectedItems[index++]));
-            }
-            Assert.That(index, Is.EqualTo(expectedItems.Length));
+            Assert.That(removed1, Is.True);
+            Assert.That(removed2, Is.True);
+            Assert.That(item, Is.EqualTo(1));
+            Assert.That(item2, Is.EqualTo(2));
+            Assert.That(q.Count, Is.EqualTo(1));
+            Assert.That(q.MaxCount, Is.EqualTo(16));
         }
     }
 
     [TestFixture]
-    public class QueueTests_Clear
+    public class QueueTests_Peek
     {
         [Test]
-        public void Clear_SetsCurrentCountToZero()
+        public void Peek_Empty()
         {
-            // Arrange
-            var queue = new Queue<int>();
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
+            MyQueue<int> q = new();
 
-            // Act
-            queue.Clear();
-
-            // Assert
-            Assert.That(queue.Count, Is.EqualTo(0));
+            Assert.Throws<InvalidOperationException>(() => q.Peek());
         }
 
         [Test]
-        public void Clear_ResetsHeadAndTailIndicesToZero()
+        public void Peek_One()
         {
-            // Arrange
-            var queue = new Queue<int>(4);
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
-            queue.Dequeue();
-            queue.Dequeue();
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            int item = q.Peek();
 
-            // Act
-            queue.Clear();
-
-            // Assert
-            Assert.That(queue.ToArray()[0], Is.EqualTo(0));
+            Assert.That(q, Has.Count.EqualTo(1));
+            Assert.That(item, Is.EqualTo(1));
         }
 
         [Test]
-        public void Clear_DoesNotChangeCapacity()
+        public void Peek_Two()
         {
-            // Arrange
-            var queue = new Queue<int>(8);
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
-            int initialCapacity = queue.MaxCount;
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            q.Enqueue(2);
 
-            // Act
-            queue.Clear();
+            int item = q.Peek();
 
-            // Assert
-            Assert.That(queue.MaxCount, Is.EqualTo(initialCapacity));
+            Assert.That(q, Has.Count.EqualTo(2));
+            Assert.That(item, Is.EqualTo(1));
         }
 
         [Test]
-        public void Clear_ClearsQueueContents()
+        public void TryPeek_Empty()
         {
-            // Arrange
-            var queue = new Queue<int>(3);
-            queue.Enqueue(1);
-            queue.Enqueue(2);
-            queue.Enqueue(3);
+            MyQueue<int> q = new();
+            bool removed = q.TryPeek(out var item);
+            
+            Assert.That(removed, Is.False);
+            Assert.That(item, Is.EqualTo(0));
+        }
 
-            // Act
-            queue.Clear();
+        [Test]
+        public void TryPeek_One()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            bool removed = q.TryPeek(out var item);
 
-            // Assert
-            Assert.That(queue.ToArray(), Is.EqualTo(new[] { 0, 0, 0 }));
+            Assert.That(q, Has.Count.EqualTo(1));
+            Assert.That(removed, Is.True);
+            Assert.That(item, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void TryPeek_Two()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            q.Enqueue(2);
+
+            bool removed = q.TryPeek(out var item);
+
+            Assert.That(q, Has.Count.EqualTo(2));
+            Assert.That(removed, Is.True);
+            Assert.That(item, Is.EqualTo(1));
         }
     }
 
+    [TestFixture]
+    public class QueueTests_EnsureCapacity
+    {
+        [Test]
+        public void EnsureCapacity_Negative()
+        {
+            MyQueue<int> q = new();
 
+            Assert.Throws<ArgumentOutOfRangeException>(() => q.EnsureCapacity(-1));
+        }
+        
+        [Test]
+        public void EnsureCapacity_Zero()
+        {
+            MyQueue<int> q = new();
+            q.EnsureCapacity(0);
 
+            Assert.That(q, Has.Count.EqualTo(0));
+            Assert.That(q.MaxCount, Is.EqualTo(16));
+        }
 
+        [Test]
+        public void EnsureCapacity_InitialSmaller()
+        {
+            MyQueue<int> q = new(0);
+            int initial = q.MaxCount;
+
+            q.EnsureCapacity(1);
+            int capacity = q.MaxCount;
+
+            Assert.That(initial, Is.EqualTo(0));
+            Assert.That(capacity, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void EnsureCapacity_CapacityTooLarge()
+        {
+            MyQueue<int> q = new();
+            q.EnsureCapacity(Array.MaxLength);
+
+            Assert.That(q.MaxCount, Is.EqualTo(Array.MaxLength));
+        }
+
+        [Test]
+        public void EnsureCapacity_DoubleCapacity()
+        {
+            MyQueue<int> q = new();
+            q.EnsureCapacity(20);
+
+            Assert.That(q.MaxCount, Is.EqualTo(32));
+        }
+    }
+
+    [TestFixture]
+    public class QueueTests_TrimExcess
+    {
+        [Test]
+        public void TrimExcess_Empty()
+        {
+            MyQueue<int> q = new(10);
+            q.TrimExcess();
+
+            Assert.That(q.MaxCount, Is.EqualTo(9));
+        }
+
+        [Test]
+        public void TrimExcess_FullToOneFreeSpace()
+        {
+            MyQueue<int> q = new(2);
+            q.Enqueue(1);
+            q.Enqueue(2);
+
+            int capacity1 = q.MaxCount;
+
+            q.Dequeue();
+            q.TrimExcess();
+
+            int capacity2 = q.MaxCount;
+
+            Assert.That(capacity1, Is.EqualTo(2));
+            Assert.That(capacity2, Is.EqualTo(1));
+        }
+    }
+
+    [TestFixture]
+    public class QueueTests_GetSet
+    {
+        [Test]
+        public void GetValue_Empty()
+        {
+            MyQueue<int> q = new();
+
+            Assert.Throws<InvalidOperationException>(() => q.GetValue(1));
+        }
+
+        [Test]
+        public void GetValue_IndexOutOfRange()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            Assert.Throws<IndexOutOfRangeException>(() => q.GetValue(1));
+        }
+
+        [Test]
+        public void GetValue_CorrectIndex()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            Assert.That(q.GetValue(0), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void SetValue_Empty()
+        {
+            MyQueue<int> q = new();
+
+            Assert.Throws<InvalidOperationException>(() => q.SetValue(1, 1));
+        }
+
+        [Test]
+        public void SetValue_IndexOutOfRange()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            Assert.Throws<IndexOutOfRangeException>(() => q.SetValue(1, 1));
+        }
+
+        [Test]
+        public void SetValue_CorrectIndex()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            q.SetValue(0, 2);
+
+            Assert.That(q.Peek(), Is.EqualTo(2));
+            Assert.That(q, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void SquareBracket_GetValue_Empty()
+        {
+            MyQueue<int> q = new();
+
+            Assert.Throws<InvalidOperationException>(() => Console.Write(q[1]));
+        }
+
+        [Test]
+        public void SquareBracket_GetValue_IndexOutOfRange()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            Assert.Throws<IndexOutOfRangeException>(() => Console.Write(q[1]));
+        }
+
+        [Test]
+        public void SquareBracket_GetValue_CorrectIndex()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            Assert.That(q[0], Is.EqualTo(1));
+        }
+
+        [Test]
+        public void SquareBracket_SetValue_Empty()
+        {
+            MyQueue<int> q = new();
+
+            Assert.Throws<InvalidOperationException>(() => q[1] = 1);
+        }
+
+        [Test]
+        public void SquareBracket_SetValue_IndexOutOfRange()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            Assert.Throws<IndexOutOfRangeException>(() => q[1] = 1);
+        }
+
+        [Test]
+        public void SquareBracket_SetValue_CorrectIndex()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            q[0] = 2;
+
+            Assert.That(q.Peek(), Is.EqualTo(2));
+        }
+    }
+
+    [TestFixture]
+    public class QueueTests_Contains
+    {
+        [Test]
+        public void Contains_Empty()
+        {
+            MyQueue<int> q = new();
+
+            Assert.Throws<InvalidOperationException>(() => q.Contains(1));
+        }
+
+        [Test]
+        public void Contains_ReturnsFalse()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            Assert.That(q.Contains(2), Is.False);
+        }
+
+        [Test]
+        public void Contains_ReturnsTrue()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            Assert.That(q.Contains(1), Is.True);
+        }
+    }
+
+    [TestFixture]
+    public class QueueTests_IndexOf
+    {
+        [Test]
+        public void IndexOf_Empty()
+        {
+            MyQueue<int> q = new();
+
+            Assert.Throws<InvalidOperationException>(() => q.IndexOf(1));
+        }
+
+        [Test]
+        public void IndexOf_ValueNotFound()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            Assert.That(q.IndexOf(2), Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void IndexOf_ValueFound()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            q.Enqueue(2);
+            q.Enqueue(1);
+
+            Assert.That(q.IndexOf(1), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void LastIndexOf_Empty()
+        {
+            MyQueue<int> q = new();
+
+            Assert.Throws<InvalidOperationException>(() => q.LastIndexOf(1));
+        }
+
+        [Test]
+        public void LastIndexOf_ValueNotFound()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+
+            Assert.That(q.LastIndexOf(2), Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void LastIndexOf_ValueFound()
+        {
+            MyQueue<int> q = new();
+            q.Enqueue(1);
+            q.Enqueue(2);
+            q.Enqueue(1);
+
+            Assert.That(q.LastIndexOf(1), Is.EqualTo(2));
+        }
+    }
+
+    [TestFixture]
+    public class QueueTests_Circular
+    {
+        [Test]
+        public void Circular_One()
+        {
+            MyQueue<int> q = new(4);
+            q.Enqueue(1);
+            q.Enqueue(2);
+            q.Enqueue(3);
+            q.Enqueue(4);
+
+            int first = q.Dequeue();
+            q.Enqueue(1);
+
+            Assert.That(first, Is.EqualTo(1));
+        }
+    }
 }

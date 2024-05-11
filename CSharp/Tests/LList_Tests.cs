@@ -2294,5 +2294,17 @@ public class LinkedList_Tests
         }
     }
 
-
+    [TestFixture]
+    public class LListTests_Cycle
+    {
+        [Test]
+        public void Test()
+        {
+            LList<int> list = new();
+            list.AddLast(1);
+            list.AddLast(2);
+            list.AddLast(3);
+            list.AddLast(list.First!);
+        }   
+    }
 }
