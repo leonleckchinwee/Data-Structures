@@ -57,6 +57,9 @@ public class MyStack<T> : IEnumerable<T> where T : IComparable<T>
 
     #region Constructors
 
+    /// <summary>
+    /// Initializes a new empty stack with default capacity (16).
+    /// </summary>
     public MyStack()
     {
         m_MaxCount = m_DefaultCapacity;
@@ -64,6 +67,12 @@ public class MyStack<T> : IEnumerable<T> where T : IComparable<T>
         m_Count    = 0;
     }
 
+    /// <summary>
+    /// Initializes a new empty stack with specified capacity.
+    /// </summary>
+    /// <param name="capacity">Capacity of the stack.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Capacity is negative.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Capacity is too large.</exception>
     public MyStack(int capacity)
     {
         ThrowIfNegative(capacity);
@@ -74,6 +83,14 @@ public class MyStack<T> : IEnumerable<T> where T : IComparable<T>
         m_Count    = 0;
     }
 
+    /// <summary>
+    /// Initializes a new stack with items copied from the specified collection.
+    /// </summary>
+    /// <param name="collection">Collection to copy from.</param>
+    /// <remarks>
+    /// The capacity of the stack will be the same as the number of items in the stack.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Collection is null.</exception>
     public MyStack(IEnumerable<T> collection)
     {
         ThrowIfNull(collection);

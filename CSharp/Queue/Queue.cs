@@ -85,6 +85,7 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
     /// </summary>
     /// <param name="capacity">Capacity of the queue.</param>
     /// <exception cref="ArgumentOutOfRangeException">Capacity is negative.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Capacity is too large.</exception>
     public MyQueue(int capacity)
     {
         ThrowIfNegative(capacity);
@@ -519,7 +520,7 @@ public class MyQueue<T> : IEnumerable<T> where T : IComparable<T>
 
     #endregion
 
-    #region Enumerator
+    #region Enumerators
 
     /// <summary>
     /// Gets the enumerator for this queue.

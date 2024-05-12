@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSTree", "BSTree\BSTree.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AVLTree", "AVLTree\AVLTree.csproj", "{C58F13AD-4A3F-4F19-AC66-36C2F9F729BC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Set", "Set\Set.csproj", "{46ACDA46-5FBC-49C3-BCD3-732168CF1EE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Map", "Map\Map.csproj", "{EC638C46-9118-4B63-9504-AD2E756005FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,5 +56,13 @@ Global
 		{C58F13AD-4A3F-4F19-AC66-36C2F9F729BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C58F13AD-4A3F-4F19-AC66-36C2F9F729BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C58F13AD-4A3F-4F19-AC66-36C2F9F729BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46ACDA46-5FBC-49C3-BCD3-732168CF1EE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46ACDA46-5FBC-49C3-BCD3-732168CF1EE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46ACDA46-5FBC-49C3-BCD3-732168CF1EE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46ACDA46-5FBC-49C3-BCD3-732168CF1EE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC638C46-9118-4B63-9504-AD2E756005FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC638C46-9118-4B63-9504-AD2E756005FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC638C46-9118-4B63-9504-AD2E756005FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC638C46-9118-4B63-9504-AD2E756005FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
