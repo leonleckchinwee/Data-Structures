@@ -1,4 +1,3 @@
-
 class Node
 {
     constructor(value)
@@ -9,8 +8,16 @@ class Node
     }
 }
 
+/**
+ * Doubly linked-list class.
+ * This class accepts null value for reference types.
+ * This class allows for duplicate values.
+ */
 class LinkedList 
 {
+    /**
+     * Initializes a new empty linked list.
+     */
     constructor()
     {
         this.head   = null;
@@ -18,9 +25,13 @@ class LinkedList
         this.length = 0;
     }
 
-    insertFront(value)
+    /**
+     * Inserts a new item into the front of the linked list.
+     * @param {*} item Item to insert.
+     */
+    insertFront(item)
     {
-        const newNode = new Node(value);
+        const newNode = new Node(item);
 
         if (this.head == null)
         {
@@ -37,9 +48,13 @@ class LinkedList
         ++this.length;
     }
 
-    insertBack(value)
+    /**
+     * Inserts a new item into the back of the linked list.
+     * @param {*} value Item to insert.
+     */
+    insertBack(item)
     {
-        const newNode = new Node(value);
+        const newNode = new Node(item);
 
         if (this.head == null)
         {
@@ -56,7 +71,13 @@ class LinkedList
         ++this.length;
     }
 
-    insertBefore(existingValue, newValue)
+    /**
+     * Inserts a new item before an existing item in the linked list.
+     * @param {*} existingItem Existing item in the linked list.
+     * @param {*} newItem New item to insert.
+     * @throws If linked list is empty.
+     */
+    insertBefore(existingItem, newItem)
     {
         if (this.isEmpty())
         {
@@ -66,9 +87,9 @@ class LinkedList
         let current = this.head;
         while (current != null)
         {
-            if (current.value == existingValue)
+            if (current.value == existingItem)
             {
-                const newNode = new Node(newValue);
+                const newNode = new Node(newItem);
 
                 // Update previous's next node if it exists
                 if (current.prev != null)
@@ -94,6 +115,12 @@ class LinkedList
         }
     }
 
+    /**
+     * Inserts a new item after an existing item in the linked list.
+     * @param {*} existingItem Existing item in the linked list.
+     * @param {*} newItem New item to insert.
+     * @throws If linked list is empty.
+     */
     insertAfter(existingValue, newValue)
     {
         if (this.isEmpty())
@@ -132,7 +159,13 @@ class LinkedList
         }
     }
 
-    insertAt(index, value)
+    /**
+     * Inserts a new item at the specified index and push the rest of the item back.
+     * @param {*} index Index to insert at.
+     * @param {*} item Item to insert.
+     * @throws If linked list is empty.
+     */
+    insertAt(index, item)
     {
         if (this.isEmpty())
         {
@@ -147,14 +180,14 @@ class LinkedList
         // Inserting at head
         if (index == 0)
         {
-            this.insertFront(value);
+            this.insertFront(item);
             return;
         }
 
         // Inserting at tail
         if (index == this.length)
         {
-            this.insertBack(value);
+            this.insertBack(item);
             return;
         }
 
@@ -165,7 +198,7 @@ class LinkedList
         {
             if (i == index)
             {
-                this.insertBefore(current.value, value);
+                this.insertBefore(current.value, item);
                 return;
             }
 
@@ -174,6 +207,10 @@ class LinkedList
         }
     }
 
+    /**
+     * Removes the first item in the linked list.
+     * @throws If linked list is empty.
+     */
     removeFront()
     {
         if (this.isEmpty())
@@ -190,6 +227,10 @@ class LinkedList
         --this.length;
     }
 
+    /**
+     * Removes the last item in the linked list.
+     * @throws If linked list is empty.
+     */
     removeBack()
     {
         if (this.isEmpty())
@@ -206,6 +247,11 @@ class LinkedList
         --this.length;
     }
 
+    /**
+     * Removes the item at the specified index of the linked list.
+     * @param {*} index Index to remove from.
+     * @throws If linked list is empty or index out of range.
+     */
     removeAt(index)
     {
         if (this.isEmpty())
@@ -260,7 +306,12 @@ class LinkedList
         }
     }
 
-    removeFirstOf(value)
+    /**
+     * Removes the first item that matches the specified value.
+     * @param {*} item Item to find and remove.
+     * @throws If linked list is empty.
+     */
+    removeFirstOf(item)
     {
         if (this.isEmpty())
         {
@@ -270,7 +321,7 @@ class LinkedList
         let current = this.head;
         while (current != null)
         {
-            if (current.value == value)
+            if (current.value == item)
             {
                 if (current == this.head)
                 {   
@@ -304,7 +355,12 @@ class LinkedList
         }
     }
 
-    removeLastOf(value)
+    /**
+     * Removes the last item that matches the specified value.
+     * @param {*} item Item to find and remove.
+     * @throws If linked list is empty.
+     */
+    removeLastOf(item)
     {
         if (this.isEmpty())
         {
@@ -314,7 +370,7 @@ class LinkedList
         let current = this.tail;
         while (current != null)
         {
-            if (current.value == value)
+            if (current.value == item)
             {
                 if (current == this.head)
                 {   
@@ -348,6 +404,9 @@ class LinkedList
         }
     }
 
+    /**
+     * Clears the entire linked list.
+     */
     clear()
     {
         this.head = null;
@@ -355,7 +414,13 @@ class LinkedList
         this.length = 0;
     }
 
-    indexOf(value)
+    /**
+     * Finds the first index of the node that matches the specified item.
+     * @param {*} item Item to find index of.
+     * @returns Index of item if found; otherwise -1.
+     * @throws If linked list is empty.
+     */
+    indexOf(item)
     {
         if (this.isEmpty())
         {
@@ -367,7 +432,7 @@ class LinkedList
 
         while (current != null)
         {
-            if (current.value == value)
+            if (current.value == item)
             {
                 return index;
             }
@@ -379,7 +444,13 @@ class LinkedList
         return -1;
     }
 
-    lastIndexOf(value)
+    /**
+     * Finds the last index of the node that matches the specified item.
+     * @param {*} item Item to find index of.
+     * @returns Index of item if found; otherwise -1.
+     * @throws If linked list is empty.
+     */
+    lastIndexOf(item)
     {
         if (this.isEmpty())
         {
@@ -391,7 +462,7 @@ class LinkedList
 
         while (current != null)
         {
-            if (current.value == value)
+            if (current.value == item)
             {
                 return index;
             }
@@ -403,7 +474,13 @@ class LinkedList
         return -1;
     }
 
-    contains(value)
+    /**
+     * Determines if the specified item exists in the linked list. 
+     * @param {*} item Item to check for.
+     * @returns True if item is in the linked list; otherwise false.
+     * @throws If linked list is empty.
+     */
+    contains(item)
     {
         if (this.isEmpty())
         {
@@ -413,7 +490,7 @@ class LinkedList
         var current = this.head;
         while (current != null)
         {
-            if (current.value == value)
+            if (current.value == item)
             {
                 return true;
             }
@@ -424,11 +501,24 @@ class LinkedList
         return false;
     }
 
+    hasCycle()
+    {
+
+    }
+
+    /**
+     * Determines if the linked list is empty.
+     * @returns True if linked list is empty; otherwise false.
+     */
     isEmpty()
     {
         return this.length == 0;
     }
 
+    /**
+     * Prints the entire linked list according to the specified order.
+     * @param {*} reverse Reverse the print if true.
+     */
     print(reverse = false)
     {
         if (reverse)
