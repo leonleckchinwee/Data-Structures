@@ -605,3 +605,16 @@ test('is empty, list is not empty', () => {
 
 	expect(list.isEmpty()).toBe(false);
 });
+
+test('duplicate nodes', () => {
+	const list = new LinkedList();
+	list.insertFront(1);
+	list.insertBack(list.head);
+
+	expect(list.length).toBe(2);
+	expect(list.head.value).toBe(1);
+	expect(list.head.next.prev.value).toBe(1);
+	expect(list.head.next.value).toBe(list.head);
+	expect(list.head.next.value.value).toBe(1);
+	expect(list.tail.value).toBe(list.head);
+});	

@@ -1,3 +1,6 @@
+/**
+ * Node for the doubly linked list class below.
+ */
 class Node
 {
     constructor(value)
@@ -9,7 +12,7 @@ class Node
 }
 
 /**
- * Doubly linked-list class.
+ * Doubly linked list class.
  * This class accepts null value for reference types.
  * This class allows for duplicate values.
  */
@@ -499,11 +502,6 @@ class LinkedList
         }
 
         return false;
-    }
-
-    hasCycle()
-    {
-
     }
 
     /**
