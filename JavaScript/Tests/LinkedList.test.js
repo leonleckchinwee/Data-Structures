@@ -299,14 +299,14 @@ test('remove back, three items in list', () => {
 test('remove at, list is empty', () => {
 	const list = new LinkedList();
 
-	expect(() => list.removeBack()).toThrow();
+	expect(() => list.removeAt(1)).toThrow();
 });
 
 test('remove at, one item in list, index out of range', () => {
 	const list = new LinkedList();
 	list.insertFront(1);
 
-	expect(() => list.removeAt(2, 2)).toThrow();
+	expect(() => list.removeAt(2)).toThrow();
 });
 
 test('remove at, one item in list', () => {

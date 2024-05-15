@@ -1,4 +1,3 @@
-const { experiments } = require('webpack');
 const Queue = require('../Queue/Queue');
 
 test('constructor', () => {

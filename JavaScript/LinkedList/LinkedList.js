@@ -167,6 +167,7 @@ class LinkedList
      * @param {*} index Index to insert at.
      * @param {*} item Item to insert.
      * @throws If linked list is empty.
+     * @throws If index is out of range.
      */
     insertAt(index, item)
     {
@@ -253,7 +254,8 @@ class LinkedList
     /**
      * Removes the item at the specified index of the linked list.
      * @param {*} index Index to remove from.
-     * @throws If linked list is empty or index out of range.
+     * @throws If linked list is empty.
+     * @throws If index is out of range.
      */
     removeAt(index)
     {
