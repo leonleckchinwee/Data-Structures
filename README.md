@@ -19,7 +19,7 @@ I have also included basic unit tests.
 - ❎ Hash Map
 - ❎ Trees
     - ✅ Binary Search Tree
-    - ❎ AVL Tree
+    - ✅ AVL Tree
     - ❎ Red-black Tree
     - ❎ B-Tree
     - ❎ N-ary tree
