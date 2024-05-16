@@ -606,7 +606,7 @@ public class BSTree<T> where T : IComparable<T>
         ThrowIfNull(node);
         ThrowIfNodeDoesNotBelong(node!);
 
-         // If node has left child, the predecessor is the largest node in left subtree
+        // If node has left child, the predecessor is the largest node in left subtree
         if (node!.Left != null)
         {
             BSTreeNode<T> temp = node.Left;
@@ -863,12 +863,6 @@ public class BSTree<T> where T : IComparable<T>
     {
         return Math.Abs(BalanceFactor()) <= 1;
     }
-
-    #endregion
-
-    #region Serialization
-
-    // TODO: file serialization?
 
     #endregion
 

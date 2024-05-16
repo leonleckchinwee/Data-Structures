@@ -1,6 +1,6 @@
 namespace DSA.BSTrees.Tests;
 
-public class BSTrees_Tests
+public class BSTree_Tests
 {
     [TestFixture]
     public class BSTreeTests_Constructors

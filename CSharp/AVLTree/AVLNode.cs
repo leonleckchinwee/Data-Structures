@@ -3,50 +3,36 @@ namespace DSA.AVLTrees;
 /// <summary>
 /// AVL nodes used in AVLTrees.
 /// </summary>
-/// <typeparam name="T"></typeparam>
-public class AVLNode<T> where T : IComparable<T>
+public class AVLNode<T>(T value) where T : IComparable<T>
 {
     #region Properties
 
     /// <summary>
     /// Value contain in the node.
     /// </summary>
-    public T Value;
+    public T Value = value;
 
     /// <summary>
     /// Left child.
     /// </summary>
-    public AVLNode<T>? Left;
+    public AVLNode<T>? Left = null;
 
     /// <summary>
     /// Right child.
     /// </summary>
-    public AVLNode<T>? Right;
+    public AVLNode<T>? Right = null;
 
     /// <summary>
     /// Tree the node belongs to.
     /// </summary>
-    public AVLTree<T>? Tree;
+    public AVLTree<T>? Tree = null;
 
     /// <summary>
     /// Height of node.
     /// </summary>
-    public int Height;
+    public int Height = 1;
 
     #endregion
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    /// <param name="value">Value to insert into node.</param>
-    public AVLNode(T value)
-    {
-        Value  = value;
-        Left   = null;
-        Right  = null;
-        Tree   = null;
-        Height = -1;
-    }
 
     /// <summary>
     /// Compares the current node value to the other node value.
